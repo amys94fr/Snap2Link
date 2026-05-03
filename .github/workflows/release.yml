@@ -61,6 +61,12 @@ jobs:
       - name: Run frontend tests
         run: npm test
 
+      # Tauri's `generate_context!` macro reads frontendDist (../dist) at
+      # compile time, so the cargo test invocation needs an existing dist/.
+      # We do a real build here; `npm run tauri build` later reuses it.
+      - name: Build frontend (so dist/ exists for the tauri context macro)
+        run: npm run build
+
       - name: Run backend tests
         working-directory: src-tauri
         run: cargo test --lib
