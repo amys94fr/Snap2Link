@@ -31,7 +31,7 @@ jobs:
             os: macos-13
             target: x86_64-apple-darwin
           - name: linux-x86_64
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             target: x86_64-unknown-linux-gnu
 
     steps:
@@ -40,7 +40,7 @@ jobs:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Linux system dependencies
-        if: matrix.platform.os == 'ubuntu-22.04'
+        if: matrix.platform.os == 'ubuntu-24.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -117,7 +117,7 @@ jobs:
   release:
     name: Create GitHub release
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
