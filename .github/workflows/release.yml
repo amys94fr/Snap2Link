@@ -23,7 +23,7 @@ jobs:
       installer_url: ${{ steps.urls.outputs.INSTALLER_URL }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
@@ -37,16 +37,12 @@ jobs:
           "TAG=$tag" | Out-File $env:GITHUB_OUTPUT -Append
           Write-Host "Tag: $tag, Version: $version"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: "npm"
 
       - uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
 
       - name: Install npm dependencies
         run: npm ci
