@@ -38,35 +38,40 @@ update you try to ship.
 
    ```powershell
    $env:TAURI_SIGNING_PRIVATE_KEY = (Get-Content .\.tauri-keys\snap2link.key -Raw)
-   # If you set a password on the key, also:
-   # $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = "your-password"
+   # The current key was generated without a password — Tauri *still*
+   # expects the env var to be set (to an empty string) to avoid an
+   # interactive prompt during bundling:
+   $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ""
+   # If you regenerate the key with a password, set the value here instead.
 
    npm run tauri build
    ```
 
-   Tauri will produce two files in `src-tauri/target/release/bundle/`:
+   Tauri will produce these files in `src-tauri/target/release/bundle/`:
    - `nsis/Snap2Link_<version>_x64-setup.exe`
-   - `nsis/Snap2Link_<version>_x64-setup.exe.sig` (signature, ~hex blob)
+   - `nsis/Snap2Link_<version>_x64-setup.exe.sig` (signature, ~420 chars base64)
+   - `msi/Snap2Link_<version>_x64_en-US.msi(.sig)` (alternate installer)
 
-4. Create a GitHub release tagged `v<version>` and upload **both** files
-   plus a `latest.json` manifest that looks like:
+4. Generate the manifest from the freshly built bundle:
 
-   ```json
-   {
-     "version": "1.1.0",
-     "notes": "Short release notes — shown in the Settings updater UI.",
-     "pub_date": "2026-05-03T08:00:00Z",
-     "platforms": {
-       "windows-x86_64": {
-         "signature": "<contents of the .sig file, no newlines>",
-         "url": "https://github.com/amys94fr/snap2link/releases/download/v1.1.0/Snap2Link_1.1.0_x64-setup.exe"
-       }
-     }
-   }
+   ```powershell
+   .\scripts\make_latest_json.ps1 -Version 1.1.0 -Notes "Short summary"
+   # Output: scripts\release-out\latest.json
    ```
 
-5. The endpoint in `tauri.conf.json` already points at
-   `https://github.com/amys94fr/snap2link/releases/latest/download/latest.json`,
+5. Create the GitHub release with `gh`:
+
+   ```powershell
+   gh release create v1.1.0 `
+     --title "Snap2Link v1.1.0" `
+     --notes-file scripts/release-out/release-body.md `
+     src-tauri/target/release/bundle/nsis/Snap2Link_1.1.0_x64-setup.exe `
+     src-tauri/target/release/bundle/nsis/Snap2Link_1.1.0_x64-setup.exe.sig `
+     scripts/release-out/latest.json
+   ```
+
+6. The endpoint in `tauri.conf.json` already points at
+   `https://github.com/amys94fr/Snap2Link/releases/latest/download/latest.json`,
    so as soon as the release is marked "Latest" on GitHub, every running
    client will pick up the update on the next "Check for Updates" click.
 
