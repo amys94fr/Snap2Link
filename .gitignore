@@ -24,6 +24,9 @@ src-tauri/target
 src-tauri/gen
 src-tauri/.cargo
 
+# Release artefacts (generated locally before each release)
+scripts/release-out/
+
 # Secrets
 credentials.json
 *.local
