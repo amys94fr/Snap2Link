@@ -1,0 +1,6 @@
+# Force LF line endings for shell scripts so the install.sh piped from
+# raw.githubusercontent.com runs cleanly on Linux even if cloned on Windows.
+*.sh text eol=lf
+
+# .mjs is also executed cross-platform via node — keep it consistent.
+*.mjs text eol=lf
