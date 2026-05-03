@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v1.0.1)"
+        description: "Tag to release (e.g. v1.0.1) — must already exist."
         required: true
 
 permissions:
@@ -15,22 +15,23 @@ permissions:
 
 jobs:
   build-and-release:
-    name: Build, sign & release
+    name: Build, sign and release
     runs-on: windows-latest
     outputs:
       version: ${{ steps.version.outputs.VERSION }}
+      tag: ${{ steps.version.outputs.TAG }}
       installer_url: ${{ steps.urls.outputs.INSTALLER_URL }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Resolve version from tag
         id: version
         shell: pwsh
         run: |
-          $tag = "${{ inputs.tag || github.ref_name }}"
+          $tag = "${{ github.event.inputs.tag || github.ref_name }}"
           $version = $tag.TrimStart('v')
           "VERSION=$version" | Out-File $env:GITHUB_OUTPUT -Append
           "TAG=$tag" | Out-File $env:GITHUB_OUTPUT -Append
@@ -56,7 +57,7 @@ jobs:
           CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: |
           if (-not $env:CREDENTIALS_JSON) {
-            throw "Missing secret GOOGLE_CREDENTIALS_JSON. Set it at https://github.com/${{ github.repository }}/settings/secrets/actions"
+            throw "Missing secret GOOGLE_CREDENTIALS_JSON."
           }
           $env:CREDENTIALS_JSON | Set-Content -Path credentials.json -Encoding UTF8 -NoNewline
           Write-Host "credentials.json restored ($($env:CREDENTIALS_JSON.Length) chars)"
@@ -79,7 +80,7 @@ jobs:
           }
           npm run tauri build
 
-      - name: Compute installer download URL
+      - name: Compute installer URL
         id: urls
         shell: pwsh
         run: |
@@ -91,44 +92,13 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.VERSION }}"
-          $notes = "Automated release ${{ steps.version.outputs.TAG }}. See the release description on GitHub for details."
+          $notes = "Automated release ${{ steps.version.outputs.TAG }}. See the release description for details."
           .\scripts\make_latest_json.ps1 -Version $version -Notes $notes
 
-      - name: Generate release body from CHANGELOG
+      - name: Generate release body
         shell: pwsh
         run: |
-          $version = "${{ steps.version.outputs.VERSION }}"
-          $changelog = Get-Content CHANGELOG.md -Raw -Encoding UTF8
-          $escaped = [regex]::Escape($version)
-          $pattern = "(?ms)^## \[$escaped\][^\n]*\n(.*?)(?=^## \[|\z)"
-          $match = [regex]::Match($changelog, $pattern)
-          if ($match.Success) {
-            $section = $match.Groups[1].Value.Trim()
-          } else {
-            $section = "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
-          }
-          $body = @"
-## Snap2Link ${{ steps.version.outputs.TAG }}
-
-$section
-
----
-
-### Installation
-
-Download ``Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe`` and run it. Windows SmartScreen may flag the installer (it isn't EV-code-signed); click *More info* → *Run anyway*.
-
-After install, complete the OAuth wizard to connect your Google Drive.
-
-### Files in this release
-
-- ``Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe`` — Windows installer
-- ``Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe.sig`` — signature (auto-loaded by the in-app updater)
-- ``latest.json`` — manifest read by ``Check for Updates``
-"@
-          New-Item -ItemType Directory -Force -Path scripts/release-out | Out-Null
-          $body | Set-Content scripts/release-out/release-body.md -Encoding UTF8
-          Write-Host "Generated release body ($($body.Length) chars)"
+          .\scripts\make_release_body.ps1 -Tag "${{ steps.version.outputs.TAG }}" -Repo "${{ github.repository }}"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
@@ -146,10 +116,6 @@ After install, complete the OAuth wizard to connect your Google Drive.
     name: Submit winget update PR
     needs: build-and-release
     runs-on: windows-latest
-    # Only run when a WINGET_PAT secret is configured. Skipped silently
-    # otherwise so the release flow never fails because of a missing PAT.
-    # GitHub doesn't allow `secrets.X != ''` in `if`, so we gate via a
-    # repo variable: set `vars.SUBMIT_WINGET = "true"` to enable.
     if: ${{ vars.SUBMIT_WINGET == 'true' }}
     steps:
       - name: Install wingetcreate
@@ -164,7 +130,7 @@ After install, complete the OAuth wizard to connect your Google Drive.
           WINGET_PAT: ${{ secrets.WINGET_PAT }}
         run: |
           if (-not $env:WINGET_PAT) {
-            throw "Missing secret WINGET_PAT — generate a fine-grained PAT with 'public_repo' on github.com and add it to repo secrets."
+            throw "Missing secret WINGET_PAT."
           }
           .\wingetcreate.exe update amys94fr.Snap2Link `
             --version "${{ needs.build-and-release.outputs.version }}" `

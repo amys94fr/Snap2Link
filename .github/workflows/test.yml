@@ -44,15 +44,26 @@ jobs:
         with:
           workspaces: src-tauri
 
-      # Tauri's `generate_context!` macro reads the frontendDist path at
-      # compile time, so we need a stub `dist/` so the macro doesn't error
-      # before we run the actual build.
       - name: Install npm deps
         run: npm ci
 
+      # Tauri's `generate_context!` macro reads the frontendDist path at
+      # compile time, so we need a stub `dist/` so the macro doesn't error
+      # before we run the actual build.
       - name: Build frontend (so dist/ exists for tauri context)
         run: npm run build
 
+      # tauri.conf.json declares ../credentials.json as a bundled resource,
+      # so the Tauri build script verifies the file exists at compile time.
+      # The unit tests don't actually open it, so a placeholder works fine
+      # and avoids needing the real Google secret on PR runs from forks.
+      - name: Stub credentials.json
+        shell: pwsh
+        run: |
+          @'
+          {"installed":{"client_id":"stub","project_id":"stub","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","client_secret":"stub","redirect_uris":["http://localhost"]}}
+          '@ | Set-Content credentials.json -Encoding UTF8 -NoNewline
+
       - name: Cargo test --lib
         working-directory: src-tauri
-        run: cargo test --lib --no-default-features
+        run: cargo test --lib
