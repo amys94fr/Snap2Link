@@ -23,7 +23,7 @@ jobs:
       installer_url: ${{ steps.urls.outputs.INSTALLER_URL }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
