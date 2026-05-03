@@ -1,0 +1,73 @@
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Updates are run weekly. Patch + minor bumps are grouped per ecosystem so we
+# get one PR a week per ecosystem instead of dozens. Major bumps stay separate
+# (each lands its own PR for human review). Security updates run on their own
+# schedule independent of this file.
+
+version: 2
+updates:
+  # Frontend (React, Vite, Vitest, Tailwind, Tauri JS plugins…)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "deps(npm)"
+    groups:
+      patch-and-minor:
+        update-types:
+          - "patch"
+          - "minor"
+    ignore:
+      # Don't bump @tauri-apps/* until the Rust side is bumped first;
+      # the JS API and the Rust crate must be on the same major.
+      - dependency-name: "@tauri-apps/api"
+        update-types: ["version-update:semver-major"]
+
+  # Backend (tauri, plugins, reqwest, xcap, etc.)
+  - package-ecosystem: "cargo"
+    directory: "/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+    commit-message:
+      prefix: "deps(cargo)"
+    groups:
+      patch-and-minor:
+        update-types:
+          - "patch"
+          - "minor"
+
+  # CI workflows (actions/checkout, setup-node, dtolnay/rust-toolchain, etc.)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "deps(actions)"
+    groups:
+      patch-and-minor:
+        update-types:
+          - "patch"
+          - "minor"
