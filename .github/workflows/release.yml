@@ -80,6 +80,18 @@ jobs:
           if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
             throw "Missing secret TAURI_SIGNING_PRIVATE_KEY."
           }
+          # Strip BOM, whitespace and stray quotes that may have leaked in
+          # while the secret was being set (`gh secret set --body -` over a
+          # PowerShell pipe is a common offender on Windows).
+          $key = $env:TAURI_SIGNING_PRIVATE_KEY
+          $key = $key.Trim()
+          $key = $key.Trim([char]0xFEFF)
+          $key = $key.Trim('"', "'")
+          $key = $key -replace "[`r`n`t ]", ""
+          $env:TAURI_SIGNING_PRIVATE_KEY = $key
+          # Log only the length and the first/last char codes so we can
+          # diagnose corruption without leaking the key.
+          Write-Host "Sanitised key: length=$($key.Length), first=$([int]$key[0]), last=$([int]$key[-1])"
           npm run tauri build
 
       - name: Compute installer URL
