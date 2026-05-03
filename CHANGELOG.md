@@ -4,6 +4,17 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] – 2026-05-03
+
+### Fixed
+
+- The bundled installer placed `credentials.json` in a `_up_/` subfolder
+  (because the Tauri resource path started with `../`), but the runtime
+  lookup didn't know about it, so a fresh install showed
+  *"Error: credentials.json not found"* in Settings and the OAuth flow
+  was unreachable. The OAuth client secret is now embedded at compile
+  time via `include_str!`, removing the resource-dir lookup entirely.
+
 ## [1.0.0] – 2026-05-03
 
 ### Added

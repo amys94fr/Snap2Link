@@ -2,8 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::{Path, PathBuf};
-use tauri::{AppHandle, Manager};
+use std::path::Path;
+use tauri::AppHandle;
 
 use crate::commands::config::{load_config_from, save_config_to};
 use crate::utils::{app_data_dir, ensure_dir, token_path_in};
@@ -81,25 +81,19 @@ pub fn is_authenticated() -> bool {
     is_authenticated_inner()
 }
 
-fn credentials_candidates(app: &AppHandle) -> Vec<PathBuf> {
-    let mut paths = Vec::new();
-    if let Ok(res) = app.path().resource_dir() {
-        paths.push(res.join("credentials.json"));
-        paths.push(res.join("../credentials.json"));
-    }
-    paths.push(PathBuf::from("./credentials.json"));
-    paths.push(PathBuf::from("../credentials.json"));
-    paths
-}
+/// OAuth client secret embedded into the binary at compile time. The file
+/// is gitignored and must exist at the project root when the crate is
+/// compiled — locally during development, and via the
+/// `GOOGLE_CREDENTIALS_JSON` repo secret on CI (see release.yml).
+///
+/// Embedding here, rather than relying on a runtime `resource_dir()` lookup,
+/// avoids platform-specific quirks (e.g. NSIS placing files under `_up_/`
+/// when the resource path starts with `../`).
+const EMBEDDED_CREDENTIALS_JSON: &str = include_str!("../../../credentials.json");
 
-fn read_credentials(app: &AppHandle) -> Result<ClientSecret, String> {
-    for path in credentials_candidates(app) {
-        if let Ok(text) = fs::read_to_string(&path) {
-            return serde_json::from_str(&text)
-                .map_err(|e| format!("Invalid credentials.json: {e}"));
-        }
-    }
-    Err("credentials.json not found".into())
+fn read_credentials(_app: &AppHandle) -> Result<ClientSecret, String> {
+    serde_json::from_str(EMBEDDED_CREDENTIALS_JSON)
+        .map_err(|e| format!("Invalid credentials.json (compile-time): {e}"))
 }
 
 #[tauri::command]

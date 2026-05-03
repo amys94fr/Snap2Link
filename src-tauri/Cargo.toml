@@ -1,6 +1,6 @@
 [package]
 name = "snap2link"
-version = "1.0.0"
+version = "1.0.1"
 description = "Capture a screen region and instantly get a Google Drive share link."
 authors = ["Steven Abittan"]
 license = "MIT"

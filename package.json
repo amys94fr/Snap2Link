@@ -1,7 +1,7 @@
 {
   "name": "snap2link",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Capture a screen region and instantly get a Google Drive share link.",
   "author": "Steven Abittan",
