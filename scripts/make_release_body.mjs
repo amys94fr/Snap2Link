@@ -45,7 +45,7 @@ const lines = [
   `- Download \`Snap2Link_${version}_x64-setup.exe\` and run it. SmartScreen may flag the binary as *"unrecognised app"* (not yet EV-code-signed); click *More info → Run anyway*.`,
   "",
   "**macOS**",
-  `- Download \`Snap2Link_${version}_aarch64.dmg\` (Apple Silicon) or \`Snap2Link_${version}_x64.dmg\` (Intel).`,
+  `- Download \`Snap2Link_${version}_universal.dmg\` — a single Universal binary that runs natively on both Apple Silicon and Intel Macs.`,
   '- The app is **not yet notarised**, so the first launch needs a manual override: right-click the app in Finder → *Open* → *Open* in the dialog. Subsequent launches behave normally.',
   '- The first screenshot capture triggers a **Screen Recording permission prompt** in System Preferences → Security & Privacy → Screen Recording. Grant it and re-launch.',
   "",

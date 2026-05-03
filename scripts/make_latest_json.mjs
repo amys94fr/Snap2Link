@@ -43,27 +43,26 @@ const REPO_BASE = "https://github.com/amys94fr/Snap2Link/releases/download";
 // `find` returns the *first* file matching the pattern; missing platforms
 // are simply omitted from the manifest (so Mac users won't be offered a
 // Windows update etc.).
+// Each entry maps a workflow artefact directory to one or more updater
+// platform keys. A `darwin-universal` build serves both ARM and Intel Macs
+// (Tauri lipos a single .app.tar.gz containing both architectures), so we
+// expand it into both `darwin-aarch64` and `darwin-x86_64` so the in-app
+// updater knows where to download regardless of the user's CPU.
 const PLATFORMS = [
   {
-    key: "windows-x86_64",
+    keys: ["windows-x86_64"],
     artefactDir: "bundle-windows-x86_64",
     sigPattern: /\.exe\.sig$/i,
     installerPattern: /-setup\.exe$/i,
   },
   {
-    key: "darwin-aarch64",
-    artefactDir: "bundle-darwin-aarch64",
+    keys: ["darwin-aarch64", "darwin-x86_64"],
+    artefactDir: "bundle-darwin-universal",
     sigPattern: /\.app\.tar\.gz\.sig$/i,
     installerPattern: /\.app\.tar\.gz$/i,
   },
   {
-    key: "darwin-x86_64",
-    artefactDir: "bundle-darwin-x86_64",
-    sigPattern: /\.app\.tar\.gz\.sig$/i,
-    installerPattern: /\.app\.tar\.gz$/i,
-  },
-  {
-    key: "linux-x86_64",
+    keys: ["linux-x86_64"],
     artefactDir: "bundle-linux-x86_64",
     sigPattern: /\.AppImage\.tar\.gz\.sig$/i,
     installerPattern: /\.AppImage\.tar\.gz$/i,
@@ -93,16 +92,20 @@ for (const p of PLATFORMS) {
   const sigFile = findFile(dir, p.sigPattern);
   const installerFile = findFile(dir, p.installerPattern);
   if (!sigFile || !installerFile) {
-    summary.push(`  ${p.key}: skipped (sig=${!!sigFile}, installer=${!!installerFile})`);
+    summary.push(
+      `  ${p.keys.join("+")}: skipped (sig=${!!sigFile}, installer=${!!installerFile})`,
+    );
     continue;
   }
   const signature = fs.readFileSync(sigFile, "utf8").trim();
   const installerName = path.basename(installerFile);
-  platforms[p.key] = {
-    signature,
-    url: `${REPO_BASE}/v${version}/${installerName}`,
-  };
-  summary.push(`  ${p.key}: ${installerName} (sig ${signature.length} chars)`);
+  const url = `${REPO_BASE}/v${version}/${installerName}`;
+  for (const key of p.keys) {
+    platforms[key] = { signature, url };
+  }
+  summary.push(
+    `  ${p.keys.join("+")}: ${installerName} (sig ${signature.length} chars)`,
+  );
 }
 
 if (Object.keys(platforms).length === 0) {

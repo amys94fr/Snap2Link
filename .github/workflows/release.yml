@@ -24,12 +24,10 @@ jobs:
           - name: windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
-          - name: darwin-aarch64
+          - name: darwin-universal
             os: macos-14
-            target: aarch64-apple-darwin
-          - name: darwin-x86_64
-            os: macos-13
-            target: x86_64-apple-darwin
+            target: universal-apple-darwin
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
           - name: linux-x86_64
             os: ubuntu-24.04
             target: x86_64-unknown-linux-gnu
@@ -67,7 +65,10 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform.target }}
+          # universal-apple-darwin is a Tauri meta-target that lipos
+          # aarch64 + x86_64 builds; we install the two real targets
+          # explicitly when the matrix entry asks for it.
+          targets: ${{ matrix.platform.rust_targets || matrix.platform.target }}
 
       - name: Install npm dependencies
         run: npm ci
@@ -119,6 +120,8 @@ jobs:
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/appimage/*
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/deb/*
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/rpm/*
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/*
 
   release:
     name: Create GitHub release
