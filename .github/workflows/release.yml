@@ -97,7 +97,7 @@ jobs:
           .\scripts\make_release_body.ps1 -Tag "${{ steps.version.outputs.TAG }}" -Repo "${{ github.repository }}"
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
           name: Snap2Link ${{ steps.version.outputs.TAG }}
