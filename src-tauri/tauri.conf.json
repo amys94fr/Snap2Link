@@ -45,7 +45,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/amys94fr/snap2link/releases/latest/download/latest.json"
+        "https://github.com/amys94fr/Snap2Link/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk4MTAxRkVFNzMxMEE1NjIKUldSaXBSQno3aDhRbUh1VXlYUkhqbmlvRG50aTR4REgxR1pkNEtHVmh1RUJMd2JZaU5jOStITTAK"
     }
