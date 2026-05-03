@@ -124,19 +124,19 @@ Got an idea? [Open an issue](https://github.com/amys94fr/Snap2Link/issues/new) �
 
 ## 🤝 Contributing
 
-PRs welcome. To get a working dev environment:
+PRs welcome. Quick start for contributors:
 
 ```bash
 git clone https://github.com/amys94fr/Snap2Link
 cd Snap2Link
 npm install
-npm test                     # 77 frontend tests (Vitest + Testing Library)
-cd src-tauri && cargo test --lib   # 24 backend tests
+npm test                            # 77 frontend tests (Vitest)
+cd src-tauri && cargo test --lib    # 24 backend tests
 ```
 
-CI ([`test.yml`](.github/workflows/test.yml)) runs on every push and PR. Tests must stay green for a merge.
+CI ([`test.yml`](.github/workflows/test.yml)) runs on every push and PR — tests must stay green for a merge.
 
-For the full release procedure (signing, `latest.json`, GitHub release, winget bump), see **[docs/RELEASE.md](docs/RELEASE.md)**.
+The full guide (bug reports, feature proposals, coding style, PR checklist) is in **[CONTRIBUTING.md](CONTRIBUTING.md)**. For the release procedure (signing, manifest, GitHub release, winget bump), see **[docs/RELEASE.md](docs/RELEASE.md)**.
 
 ### Project layout
 
