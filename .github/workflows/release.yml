@@ -52,6 +52,12 @@ jobs:
             libsoup-3.0-dev \
             libpipewire-0.3-dev \
             libxdo-dev \
+            libgbm-dev \
+            libegl-dev \
+            libwayland-dev \
+            libxcb1-dev \
+            libxcb-shm0-dev \
+            libdrm-dev \
             patchelf
 
       - uses: actions/setup-node@v6
