@@ -49,6 +49,9 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev \
             libssl-dev \
+            libsoup-3.0-dev \
+            libpipewire-0.3-dev \
+            libxdo-dev \
             patchelf
 
       - uses: actions/setup-node@v6
