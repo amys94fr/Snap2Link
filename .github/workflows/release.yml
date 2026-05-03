@@ -1,0 +1,173 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v1.0.1)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build, sign & release
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+      installer_url: ${{ steps.urls.outputs.INSTALLER_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Resolve version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ inputs.tag || github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          "VERSION=$version" | Out-File $env:GITHUB_OUTPUT -Append
+          "TAG=$tag" | Out-File $env:GITHUB_OUTPUT -Append
+          Write-Host "Tag: $tag, Version: $version"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Restore credentials.json from secret
+        shell: pwsh
+        env:
+          CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: |
+          if (-not $env:CREDENTIALS_JSON) {
+            throw "Missing secret GOOGLE_CREDENTIALS_JSON. Set it at https://github.com/${{ github.repository }}/settings/secrets/actions"
+          }
+          $env:CREDENTIALS_JSON | Set-Content -Path credentials.json -Encoding UTF8 -NoNewline
+          Write-Host "credentials.json restored ($($env:CREDENTIALS_JSON.Length) chars)"
+
+      - name: Run frontend tests
+        run: npm test
+
+      - name: Run backend tests
+        working-directory: src-tauri
+        run: cargo test --lib
+
+      - name: Build signed Tauri bundle
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
+        run: |
+          if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
+            throw "Missing secret TAURI_SIGNING_PRIVATE_KEY."
+          }
+          npm run tauri build
+
+      - name: Compute installer download URL
+        id: urls
+        shell: pwsh
+        run: |
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.TAG }}/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe"
+          "INSTALLER_URL=$url" | Out-File $env:GITHUB_OUTPUT -Append
+          Write-Host $url
+
+      - name: Generate latest.json
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $notes = "Automated release ${{ steps.version.outputs.TAG }}. See the release description on GitHub for details."
+          .\scripts\make_latest_json.ps1 -Version $version -Notes $notes
+
+      - name: Generate release body from CHANGELOG
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $changelog = Get-Content CHANGELOG.md -Raw -Encoding UTF8
+          $escaped = [regex]::Escape($version)
+          $pattern = "(?ms)^## \[$escaped\][^\n]*\n(.*?)(?=^## \[|\z)"
+          $match = [regex]::Match($changelog, $pattern)
+          if ($match.Success) {
+            $section = $match.Groups[1].Value.Trim()
+          } else {
+            $section = "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
+          }
+          $body = @"
+## Snap2Link ${{ steps.version.outputs.TAG }}
+
+$section
+
+---
+
+### Installation
+
+Download ``Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe`` and run it. Windows SmartScreen may flag the installer (it isn't EV-code-signed); click *More info* → *Run anyway*.
+
+After install, complete the OAuth wizard to connect your Google Drive.
+
+### Files in this release
+
+- ``Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe`` — Windows installer
+- ``Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe.sig`` — signature (auto-loaded by the in-app updater)
+- ``latest.json`` — manifest read by ``Check for Updates``
+"@
+          New-Item -ItemType Directory -Force -Path scripts/release-out | Out-Null
+          $body | Set-Content scripts/release-out/release-body.md -Encoding UTF8
+          Write-Host "Generated release body ($($body.Length) chars)"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: Snap2Link ${{ steps.version.outputs.TAG }}
+          body_path: scripts/release-out/release-body.md
+          fail_on_unmatched_files: true
+          files: |
+            src-tauri/target/release/bundle/nsis/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe
+            src-tauri/target/release/bundle/nsis/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe.sig
+            scripts/release-out/latest.json
+
+  submit-winget:
+    name: Submit winget update PR
+    needs: build-and-release
+    runs-on: windows-latest
+    # Only run when a WINGET_PAT secret is configured. Skipped silently
+    # otherwise so the release flow never fails because of a missing PAT.
+    # GitHub doesn't allow `secrets.X != ''` in `if`, so we gate via a
+    # repo variable: set `vars.SUBMIT_WINGET = "true"` to enable.
+    if: ${{ vars.SUBMIT_WINGET == 'true' }}
+    steps:
+      - name: Install wingetcreate
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          .\wingetcreate.exe --version
+
+      - name: Submit update to microsoft/winget-pkgs
+        shell: pwsh
+        env:
+          WINGET_PAT: ${{ secrets.WINGET_PAT }}
+        run: |
+          if (-not $env:WINGET_PAT) {
+            throw "Missing secret WINGET_PAT — generate a fine-grained PAT with 'public_repo' on github.com and add it to repo secrets."
+          }
+          .\wingetcreate.exe update amys94fr.Snap2Link `
+            --version "${{ needs.build-and-release.outputs.version }}" `
+            --urls "${{ needs.build-and-release.outputs.installer_url }}" `
+            --submit `
+            --token "$env:WINGET_PAT"

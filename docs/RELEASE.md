@@ -27,7 +27,61 @@ The private key (`.tauri-keys/snap2link.key`) is gitignored. **Back it up
 somewhere safe** — losing it means existing installs will reject any
 update you try to ship.
 
-## Cutting a release
+## Cutting a release — automated path (recommended)
+
+The repo ships a GitHub Actions workflow (`.github/workflows/release.yml`)
+that does the *entire* release flow for you. After the one-time secret
+setup below, every release is just:
+
+```bash
+# 1. Bump version in package.json + src-tauri/Cargo.toml + src-tauri/tauri.conf.json
+# 2. Add a [X.Y.Z] section to CHANGELOG.md
+git add -A && git commit -m "Release vX.Y.Z"
+git tag vX.Y.Z
+git push origin main --tags
+```
+
+The workflow then:
+
+1. Runs frontend + backend tests (release fails if anything is red).
+2. Restores `credentials.json` from a secret.
+3. Builds a signed Tauri bundle (Windows NSIS).
+4. Generates `latest.json` from the freshly-signed `.exe`.
+5. Generates a release body from the matching `CHANGELOG.md` section.
+6. Creates the GitHub release with installer + `.sig` + `latest.json`.
+7. (Optional) submits a `wingetcreate update` PR to `microsoft/winget-pkgs`.
+
+### One-time secret setup
+
+Configure these at <https://github.com/amys94fr/Snap2Link/settings/secrets/actions>:
+
+| Secret | Value | Required |
+|---|---|---|
+| `TAURI_SIGNING_PRIVATE_KEY` | The full text content of `.tauri-keys/snap2link.key` | ✅ |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Empty string (the current key has no password). Falls back to `""` if absent. | optional |
+| `GOOGLE_CREDENTIALS_JSON` | The full text content of your `credentials.json` (Google OAuth desktop client) | ✅ |
+| `WINGET_PAT` | A GitHub fine-grained PAT with `public_repo` scope (used to fork `microsoft/winget-pkgs`) | optional |
+
+And one repo variable at <https://github.com/amys94fr/Snap2Link/settings/variables/actions>:
+
+| Variable | Value | Required |
+|---|---|---|
+| `SUBMIT_WINGET` | `true` to auto-submit a winget update PR after every release. | optional |
+
+### Failure modes
+
+- The `submit-winget` job will fail (and the rest of the release will succeed)
+  on the very first run because `wingetcreate update` requires the package to
+  already exist in `microsoft/winget-pkgs`. Once the initial v1.0.0 PR is merged,
+  this stops being an issue.
+- If you regenerate the signing keypair you must update both
+  `tauri.conf.json` (`plugins.updater.pubkey`) **and** the
+  `TAURI_SIGNING_PRIVATE_KEY` secret. Existing installs reject the new key
+  silently otherwise.
+
+---
+
+## Cutting a release — manual path
 
 1. Bump `version` in:
    - `package.json`
