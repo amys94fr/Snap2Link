@@ -1,0 +1,60 @@
+[package]
+name = "snap2link"
+version = "1.0.0"
+description = "Capture a screen region and instantly get a Google Drive share link."
+authors = ["Steven Abittan"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "snap2link_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "multipart", "rustls-tls"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1"
+thiserror = "2"
+dirs = "5"
+image = "0.25"
+xcap = "0.0.14"
+url = "2"
+urlencoding = "2"
+tiny_http = "0.12"
+base64 = "0.22"
+log = "0.4"
+open = "5"
+
+[dev-dependencies]
+tempfile = "3"
+mockito = "1"
+tokio = { version = "1", features = ["full", "test-util"] }
+serial_test = "3"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

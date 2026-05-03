@@ -1,0 +1,38 @@
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Frontend
+node_modules
+dist
+dist-ssr
+coverage
+
+# Tauri / Rust
+src-tauri/target
+src-tauri/gen
+src-tauri/.cargo
+
+# Secrets
+credentials.json
+*.local
+# Tauri updater signing keys — never commit the private key.
+.tauri-keys/*.key
+!.tauri-keys/*.key.pub
+
+# OS
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
