@@ -108,10 +108,15 @@ And one repo variable at <https://github.com/amys94fr/Snap2Link/settings/variabl
 
 4. Generate the manifest from the freshly built bundle:
 
-   ```powershell
-   .\scripts\make_latest_json.ps1 -Version 1.1.0 -Notes "Short summary"
-   # Output: scripts\release-out\latest.json
+   ```bash
+   node scripts/make_latest_json.mjs --version 1.1.0 --notes "Short summary"
+   # Output: scripts/release-out/latest.json
    ```
+
+   The same script is used by CI; it ingests artefacts from
+   `artefacts/bundle-<platform>/` (workflow artifacts downloaded on the
+   release-aggregator job) and emits a manifest covering every platform
+   that completed its build.
 
 5. Create the GitHub release with `gh`:
 

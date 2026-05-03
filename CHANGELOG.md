@@ -4,6 +4,37 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] – 2026-05-03
+
+### Added
+
+- **macOS support** — Apple Silicon (`aarch64`) and Intel (`x86_64`) builds
+  are now produced by CI for every release. Distributed unsigned for now,
+  so the first launch needs a manual *right-click → Open* in Finder.
+- **Linux support** — `.AppImage` (portable), `.deb` (Debian/Ubuntu) and
+  `.rpm` (Fedora/RHEL) packages, all signed for the in-app updater.
+- The release workflow now builds across a 4-runner matrix (Windows,
+  macOS ARM, macOS Intel, Ubuntu) in parallel and aggregates everything
+  into a single GitHub release with a multi-platform `latest.json`.
+
+### Changed
+
+- `make_latest_json.ps1` and `make_release_body.ps1` rewritten in Node
+  (`.mjs`) so they can run on the Linux release-aggregator runner.
+- `tauri.conf.json` declares the Linux `.deb` runtime dependencies
+  (`libwebkit2gtk-4.1-0`, `libayatana-appindicator3-1`) and enables
+  `bundleMediaFramework` for the AppImage so it's truly portable.
+
+### Known issues
+
+- Without an Apple Developer ID certificate, macOS Gatekeeper blocks the
+  first launch — workaround: right-click the app in Finder → *Open*.
+  Notarisation tracked separately; see [docs/RELEASE.md](docs/RELEASE.md).
+- The `glib` `VariantStrIter` unsoundness (RUSTSEC) is a Linux-only
+  transitive coming from `wry` → `webkit2gtk`. We have not been able to
+  bump it without bumping Tauri itself; will revisit when an upstream fix
+  lands.
+
 ## [1.0.2] – 2026-05-03
 
 ### Security

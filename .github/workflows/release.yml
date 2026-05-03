@@ -7,35 +7,49 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v1.0.1) — must already exist."
+        description: "Tag to release (e.g. v1.1.0) — must already exist."
         required: true
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    name: Build, sign and release
-    runs-on: windows-latest
-    outputs:
-      version: ${{ steps.version.outputs.VERSION }}
-      tag: ${{ steps.version.outputs.TAG }}
-      installer_url: ${{ steps.urls.outputs.INSTALLER_URL }}
+  build:
+    name: Build (${{ matrix.platform.name }})
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - name: darwin-aarch64
+            os: macos-14
+            target: aarch64-apple-darwin
+          - name: darwin-x86_64
+            os: macos-13
+            target: x86_64-apple-darwin
+          - name: linux-x86_64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
 
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
-      - name: Resolve version from tag
-        id: version
-        shell: pwsh
+      - name: Linux system dependencies
+        if: matrix.platform.os == 'ubuntu-22.04'
         run: |
-          $tag = "${{ github.event.inputs.tag || github.ref_name }}"
-          $version = $tag.TrimStart('v')
-          "VERSION=$version" | Out-File $env:GITHUB_OUTPUT -Append
-          "TAG=$tag" | Out-File $env:GITHUB_OUTPUT -Append
-          Write-Host "Tag: $tag, Version: $version"
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libssl-dev \
+            patchelf
 
       - uses: actions/setup-node@v6
         with:
@@ -43,76 +57,115 @@ jobs:
           cache: "npm"
 
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.target }}
 
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Build frontend (so dist/ exists for the tauri context macro)
+        run: npm run build
+
       - name: Restore credentials.json from secret
-        shell: pwsh
+        shell: bash
         env:
-          CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          CREDS: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: |
-          if (-not $env:CREDENTIALS_JSON) {
-            throw "Missing secret GOOGLE_CREDENTIALS_JSON."
-          }
-          $env:CREDENTIALS_JSON | Set-Content -Path credentials.json -Encoding UTF8 -NoNewline
-          Write-Host "credentials.json restored ($($env:CREDENTIALS_JSON.Length) chars)"
+          if [ -z "$CREDS" ]; then
+            echo "Missing secret GOOGLE_CREDENTIALS_JSON" >&2
+            exit 1
+          fi
+          printf '%s' "$CREDS" > credentials.json
+          echo "credentials.json restored ($(printf '%s' "$CREDS" | wc -c) bytes)"
 
       - name: Run frontend tests
         run: npm test
-
-      # Tauri's `generate_context!` macro reads frontendDist (../dist) at
-      # compile time, so the cargo test invocation needs an existing dist/.
-      # We do a real build here; `npm run tauri build` later reuses it.
-      - name: Build frontend (so dist/ exists for the tauri context macro)
-        run: npm run build
 
       - name: Run backend tests
         working-directory: src-tauri
         run: cargo test --lib
 
       - name: Build signed Tauri bundle
-        shell: pwsh
+        shell: bash
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
         run: |
-          if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
-            throw "Missing secret TAURI_SIGNING_PRIVATE_KEY."
-          }
-          # Strip BOM, whitespace and stray quotes that may have leaked in
-          # while the secret was being set (`gh secret set --body -` over a
-          # PowerShell pipe is a common offender on Windows).
-          $key = $env:TAURI_SIGNING_PRIVATE_KEY
-          $key = $key.Trim()
-          $key = $key.Trim([char]0xFEFF)
-          $key = $key.Trim('"', "'")
-          $key = $key -replace "[`r`n`t ]", ""
-          $env:TAURI_SIGNING_PRIVATE_KEY = $key
-          # Log only the length and the first/last char codes so we can
-          # diagnose corruption without leaking the key.
-          Write-Host "Sanitised key: length=$($key.Length), first=$([int]$key[0]), last=$([int]$key[-1])"
-          npm run tauri build
+          # Sanitise the key in case the secret carries a stray BOM/whitespace
+          # (we hit that exact bug earlier — see release.yml history).
+          KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r\n\t "'"'"'' | sed 's/^\xEF\xBB\xBF//')
+          export TAURI_SIGNING_PRIVATE_KEY="$KEY"
+          echo "Sanitised key length: ${#KEY}"
+          npm run tauri build -- --target ${{ matrix.platform.target }}
 
-      - name: Compute installer URL
-        id: urls
-        shell: pwsh
+      - name: Upload bundle artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-${{ matrix.platform.name }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/nsis/*
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/dmg/*
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/macos/*
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/appimage/*
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/deb/*
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/rpm/*
+
+  release:
+    name: Create GitHub release
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Resolve version from tag
+        id: version
         run: |
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.TAG }}/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe"
-          "INSTALLER_URL=$url" | Out-File $env:GITHUB_OUTPUT -Append
-          Write-Host $url
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG, Version: $VERSION"
+
+      - name: Download all build artefacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artefacts
+
+      - name: Show what was downloaded
+        run: find artefacts -maxdepth 4 -type f | sort
 
       - name: Generate latest.json
-        shell: pwsh
         run: |
-          $version = "${{ steps.version.outputs.VERSION }}"
-          $notes = "Automated release ${{ steps.version.outputs.TAG }}. See the release description for details."
-          .\scripts\make_latest_json.ps1 -Version $version -Notes $notes
+          node scripts/make_latest_json.mjs \
+            --version "${{ steps.version.outputs.VERSION }}" \
+            --notes "Automated release ${{ steps.version.outputs.TAG }}. See the release description for details."
 
-      - name: Generate release body
-        shell: pwsh
+      - name: Generate release body from CHANGELOG
         run: |
-          .\scripts\make_release_body.ps1 -Tag "${{ steps.version.outputs.TAG }}" -Repo "${{ github.repository }}"
+          node scripts/make_release_body.mjs \
+            --tag "${{ steps.version.outputs.TAG }}" \
+            --repo "${{ github.repository }}"
+
+      - name: Flatten artefacts for the release
+        run: |
+          mkdir -p release-files
+          find artefacts -type f \( \
+            -name "*.exe" -o -name "*.exe.sig" -o \
+            -name "*.dmg" -o \
+            -name "*.app.tar.gz" -o -name "*.app.tar.gz.sig" -o \
+            -name "*.AppImage" -o -name "*.AppImage.tar.gz" -o -name "*.AppImage.tar.gz.sig" -o \
+            -name "*.deb" -o \
+            -name "*.rpm" \
+          \) -exec cp {} release-files/ \;
+          cp scripts/release-out/latest.json release-files/
+          ls -lh release-files/
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
@@ -121,17 +174,22 @@ jobs:
           name: Snap2Link ${{ steps.version.outputs.TAG }}
           body_path: scripts/release-out/release-body.md
           fail_on_unmatched_files: true
-          files: |
-            src-tauri/target/release/bundle/nsis/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe
-            src-tauri/target/release/bundle/nsis/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe.sig
-            scripts/release-out/latest.json
+          files: release-files/*
 
   submit-winget:
     name: Submit winget update PR
-    needs: build-and-release
+    needs: release
     runs-on: windows-latest
     if: ${{ vars.SUBMIT_WINGET == 'true' }}
     steps:
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${TAG#v}" >> "$GITHUB_OUTPUT"
+
       - name: Install wingetcreate
         shell: pwsh
         run: |
@@ -146,8 +204,9 @@ jobs:
           if (-not $env:WINGET_PAT) {
             throw "Missing secret WINGET_PAT."
           }
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.TAG }}/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe"
           .\wingetcreate.exe update amys94fr.Snap2Link `
-            --version "${{ needs.build-and-release.outputs.version }}" `
-            --urls "${{ needs.build-and-release.outputs.installer_url }}" `
+            --version "${{ steps.version.outputs.VERSION }}" `
+            --urls "$url" `
             --submit `
             --token "$env:WINGET_PAT"
