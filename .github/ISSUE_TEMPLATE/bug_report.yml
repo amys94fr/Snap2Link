@@ -1,0 +1,82 @@
+name: 🐛 Bug report
+description: Something is broken or behaves unexpectedly.
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! The more reproducible the description, the faster the fix.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence describing the bug.
+      placeholder: "The uploader toast doesn't disappear when the upload fails on a 401."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Be precise — start from "open Snap2Link" and walk through every action.
+      placeholder: |
+        1. Open Snap2Link from the tray.
+        2. Press Ctrl+PrintScreen.
+        3. Drag a 200×200 region.
+        4. Wait for the toast.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      placeholder: "Toast turns into a green check, then disappears after ~1.8 s."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      placeholder: "Toast keeps spinning forever; no notification fires."
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Snap2Link version
+      description: Settings → About, or the version in the installer file name.
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+        - Other (please describe in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: |
+        If you ran `npm run tauri dev`, paste the relevant `[snap2link]` / `[overlay]` / `[frontend]` lines from the terminal. UI bugs benefit from a short GIF or screenshot.
+      placeholder: "Drag-and-drop screenshots or GIFs directly into this field."
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else? Antivirus, custom Drive setup, multi-monitor, weird DPI…

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Question or design discussion
+    url: https://github.com/amys94fr/Snap2Link/discussions
+    about: For questions, ideas, or anything that isn't a bug or a concrete feature request.
+  - name: 🔒 Security vulnerability
+    url: https://github.com/amys94fr/Snap2Link/security/advisories/new
+    about: Please report security issues privately, never in a public issue.

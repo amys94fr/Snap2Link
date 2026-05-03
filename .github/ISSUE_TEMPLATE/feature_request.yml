@@ -1,0 +1,49 @@
+name: ✨ Feature request
+description: Suggest a new capability or improvement.
+title: "[Feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an idea! Please check the [roadmap](https://github.com/amys94fr/Snap2Link#%EF%B8%8F-roadmap) and existing issues first — your idea may already be planned or under discussion.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case in one or two sentences. *"As a __, I want __ so that __."*
+      placeholder: "As a designer reviewing mockups, I want to add a quick arrow on the screenshot before it uploads, so I can point to the issue without opening Photoshop."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: A rough sketch is fine — final spec comes during discussion.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about and why you didn't pick them.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How important is this to you?
+      options:
+        - Nice to have
+        - Would make my life easier
+        - Blocking my workflow
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Mockups, links to similar features in other tools, related issues, anything else.
