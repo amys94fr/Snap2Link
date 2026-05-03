@@ -4,6 +4,30 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] – 2026-05-03
+
+### Security
+
+- Bumped Vite to 8.x and Vitest to 4.x, which transitively pulls
+  fixed esbuild and rolldown. This silences the
+  [GHSA-67mh-4wv8-2f99] (Vite path traversal in dev-only `.map`
+  handler) and [GHSA-67mh-4wv8-2f99] (esbuild dev server CSRF)
+  Dependabot alerts. Both vulnerabilities only affected
+  `npm run dev`, not the released binary.
+
+### Changed
+
+- Upgraded React 18 → 19, Zustand 4 → 5, Vitest 2 → 4, Vite 5 → 8.
+  No behavioural changes — covered by the existing 77-test frontend
+  suite.
+- Upgraded Rust deps: `xcap` 0.0.14 → 0.9.4 (rewrote the screenshot
+  helper to handle xcap's new `Result`-returning monitor accessors)
+  and `dirs` 5 → 6.
+- GitHub Actions bumped to v6 (`checkout`, `setup-node`) and v3
+  (`softprops/action-gh-release`).
+
+[GHSA-67mh-4wv8-2f99]: https://github.com/advisories/GHSA-67mh-4wv8-2f99
+
 ## [1.0.1] – 2026-05-03
 
 ### Fixed

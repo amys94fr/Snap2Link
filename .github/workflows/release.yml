@@ -23,7 +23,7 @@ jobs:
       installer_url: ${{ steps.urls.outputs.INSTALLER_URL }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
@@ -37,7 +37,7 @@ jobs:
           "TAG=$tag" | Out-File $env:GITHUB_OUTPUT -Append
           Write-Host "Tag: $tag, Version: $version"
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
@@ -115,7 +115,7 @@ jobs:
           .\scripts\make_release_body.ps1 -Tag "${{ steps.version.outputs.TAG }}" -Repo "${{ github.repository }}"
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
           name: Snap2Link ${{ steps.version.outputs.TAG }}
