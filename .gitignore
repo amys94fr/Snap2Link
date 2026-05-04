@@ -39,3 +39,6 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Local output of wingetcreate runs (manifests are submitted upstream, not committed here)
+manifests/
