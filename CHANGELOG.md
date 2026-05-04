@@ -4,6 +4,35 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] – 2026-05-04
+
+### Changed — Modern stack refresh
+
+Every direct dependency bumped to the latest stable major. No behaviour change for end users, but the codebase is now on the current line of every framework so future security patches and feature work land on a supported baseline.
+
+#### Frontend
+
+- **Tailwind CSS 3 → 4.** The PostCSS plugin moved to a separate package — installer/build now go through `@tailwindcss/postcss`, autoprefixer dropped (Tailwind 4 ships its own vendor-prefixing via Lightning CSS). Custom `.btn` / `.btn-primary` / `.btn-secondary` / `.btn-success` classes migrated from `@layer components` to the new `@utility` directive (Tailwind 4 no longer auto-registers component-layer classes for `@apply`). CSS entry switched from `@tailwind base/components/utilities` to `@import "tailwindcss"` + `@config "../../tailwind.config.js"` so the existing colour palette (`brand`, `success`, `danger`, custom slate) is preserved.
+- **TypeScript 5 → 6.** Compiles cleanly under strict mode. `tsconfig.json`'s deprecated `baseUrl` removed in favour of relative-anchored `paths` (`./src/*`).
+- **react-i18next 15 → 17.** Picks up i18next 26 and broadens its TypeScript peer to `^5 || ^6`, which is what unblocked the TS bump.
+- **jsdom 25 → 29**, **@types/node 22 → 25** (testing infra).
+- All `@tauri-apps/*` plugin packages bumped to their latest 2.x release (api 2.11, plugin-autostart 2.5, plugin-clipboard-manager 2.3, plugin-global-shortcut 2.3, plugin-notification 2.3, plugin-shell 2.3).
+- All `@testing-library/*` bumped (jest-dom 6.9, react 16.3, user-event 14.6) and `postcss` 8.5.
+
+#### Backend
+
+- **reqwest 0.12 → 0.13.** Renamed the `rustls-tls` feature to `rustls`; the `form` and `query` extensions are now opt-in and explicitly enabled.
+- `cargo update` ran across the rest of the tree, picking up the latest minors of every Tauri plugin, `tokio`, `serde`, `chrono`, `image`, `xcap`, `thiserror`, etc.
+
+#### CI
+
+- `actions/upload-artifact` 4 → 7 and `actions/download-artifact` 4 → 8 in the release workflow.
+
+### Internals
+
+- Repository now ships a `.gitattributes` enforcing LF endings on `*.sh` and `*.mjs` (so `scripts/install.sh` keeps its shebang clean when cloned on Windows).
+- New `scripts/install.sh` — one-liner Linux installer (`curl -fsSL .../install.sh | bash`) that auto-detects apt/dnf/zypper and falls back to the AppImage.
+
 ## [1.1.0] – 2026-05-03
 
 ### Added

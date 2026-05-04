@@ -1,6 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind 4 — single import replaces the old @tailwind base/components/utilities trio.
+   We keep `tailwind.config.js` for the colour palette + content scan via @config. */
+@import "tailwindcss";
+@config "../../tailwind.config.js";
 
 @layer base {
   html, body, #root {
@@ -22,13 +23,23 @@
   }
 }
 
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center rounded-lg font-semibold transition
-           focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2
-           focus-visible:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-primary { @apply btn bg-brand hover:bg-brand-dark text-white px-6 py-3; }
-  .btn-secondary { @apply btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2; }
-  .btn-success { @apply btn bg-success hover:bg-emerald-600 text-white px-6 py-3; }
+/* Tailwind 4 dropped the implicit @apply support for component classes
+   defined in @layer components — custom utilities must now be declared
+   with @utility so they can be referenced from other rules. */
+@utility btn {
+  @apply inline-flex items-center justify-center rounded-lg font-semibold transition
+         focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2
+         focus-visible:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+@utility btn-primary {
+  @apply btn bg-brand hover:bg-brand-dark text-white px-6 py-3;
+}
+
+@utility btn-secondary {
+  @apply btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2;
+}
+
+@utility btn-success {
+  @apply btn bg-success hover:bg-emerald-600 text-white px-6 py-3;
 }

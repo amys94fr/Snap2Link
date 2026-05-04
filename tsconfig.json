@@ -21,9 +21,8 @@
 
     "types": ["vitest/globals", "@testing-library/jest-dom"],
 
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src", "vitest.config.ts", "vite.config.ts"]
