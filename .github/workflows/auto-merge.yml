@@ -1,0 +1,53 @@
+name: Auto-merge
+
+# Auto-merge Dependabot PRs as soon as the Tests workflow goes green.
+#
+# Decision matrix:
+#   patch / minor (any ecosystem)  -> merge immediately, no human in the loop
+#   major (any ecosystem)          -> NO auto-merge — wait for review (Claude
+#                                     cron or a human will triage). Majors are
+#                                     where breaking changes live (we hit this
+#                                     with Tailwind 4 and TS 6).
+#
+# Non-Dependabot PRs are ignored entirely; they always need human review.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot-auto-merge:
+    name: Squash-merge if patch/minor + CI green
+    runs-on: ubuntu-24.04
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for patch/minor
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          # `gh pr merge --auto` queues the merge — GitHub fires it the moment
+          # all required checks (Tests workflow) report success.
+          gh pr merge "$PR_URL" --auto --squash --delete-branch
+
+      - name: Comment on majors so the maintainer knows it's queued for review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PKG: ${{ steps.metadata.outputs.dependency-names }}
+        run: |
+          gh pr comment "$PR_URL" --body "🚧 Major version bump for \`$PKG\` detected. Auto-merge is **disabled** for majors — waiting for human or Claude review. CI will still run and the merge button will be enabled once it's green."
