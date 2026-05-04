@@ -146,7 +146,7 @@ jobs:
           echo "Tag: $TAG, Version: $VERSION"
 
       - name: Download all build artefacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artefacts
 
