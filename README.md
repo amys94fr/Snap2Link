@@ -13,7 +13,7 @@
   <a href="https://github.com/amys94fr/Snap2Link/releases/latest"><img src="https://img.shields.io/github/v/release/amys94fr/Snap2Link?style=flat-square&color=22c55e" alt="Release"></a>
   <a href="https://github.com/amys94fr/Snap2Link/releases"><img src="https://img.shields.io/github/downloads/amys94fr/Snap2Link/total?style=flat-square&color=3b82f6" alt="Downloads"></a>
   <a href="https://github.com/amys94fr/Snap2Link/stargazers"><img src="https://img.shields.io/github/stars/amys94fr/Snap2Link?style=flat-square&color=f59e0b" alt="Stars"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/amys94fr/Snap2Link?style=flat-square&color=64748b" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748b?style=flat-square" alt="License: MIT"></a>
   <a href="https://github.com/amys94fr/Snap2Link/actions"><img src="https://img.shields.io/github/actions/workflow/status/amys94fr/Snap2Link/test.yml?branch=main&style=flat-square&label=tests" alt="CI"></a>
 </p>
 
