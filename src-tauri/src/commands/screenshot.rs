@@ -1,5 +1,11 @@
 //! Region screenshot capture using the `xcap` crate.
+//!
+//! Plus a small helper command — `write_annotated_image` — that the
+//! annotator window calls when the user hits "Done": it takes the PNG
+//! bytes the Konva stage exported and stashes them in a temp file so the
+//! existing upload pipeline (which expects a path) stays unchanged.
 
+use std::fs;
 use xcap::Monitor;
 
 #[tauri::command]
@@ -53,4 +59,39 @@ pub fn capture_region_inner(
     let tmp = std::env::temp_dir().join("snap2link_cap.png");
     cropped.save(&tmp)?;
     Ok(tmp.to_string_lossy().to_string())
+}
+
+/// Saves a base64-decoded PNG to a temp file and returns its path. The
+/// annotator window invokes this with the PNG bytes the Konva stage
+/// exported, then chains into `upload_screenshot` with the returned path.
+#[tauri::command]
+pub fn write_annotated_image(bytes: Vec<u8>) -> Result<String, String> {
+    write_annotated_image_inner(&bytes).map_err(|e| e.to_string())
+}
+
+pub fn write_annotated_image_inner(bytes: &[u8]) -> anyhow::Result<String> {
+    if bytes.is_empty() {
+        anyhow::bail!("empty image payload");
+    }
+    let tmp = std::env::temp_dir().join("snap2link_annotated.png");
+    fs::write(&tmp, bytes)?;
+    Ok(tmp.to_string_lossy().to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn write_annotated_image_writes_bytes_and_returns_path() {
+        let bytes: Vec<u8> = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]; // PNG magic
+        let path = write_annotated_image_inner(&bytes).unwrap();
+        let read_back = std::fs::read(&path).unwrap();
+        assert_eq!(read_back, bytes);
+    }
+
+    #[test]
+    fn write_annotated_image_rejects_empty_payload() {
+        assert!(write_annotated_image_inner(&[]).is_err());
+    }
 }

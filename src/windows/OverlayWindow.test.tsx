@@ -26,9 +26,10 @@ describe("<OverlayWindow />", () => {
     expect(hide).toHaveBeenCalled();
   });
 
-  it("captures and uploads on mouse drag of >= 10×10 px", async () => {
+  it("captures and uploads on mouse drag of >= 10×10 px when annotator is OFF", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
       if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "get_config") return { enable_annotator: false };
       if (cmd === "upload_screenshot") return "https://drive/file/abc";
       return undefined;
     });
@@ -62,6 +63,28 @@ describe("<OverlayWindow />", () => {
     expect(sendNotification).toHaveBeenCalled();
   });
 
+  it("hands the capture off to the annotator window when the annotator is ON", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "get_config") return { enable_annotator: true };
+      return undefined;
+    });
+
+    render(<OverlayWindow />);
+    const surface = screen.getByTestId("overlay-surface");
+    fireEvent.mouseDown(surface, { clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(surface, { clientX: 300, clientY: 250 });
+    fireEvent.mouseUp(surface, { clientX: 300, clientY: 250 });
+
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("capture_region", expect.anything());
+    });
+    // Upload must NOT happen from the overlay — the annotator owns it now.
+    expect(invoke).not.toHaveBeenCalledWith("upload_screenshot", expect.anything());
+    // And the clipboard must not be touched here either.
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
   it("does nothing when the selection is smaller than 10x10", () => {
     render(<OverlayWindow />);
     const surface = screen.getByTestId("overlay-surface");
@@ -75,6 +98,7 @@ describe("<OverlayWindow />", () => {
   it("normalizes the rectangle when dragging up-left", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
       if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "get_config") return { enable_annotator: false };
       if (cmd === "upload_screenshot") return "https://drive/x";
       return undefined;
     });
@@ -97,6 +121,7 @@ describe("<OverlayWindow />", () => {
   it("shows the in-overlay toast (uploading then success) during a capture", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
       if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "get_config") return { enable_annotator: false };
       if (cmd === "upload_screenshot") return "https://drive/x";
       return undefined;
     });
@@ -123,6 +148,7 @@ describe("<OverlayWindow />", () => {
   it("hides the toast even when the upload fails", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
       if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "get_config") return { enable_annotator: false };
       if (cmd === "upload_screenshot") throw new Error("nope");
       return undefined;
     });

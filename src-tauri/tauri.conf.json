@@ -35,10 +35,27 @@
         "resizable": false,
         "focus": true,
         "url": "index.html?window=overlay"
+      },
+      {
+        "label": "annotator",
+        "title": "Snap2Link — Annotate",
+        "width": 1100,
+        "height": 760,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "center": true,
+        "visible": false,
+        "decorations": true,
+        "url": "index.html?window=annotator"
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
     }
   },
   "plugins": {

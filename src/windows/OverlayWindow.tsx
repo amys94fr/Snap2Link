@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { sendNotification } from "@tauri-apps/plugin-notification";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import {
+  getCurrentWebviewWindow,
+  WebviewWindow,
+} from "@tauri-apps/api/webviewWindow";
 import { t } from "@/i18n";
 import { UploaderToast } from "./UploaderToast";
+
+interface AppConfigShape {
+  enable_annotator?: boolean;
+}
 
 const MIN_SELECTION_PX = 10;
 const SUCCESS_DISPLAY_MS = 1800;
@@ -105,11 +113,31 @@ export function OverlayWindow() {
       });
       dlog(`[overlay] captured to: ${imagePath}`);
 
+      // Branch on the user's preference: when the annotator is enabled,
+      // hand the capture off to the annotator window and let it own the
+      // upload. Otherwise upload immediately as before.
+      const cfg = await invoke<AppConfigShape>("get_config").catch(
+        () => ({}) as AppConfigShape,
+      );
+      const annotatorEnabled = cfg.enable_annotator !== false;
+
+      if (annotatorEnabled) {
+        const annotator = await WebviewWindow.getByLabel("annotator");
+        if (annotator) {
+          await annotator.show();
+          await annotator.setFocus();
+        }
+        // Tell the annotator window which file to load. We can't reuse the
+        // URL query param after the window is created, so emit an event.
+        await emit("annotator-load", { path: imagePath });
+        dlog(`[overlay] annotator handed: ${imagePath}`);
+        uploadedOk = true; // not really uploaded, but the overlay is done
+        return;
+      }
+
       // Re-show the window in "uploading" mode — this turns the same
       // fullscreen overlay into a centered toast (via CSS flex centering).
       setMode("uploading");
-      // Yield to React so the new mode is rendered before the window
-      // becomes visible again.
       await new Promise((r) => window.setTimeout(r, 0));
       await win.show();
 

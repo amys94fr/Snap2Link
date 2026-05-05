@@ -38,6 +38,7 @@ pub fn run() {
             commands::drive::upload_screenshot,
             commands::drive::cleanup_old_screenshots,
             commands::screenshot::capture_region,
+            commands::screenshot::write_annotated_image,
             commands::updater::check_for_update,
             commands::updater::install_update,
             hotkey::update_hotkey,

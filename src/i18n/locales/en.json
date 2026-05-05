@@ -33,6 +33,8 @@
   "settings.keep_for": "Keep screenshots for",
   "settings.days": "days",
   "settings.delete_saved": "✅ Screenshots deleted after {days} days",
+  "settings.annotator": "Open annotation editor before upload",
+  "settings.annotator.hint": "Adds a step where you can draw arrows, blur sensitive areas, add text — all before the screenshot is uploaded.",
   "settings.startup": "Start with Windows",
   "settings.about_btn": "About",
   "settings.close": "Close",
@@ -68,6 +70,24 @@
   "notify.cleanup": "🗑 {n} old screenshot(s) deleted from Drive.",
 
   "overlay.hint": "Select an area  •  ESC to cancel",
+
+  "annotator.title": "Snap2Link — Annotate",
+  "annotator.tool.select": "Select",
+  "annotator.tool.pen": "Pen",
+  "annotator.tool.rectangle": "Rectangle",
+  "annotator.tool.circle": "Circle",
+  "annotator.tool.arrow": "Arrow",
+  "annotator.tool.text": "Text",
+  "annotator.tool.blur": "Blur",
+  "annotator.color": "Colour",
+  "annotator.stroke": "Stroke width",
+  "annotator.undo": "Undo",
+  "annotator.redo": "Redo",
+  "annotator.cancel": "Cancel",
+  "annotator.done": "Done",
+  "annotator.loading": "Loading capture…",
+  "annotator.text.placeholder": "Type text…",
+
 
   "uploader.title": "Uploading to Google Drive",
   "uploader.subtitle": "Hold tight — the link is on its way to your clipboard.",

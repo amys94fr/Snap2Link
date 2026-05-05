@@ -7,15 +7,23 @@ import { SetupWizard } from "./windows/SetupWizard";
 import { SettingsWindow } from "./windows/SettingsWindow";
 import { AboutWindow } from "./windows/AboutWindow";
 import { OverlayWindow } from "./windows/OverlayWindow";
+import { AnnotatorWindow } from "./windows/AnnotatorWindow";
 
-function getWindowKind(): "main" | "overlay" {
+type WindowKind = "main" | "overlay" | "annotator";
+
+function getWindowKind(): WindowKind {
   if (typeof window === "undefined") return "main";
   const params = new URLSearchParams(window.location.search);
-  return params.get("window") === "overlay" ? "overlay" : "main";
+  const kind = params.get("window");
+  if (kind === "overlay") return "overlay";
+  if (kind === "annotator") return "annotator";
+  return "main";
 }
 
 export default function App() {
-  if (getWindowKind() === "overlay") return <OverlayWindow />;
+  const kind = getWindowKind();
+  if (kind === "overlay") return <OverlayWindow />;
+  if (kind === "annotator") return <AnnotatorWindow />;
   return <MainApp />;
 }
 

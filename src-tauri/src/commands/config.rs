@@ -23,6 +23,10 @@ pub struct AppConfig {
     pub retention_days: u32,
     #[serde(default = "default_auto_delete")]
     pub auto_delete: bool,
+    /// When true the annotator window opens between capture and upload so
+    /// the user can draw arrows / blur / text on top before sharing.
+    #[serde(default = "default_enable_annotator")]
+    pub enable_annotator: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub folder_id: Option<String>,
 }
@@ -36,6 +40,9 @@ fn default_retention_days() -> u32 {
 fn default_auto_delete() -> bool {
     true
 }
+fn default_enable_annotator() -> bool {
+    true
+}
 
 impl Default for AppConfig {
     fn default() -> Self {
@@ -43,6 +50,7 @@ impl Default for AppConfig {
             hotkey: default_hotkey(),
             retention_days: default_retention_days(),
             auto_delete: default_auto_delete(),
+            enable_annotator: default_enable_annotator(),
             folder_id: None,
         }
     }
@@ -81,12 +89,16 @@ pub fn save_config(
     hotkey: String,
     retention_days: u32,
     auto_delete: bool,
+    enable_annotator: Option<bool>,
 ) -> Result<(), String> {
     let dir = app_data_dir();
     let mut cfg = load_config_from(&dir);
     cfg.hotkey = hotkey;
     cfg.retention_days = clamp_retention(retention_days);
     cfg.auto_delete = auto_delete;
+    if let Some(en) = enable_annotator {
+        cfg.enable_annotator = en;
+    }
     save_config_to(&dir, &cfg).map_err(|e| e.to_string())
 }
 
@@ -101,7 +113,20 @@ mod tests {
         assert_eq!(cfg.hotkey, DEFAULT_HOTKEY);
         assert_eq!(cfg.retention_days, DEFAULT_RETENTION_DAYS);
         assert!(cfg.auto_delete);
+        assert!(cfg.enable_annotator);
         assert!(cfg.folder_id.is_none());
+    }
+
+    #[test]
+    fn missing_enable_annotator_field_defaults_to_true() {
+        let tmp = TempDir::new().unwrap();
+        std::fs::write(
+            tmp.path().join("config.json"),
+            r#"{ "hotkey": "Ctrl+S", "retention_days": 30, "auto_delete": true }"#,
+        )
+        .unwrap();
+        let cfg = load_config_from(tmp.path());
+        assert!(cfg.enable_annotator);
     }
 
     #[test]
@@ -118,6 +143,7 @@ mod tests {
             hotkey: "Ctrl+Alt+P".into(),
             retention_days: 90,
             auto_delete: false,
+            enable_annotator: false,
             folder_id: Some("abc123".into()),
         };
         save_config_to(tmp.path(), &cfg).unwrap();
@@ -179,5 +205,15 @@ mod tests {
         };
         let json = serde_json::to_string(&cfg).unwrap();
         assert!(json.contains("\"folder_id\":\"xyz\""));
+    }
+
+    #[test]
+    fn enable_annotator_can_be_disabled() {
+        let cfg = AppConfig {
+            enable_annotator: false,
+            ..AppConfig::default()
+        };
+        let json = serde_json::to_string(&cfg).unwrap();
+        assert!(json.contains("\"enable_annotator\":false"));
     }
 }

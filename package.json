@@ -27,9 +27,11 @@
     "@tauri-apps/plugin-shell": "^2.3.5",
     "clsx": "^2.1.1",
     "i18next": "^26.0.8",
+    "konva": "^10.3.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-i18next": "^17.0.6",
+    "react-konva": "^19.2.3",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
