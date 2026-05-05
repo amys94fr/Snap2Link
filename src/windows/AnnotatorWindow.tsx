@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type Konva from "konva";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
-import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { listen, emit } from "@tauri-apps/api/event";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { t } from "@/i18n";
@@ -86,7 +85,8 @@ export function AnnotatorWindow() {
   useEffect(() => {
     reset();
     if (!imagePath) {
-      setLoadError("missing path");
+      // No path yet — the overlay emits annotator-load on every capture.
+      // The neutral "loading capture…" text already covers this state.
       return;
     }
     const img = new window.Image();
@@ -137,6 +137,18 @@ export function AnnotatorWindow() {
         redo();
         return;
       }
+      // Delete/Backspace removes the currently selected shape. We read
+      // the latest store state inside the handler instead of trusting the
+      // closure — selection updates from Konva clicks happen outside the
+      // React render cycle and would otherwise see a stale value.
+      if ((e.key === "Delete" || e.key === "Backspace") && !ctrl) {
+        const sid = useAnnotatorStore.getState().selectedId;
+        if (sid) {
+          e.preventDefault();
+          useAnnotatorStore.getState().deleteShape(sid);
+          return;
+        }
+      }
       const k = e.key.toLowerCase();
       if (TOOL_KEYS[k] && !ctrl && !e.altKey) {
         e.preventDefault();
@@ -162,8 +174,11 @@ export function AnnotatorWindow() {
     await hide();
   };
 
-  /** Done = export Konva stage to PNG, ship it through the existing
-   *  upload pipeline, copy the share link, fire the success notif, hide. */
+  /** Done = export Konva stage to PNG, dismiss the editor *immediately*
+   *  so the user gets a clear "I'm done" signal, then hand the saved
+   *  path off to the overlay window which drives the upload + toast.
+   *  Keeping the toast in the overlay (a separate window) means the
+   *  editor doesn't sit half-visible behind a centered spinner. */
   const onDone = async () => {
     if (busy) return;
     setBusy(true);
@@ -178,18 +193,11 @@ export function AnnotatorWindow() {
       });
       const bytes = dataUrlToBytes(dataUrl);
       const path = await invoke<string>("write_annotated_image", { bytes });
-      const link = await invoke<string>("upload_screenshot", { imagePath: path });
-      await writeText(link);
-      try {
-        sendNotification({
-          title: t("notify.app_name"),
-          body: t("notify.link_copied"),
-        });
-      } catch {
-        // notifications may be denied — clipboard still set
-      }
+      // Dismiss the editor before kicking off the upload so the toast in
+      // the overlay window stands alone instead of overlapping the canvas.
       reset();
       await hide();
+      await emit("upload-from-path", { path });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       try {
@@ -281,7 +289,7 @@ export function AnnotatorWindow() {
           disabled={busy || !image}
           className="px-4 py-2 rounded-md bg-brand hover:bg-brand-dark disabled:opacity-50 text-white text-sm font-medium"
         >
-          {busy ? t("uploader.title") : t("annotator.done")}
+          {t("annotator.done")}
         </button>
       </div>
     </div>

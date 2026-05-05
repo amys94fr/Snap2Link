@@ -21,7 +21,9 @@ vi.mock("@tauri-apps/api/core", async () => {
   const actual = await vi.importActual<Record<string, unknown>>("@tauri-apps/api/core");
   return {
     ...actual,
-    invoke: vi.fn(),
+    // Default to a resolved promise so production code can safely chain
+    // .catch() / await on every invoke without crashing in tests.
+    invoke: vi.fn(async () => undefined),
     convertFileSrc: vi.fn((p: string) => `asset://localhost/${encodeURIComponent(p)}`),
   };
 });
@@ -52,10 +54,14 @@ describe("<AnnotatorWindow />", () => {
     expect(screen.getByText(/loading capture/i)).toBeInTheDocument();
   });
 
-  it("renders the error state when the path query param is missing", () => {
+  it("renders the loading state (not an error) while waiting for the path event", () => {
+    // The annotator window is created hidden at startup; until the overlay
+    // emits annotator-load, there's no path yet — show the neutral loading
+    // text instead of an error.
     setLocation("?window=annotator");
     render(<AnnotatorWindow />);
-    expect(screen.getByTestId("annotator-error")).toHaveTextContent(/missing path/i);
+    expect(screen.getByText(/loading capture/i)).toBeInTheDocument();
+    expect(screen.queryByTestId("annotator-error")).not.toBeInTheDocument();
   });
 
   it("Cancel button hides the window and resets the canvas state", () => {
@@ -125,6 +131,44 @@ describe("<AnnotatorWindow />", () => {
       expect(useAnnotatorStore.getState().shapes).toHaveLength(1);
       fireEvent.keyDown(window, { key: "y", ctrlKey: true });
       expect(useAnnotatorStore.getState().shapes).toHaveLength(2);
+    });
+
+    it("Delete removes the selected shape (in select mode)", () => {
+      setLocation("?window=annotator&path=" + encodeURIComponent("C:/tmp/cap.png"));
+      render(<AnnotatorWindow />);
+      const s = useAnnotatorStore.getState();
+      s.addShape({
+        id: "r1",
+        type: "rectangle",
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        color: "#fff",
+        strokeWidth: 2,
+      });
+      s.setSelectedId("r1");
+      fireEvent.keyDown(window, { key: "Delete" });
+      expect(useAnnotatorStore.getState().shapes).toHaveLength(0);
+    });
+
+    it("Backspace also removes the selected shape", () => {
+      setLocation("?window=annotator&path=" + encodeURIComponent("C:/tmp/cap.png"));
+      render(<AnnotatorWindow />);
+      const s = useAnnotatorStore.getState();
+      s.addShape({
+        id: "r1",
+        type: "rectangle",
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        color: "#fff",
+        strokeWidth: 2,
+      });
+      s.setSelectedId("r1");
+      fireEvent.keyDown(window, { key: "Backspace" });
+      expect(useAnnotatorStore.getState().shapes).toHaveLength(0);
     });
 
     it("ignores letter shortcuts while a textarea has focus (so typing 'r' inserts an 'r')", () => {

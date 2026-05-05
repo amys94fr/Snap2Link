@@ -9,7 +9,6 @@ const defaultConfig = {
   hotkey: "Ctrl+PrintScreen",
   retention_days: 30,
   auto_delete: true,
-  enable_annotator: true,
 };
 
 function mockInvoke(overrides?: {
@@ -22,34 +21,6 @@ function mockInvoke(overrides?: {
     return undefined;
   });
 }
-
-describe("annotator toggle", () => {
-  beforeEach(() => {
-    mockInvoke();
-  });
-
-  it("renders the toggle reflecting the saved value", async () => {
-    render(<SettingsWindow onClose={vi.fn()} onAbout={vi.fn()} />);
-    const toggle = await screen.findByRole("checkbox", {
-      name: /open annotation editor/i,
-    });
-    expect(toggle).toBeChecked();
-  });
-
-  it("flipping the toggle calls save_config with enableAnnotator: false", async () => {
-    render(<SettingsWindow onClose={vi.fn()} onAbout={vi.fn()} />);
-    const toggle = await screen.findByRole("checkbox", {
-      name: /open annotation editor/i,
-    });
-    await userEvent.click(toggle);
-    await waitFor(() => {
-      expect(invoke).toHaveBeenCalledWith(
-        "save_config",
-        expect.objectContaining({ enableAnnotator: false }),
-      );
-    });
-  });
-});
 
 describe("<SettingsWindow />", () => {
   beforeEach(() => {

@@ -4,6 +4,41 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] – 2026-05-05
+
+### Added — In-app annotation editor
+
+After every region capture, Snap2Link now asks **"What now?"** with two clear paths:
+
+- 📝 **Edit** — opens a full annotation editor with a canvas (Konva-backed) loaded with the screenshot. Tools on the left toolbar:
+  - **Select** (`V`) — click any placed shape to select it (blue glow), drag to move, `Delete` / `Backspace` to remove. Click empty canvas to deselect.
+  - **Pen** (`P`) — freeform polyline.
+  - **Rectangle** (`R`) — click-and-drag rectangle.
+  - **Circle / Oval** (`O`) — click-and-drag ellipse.
+  - **Arrow** (`A`) — click-and-drag arrow with a head sized from the stroke preset.
+  - **Text** (`T`) — click to place, inline textarea, commit with `Enter` or click-away. Empty text drops the placeholder.
+  - **Blur** (`B`) — click-and-drag a region; a Gaussian blur is applied to the source image cropped to that rectangle. Intensity is driven by the stroke preset. Icon is a water droplet — the universal blur metaphor.
+  - 6-swatch colour palette + native HTML5 custom picker.
+  - 3 stroke widths, also driving text size and blur radius.
+  - Undo / Redo (`Ctrl+Z` / `Ctrl+Y`, history capped at 50).
+- 📤 **Save & share** — uploads the screenshot directly without annotating (the v1.2.0 default flow). Same speed as before.
+- `Esc` from the prompt cancels everything.
+
+The `Edit` flow exports the Konva stage at native (un-scaled) resolution so the upload keeps the original sharpness even if the canvas was downscaled to fit. On `Done` the annotator window dismisses immediately, hands the annotated PNG path off to the overlay, and the same centered toast (`Uploading… → Link copied!`) the legacy flow used confirms the upload.
+
+### Changed
+
+- The post-capture flow now always asks Edit / Save (no more global toggle in Settings — the choice is per screenshot).
+- The overlay window owns the upload + toast for both Save and Done, so the toast never visually overlaps the editor.
+- `tauri = features += [protocol-asset]` and `tauri.conf.json` declares an asset-protocol scope so the captured PNG can be loaded into the editor's webview via `convertFileSrc`.
+
+### Internals
+
+- New backend command `write_annotated_image(bytes)` saves the PNG bytes the editor exports to a temp file (used as the input to the existing `upload_screenshot`).
+- New `annotator` Tauri window (decorated, 1100×760, hidden by default, opened on-demand via `WebviewWindow.getByLabel`).
+- Bundled deps: `konva` 10, `react-konva` 19. Bundle grew from 280 KB to ~604 KB JS — within the desktop budget.
+- 47 new frontend tests (annotator store + canvas + toolbar + window) + 2 new backend tests.
+
 ## [1.2.0] – 2026-05-04
 
 ### Changed — Modern stack refresh

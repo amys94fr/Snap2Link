@@ -33,7 +33,7 @@ interface DraftShape {
  * effect — Konva mutates the canvas so React's render cycle alone won't
  * trigger the filter.
  */
-function BlurPatch(props: {
+interface BlurPatchProps {
   sourceImage: HTMLImageElement;
   sourceWidth: number;
   sourceHeight: number;
@@ -42,9 +42,28 @@ function BlurPatch(props: {
   width: number;
   height: number;
   blurRadius: number;
-}) {
+  selected?: boolean;
+  draggable?: boolean;
+  hitStrokeWidth?: number;
+  onClick?: () => void;
+  onTap?: () => void;
+  onDragEnd?: (e: Konva.KonvaEventObject<DragEvent>) => void;
+}
+
+function BlurPatch(props: BlurPatchProps) {
   const ref = useRef<Konva.Image | null>(null);
-  const { sourceImage, sourceWidth, sourceHeight, x, y, width, height, blurRadius } = props;
+  const {
+    sourceImage,
+    sourceWidth,
+    sourceHeight,
+    x,
+    y,
+    width,
+    height,
+    blurRadius,
+    selected,
+    ...rest
+  } = props;
   const cropX = (x / sourceWidth) * sourceImage.naturalWidth;
   const cropY = (y / sourceHeight) * sourceImage.naturalHeight;
   const cropW = (width / sourceWidth) * sourceImage.naturalWidth;
@@ -68,6 +87,9 @@ function BlurPatch(props: {
       crop={{ x: cropX, y: cropY, width: cropW, height: cropH }}
       filters={[Konva.Filters.Blur]}
       blurRadius={blurRadius}
+      shadowColor={selected ? "#3b82f6" : undefined}
+      shadowBlur={selected ? 8 : 0}
+      {...rest}
     />
   );
 }
@@ -110,8 +132,11 @@ export function AnnotatorCanvas({ image, width, height, onStageReady, style }: P
   const addShape = useAnnotatorStore((s) => s.addShape);
   const updateShape = useAnnotatorStore((s) => s.updateShape);
   const deleteShape = useAnnotatorStore((s) => s.deleteShape);
+  const selectedId = useAnnotatorStore((s) => s.selectedId);
+  const setSelectedId = useAnnotatorStore((s) => s.setSelectedId);
   const [draft, setDraft] = useState<DraftShape | null>(null);
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const isSelectMode = tool === "select";
 
   const stageRefCb = useCallback(
     (node: unknown) => {
@@ -156,6 +181,15 @@ export function AnnotatorCanvas({ image, width, height, onStageReady, style }: P
   const fontSizeFromStroke = (w: number) => 12 + w * 4; // 2->20, 4->28, 8->44
 
   const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // Select tool: clicking on empty canvas (the Stage itself, not a child
+    // shape) deselects whatever was previously highlighted.
+    if (isSelectMode) {
+      const stage = e.target.getStage?.();
+      if (e.target === stage) {
+        setSelectedId(null);
+      }
+      return;
+    }
     if (tool !== "text" || editingTextId) return;
     const stage = e.target.getStage();
     const pos = stage?.getPointerPosition();
@@ -171,6 +205,57 @@ export function AnnotatorCanvas({ image, width, height, onStageReady, style }: P
       fontSize: fontSizeFromStroke(strokeWidth),
     });
     setEditingTextId(id);
+  };
+
+  /**
+   * Drag-end handler for an existing shape. Konva mutates the node's x/y
+   * (or its origin offset for points-based shapes) during a drag — we
+   * need to bake that delta back into the persistent shape data so the
+   * next render starts from the new position.
+   */
+  const handleShapeDragEnd =
+    (id: string) => (e: Konva.KonvaEventObject<DragEvent>) => {
+      const shape = shapes.find((s) => s.id === id);
+      if (!shape) return;
+      const dx = e.target.x();
+      const dy = e.target.y();
+      switch (shape.type) {
+        case "rectangle":
+        case "blur":
+          updateShape(id, { x: dx, y: dy } as Partial<AnnotatorShape>);
+          break;
+        case "circle":
+          updateShape(id, { x: dx, y: dy } as Partial<AnnotatorShape>);
+          break;
+        case "text":
+          updateShape(id, { x: dx, y: dy } as Partial<AnnotatorShape>);
+          break;
+        case "arrow": {
+          const [x1, y1, x2, y2] = shape.points;
+          updateShape(id, {
+            points: [x1 + dx, y1 + dy, x2 + dx, y2 + dy] as [
+              number,
+              number,
+              number,
+              number,
+            ],
+          } as Partial<AnnotatorShape>);
+          // Reset the Konva node origin so the next drag starts at (0,0).
+          e.target.position({ x: 0, y: 0 });
+          break;
+        }
+        case "pen": {
+          const next = shape.points.map((v, i) => (i % 2 === 0 ? v + dx : v + dy));
+          updateShape(id, { points: next } as Partial<AnnotatorShape>);
+          e.target.position({ x: 0, y: 0 });
+          break;
+        }
+      }
+    };
+
+  const handleShapeClick = (id: string) => () => {
+    if (!isSelectMode) return;
+    setSelectedId(id);
   };
 
   const editingText = shapes.find(
@@ -255,53 +340,77 @@ export function AnnotatorCanvas({ image, width, height, onStageReady, style }: P
   };
 
   const renderShape = (s: AnnotatorShape) => {
+    const selected = s.id === selectedId && isSelectMode;
+    /** Common props shared by every Konva shape so select-mode hit-testing,
+     *  drag-and-drop, and click selection all flow through one path. */
+    const commonProps = {
+      draggable: isSelectMode,
+      onClick: handleShapeClick(s.id),
+      onTap: handleShapeClick(s.id),
+      onDragEnd: handleShapeDragEnd(s.id),
+      // Make a slightly thicker hit-test zone — thin lines are otherwise
+      // hard to click.
+      hitStrokeWidth: 16,
+    };
     switch (s.type) {
       case "rectangle":
         return (
           <KRect
             key={s.id}
+            {...commonProps}
             x={s.x}
             y={s.y}
             width={s.width}
             height={s.height}
             stroke={s.color}
             strokeWidth={s.strokeWidth}
+            shadowColor={selected ? "#3b82f6" : undefined}
+            shadowBlur={selected ? 8 : 0}
           />
         );
       case "circle":
         return (
           <KEllipse
             key={s.id}
+            {...commonProps}
             x={s.x}
             y={s.y}
             radiusX={s.radiusX}
             radiusY={s.radiusY}
             stroke={s.color}
             strokeWidth={s.strokeWidth}
+            shadowColor={selected ? "#3b82f6" : undefined}
+            shadowBlur={selected ? 8 : 0}
           />
         );
       case "arrow":
         return (
           <KArrow
             key={s.id}
+            {...commonProps}
             points={s.points as number[]}
             stroke={s.color}
             fill={s.color}
             strokeWidth={s.strokeWidth}
             pointerLength={10 + s.strokeWidth}
             pointerWidth={10 + s.strokeWidth}
+            shadowColor={selected ? "#3b82f6" : undefined}
+            shadowBlur={selected ? 8 : 0}
           />
         );
       case "pen":
         return (
           <KLine
             key={s.id}
+            {...commonProps}
             points={s.points}
             stroke={s.color}
             strokeWidth={s.strokeWidth}
             tension={0.4}
             lineCap="round"
             lineJoin="round"
+            shadowColor={selected ? "#3b82f6" : undefined}
+            shadowBlur={selected ? 8 : 0}
           />
         );
       case "text":
@@ -311,17 +420,22 @@ export function AnnotatorCanvas({ image, width, height, onStageReady, style }: P
         return (
           <KText
             key={s.id}
+            {...commonProps}
             x={s.x}
             y={s.y}
             text={s.text}
             fontSize={s.fontSize}
             fill={s.color}
+            shadowColor={selected ? "#3b82f6" : undefined}
+            shadowBlur={selected ? 8 : 0}
           />
         );
       case "blur":
         return (
           <BlurPatch
             key={s.id}
+            {...commonProps}
+            selected={selected}
             sourceImage={image}
             sourceWidth={width}
             sourceHeight={height}

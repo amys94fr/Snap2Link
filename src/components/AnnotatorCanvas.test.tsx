@@ -61,19 +61,39 @@ vi.mock("react-konva", () => {
     Layer: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
     Image: () => <div data-testid="kimage" />,
     Rect: (props: Record<string, unknown>) => (
-      <div data-testid="krect" data-props={JSON.stringify(props)} />
+      <div
+        data-testid="krect"
+        data-props={JSON.stringify(props)}
+        onClick={props.onClick as React.MouseEventHandler}
+      />
     ),
     Ellipse: (props: Record<string, unknown>) => (
-      <div data-testid="kellipse" data-props={JSON.stringify(props)} />
+      <div
+        data-testid="kellipse"
+        data-props={JSON.stringify(props)}
+        onClick={props.onClick as React.MouseEventHandler}
+      />
     ),
     Arrow: (props: Record<string, unknown>) => (
-      <div data-testid="karrow" data-props={JSON.stringify(props)} />
+      <div
+        data-testid="karrow"
+        data-props={JSON.stringify(props)}
+        onClick={props.onClick as React.MouseEventHandler}
+      />
     ),
     Line: (props: Record<string, unknown>) => (
-      <div data-testid="kline" data-props={JSON.stringify(props)} />
+      <div
+        data-testid="kline"
+        data-props={JSON.stringify(props)}
+        onClick={props.onClick as React.MouseEventHandler}
+      />
     ),
     Text: (props: Record<string, unknown>) => (
-      <div data-testid="ktext" data-props={JSON.stringify(props)} />
+      <div
+        data-testid="ktext"
+        data-props={JSON.stringify(props)}
+        onClick={props.onClick as React.MouseEventHandler}
+      />
     ),
   };
 });
@@ -241,6 +261,53 @@ describe("<AnnotatorCanvas /> — drawing", () => {
       height: 60,
       blurRadius: 20, // 4 + 8 * 2
     });
+  });
+
+  it("select tool: clicking a shape sets it as the selected shape", () => {
+    useAnnotatorStore.getState().addShape({
+      id: "r1",
+      type: "rectangle",
+      x: 0,
+      y: 0,
+      width: 50,
+      height: 50,
+      color: "#fff",
+      strokeWidth: 2,
+    });
+    useAnnotatorStore.getState().setTool("select");
+    render(<AnnotatorCanvas image={fakeImage} width={400} height={300} />);
+    fireEvent.click(screen.getByTestId("krect"));
+    expect(useAnnotatorStore.getState().selectedId).toBe("r1");
+  });
+
+  it("select tool: shapes are draggable; non-select tools leave them static", () => {
+    useAnnotatorStore.getState().addShape({
+      id: "r1",
+      type: "rectangle",
+      x: 10,
+      y: 20,
+      width: 50,
+      height: 50,
+      color: "#fff",
+      strokeWidth: 2,
+    });
+    // pen tool by default — no drag
+    useAnnotatorStore.getState().setTool("pen");
+    const { rerender } = render(
+      <AnnotatorCanvas image={fakeImage} width={400} height={300} />,
+    );
+    let props = JSON.parse(
+      screen.getByTestId("krect").getAttribute("data-props") ?? "{}",
+    );
+    expect(props.draggable).toBe(false);
+
+    // switch to select — now the shape is draggable
+    useAnnotatorStore.getState().setTool("select");
+    rerender(<AnnotatorCanvas image={fakeImage} width={400} height={300} />);
+    props = JSON.parse(
+      screen.getByTestId("krect").getAttribute("data-props") ?? "{}",
+    );
+    expect(props.draggable).toBe(true);
   });
 
   it("renders existing shapes from the store", () => {

@@ -15,7 +15,6 @@ interface Config {
   hotkey: string;
   retention_days: number;
   auto_delete: boolean;
-  enable_annotator: boolean;
 }
 
 interface Props {
@@ -32,7 +31,6 @@ const DEFAULT_CONFIG: Config = {
   hotkey: "Ctrl+PrintScreen",
   retention_days: 30,
   auto_delete: true,
-  enable_annotator: true,
 };
 
 export function SettingsWindow({ onClose, onAbout, autoCheckUpdates }: Props) {
@@ -60,12 +58,7 @@ export function SettingsWindow({ onClose, onAbout, autoCheckUpdates }: Props) {
       hotkey: next.hotkey,
       retentionDays: next.retention_days,
       autoDelete: next.auto_delete,
-      enableAnnotator: next.enable_annotator,
     });
-  };
-
-  const handleAnnotatorToggle = async (enable_annotator: boolean) => {
-    await persistConfig({ ...config, enable_annotator });
   };
 
   const handleSwitchAccount = async () => {
@@ -160,22 +153,6 @@ export function SettingsWindow({ onClose, onAbout, autoCheckUpdates }: Props) {
         onToggle={handleRetentionToggle}
         onSave={handleRetentionSave}
       />
-
-      <hr className="border-slate-800 my-3" />
-
-      <label className="flex items-center justify-between cursor-pointer">
-        <span className="text-sm font-medium">{t("settings.annotator")}</span>
-        <input
-          type="checkbox"
-          aria-label={t("settings.annotator")}
-          checked={config.enable_annotator}
-          onChange={(e) => void handleAnnotatorToggle(e.target.checked)}
-          className="w-10 h-5 accent-brand cursor-pointer"
-        />
-      </label>
-      <p className="text-xs text-slate-400 mt-1 mb-2">
-        {t("settings.annotator.hint")}
-      </p>
 
       <hr className="border-slate-800 my-3" />
 

@@ -96,17 +96,11 @@ const TOOLS: ToolDef[] = [
     id: "blur",
     labelKey: "annotator.tool.blur",
     shortcut: "B",
+    // Water-drop silhouette — the universal "blur / soften" icon in
+    // image editors (Photoshop's blur tool uses the same metaphor).
     icon: (
       <svg {...ICON_PROPS}>
-        <circle cx="6" cy="6" r="1.5" />
-        <circle cx="12" cy="6" r="1.5" />
-        <circle cx="18" cy="6" r="1.5" />
-        <circle cx="6" cy="12" r="1.5" />
-        <circle cx="12" cy="12" r="1.5" />
-        <circle cx="18" cy="12" r="1.5" />
-        <circle cx="6" cy="18" r="1.5" />
-        <circle cx="12" cy="18" r="1.5" />
-        <circle cx="18" cy="18" r="1.5" />
+        <path d="M12 2.5c-3.5 4.7-7 8.5-7 12.5a7 7 0 0 0 14 0c0-4-3.5-7.8-7-12.5z" />
       </svg>
     ),
   },

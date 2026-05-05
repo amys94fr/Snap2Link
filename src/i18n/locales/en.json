@@ -33,8 +33,6 @@
   "settings.keep_for": "Keep screenshots for",
   "settings.days": "days",
   "settings.delete_saved": "✅ Screenshots deleted after {days} days",
-  "settings.annotator": "Open annotation editor before upload",
-  "settings.annotator.hint": "Adds a step where you can draw arrows, blur sensitive areas, add text — all before the screenshot is uploaded.",
   "settings.startup": "Start with Windows",
   "settings.about_btn": "About",
   "settings.close": "Close",
@@ -70,6 +68,10 @@
   "notify.cleanup": "🗑 {n} old screenshot(s) deleted from Drive.",
 
   "overlay.hint": "Select an area  •  ESC to cancel",
+  "overlay.prompt.title": "What now?",
+  "overlay.prompt.edit": "📝  Edit",
+  "overlay.prompt.save": "📤  Save & share",
+  "overlay.prompt.hint": "E to edit  •  S to save  •  ESC to cancel",
 
   "annotator.title": "Snap2Link — Annotate",
   "annotator.tool.select": "Select",
