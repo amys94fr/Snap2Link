@@ -10,6 +10,11 @@
 </p>
 
 <p align="center">
+  <a href="https://snap2link.app"><strong>🌐 snap2link.app</strong></a>
+</p>
+
+<p align="center">
+  <a href="https://snap2link.app"><img src="https://img.shields.io/badge/website-snap2link.app-D97757?style=flat-square&logo=cloudflare&logoColor=white" alt="Website"></a>
   <a href="https://github.com/amys94fr/Snap2Link/releases/latest"><img src="https://img.shields.io/github/v/release/amys94fr/Snap2Link?style=flat-square&color=22c55e" alt="Release"></a>
   <a href="https://github.com/amys94fr/Snap2Link/releases"><img src="https://img.shields.io/github/downloads/amys94fr/Snap2Link/total?style=flat-square&color=3b82f6" alt="Downloads"></a>
   <a href="https://github.com/amys94fr/Snap2Link/stargazers"><img src="https://img.shields.io/github/stars/amys94fr/Snap2Link?style=flat-square&color=f59e0b" alt="Stars"></a>
