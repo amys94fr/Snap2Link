@@ -155,7 +155,7 @@ Snap2Link only requests the minimum scopes:
 - ✅ Auto-updater (signed releases via GitHub)
 - ✅ winget distribution
 - ✅ **Cross-platform** — Windows, macOS, Linux
-- 🔜 **In-app annotations** before upload — arrows, blur, text, highlight
+- ✅ **In-app annotations** before upload — pen, rectangle, circle, arrow, text, blur (per-shot Edit / Save prompt)
 - 🔜 **History pane** — last *N* screenshots with thumbnails and quick re-share
 - 🔜 **More clouds** — Dropbox, OneDrive, S3-compatible
 - 🔜 **Full-screen / window-bound capture modes** alongside region selection
