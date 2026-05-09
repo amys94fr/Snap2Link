@@ -4,6 +4,29 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] – 2026-05-10
+
+### Added: Full-screen and window-bound capture modes
+
+Until now, every Snap2Link capture started with a drag-to-select rectangle. v1.4.0 adds two more capture modes alongside region selection, all reachable from a single overlay:
+
+- 🪟 **Region** (`R` shortcut, default) : the existing drag rectangle, unchanged.
+- 🖥️ **Full Screen** (`F`) : click the centred capture button (or press F again to confirm) to snapshot the whole monitor the overlay sits on. Multi-monitor setups capture the screen the user actually triggered the hotkey from, not always the primary.
+- 🪟 **Window** (`W`) : a clickable list of every visible application window appears in the overlay (title + app name + dimensions). Click any card to capture that window.
+
+A small toolbar at the top of the overlay lets the user switch modes with the mouse too, and `ESC` cancels from any state.
+
+All three modes feed the existing Edit / Save prompt and annotator pipeline, so the rest of the workflow is unchanged.
+
+### Backend
+
+- Three new Rust commands: `capture_full_screen(x, y)`, `list_windows()` returning `Vec<WindowInfo>`, and `capture_window(id)`. All three reuse the same `snap2link_cap.png` temp-file path so the upload pipeline is untouched.
+- `list_windows` filters out minimised, zero-sized, and unidentifiable system surfaces so the picker only shows useful windows.
+
+### Internals
+
+- All produced em-dashes (`—`) in the i18n locale file replaced with the appropriate punctuation per the project's "no em-dash" prose rule.
+
 ## [1.3.0] – 2026-05-05
 
 ### Added — In-app annotation editor

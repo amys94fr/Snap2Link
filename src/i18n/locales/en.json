@@ -1,12 +1,12 @@
 {
-  "wizard.title": "Snap2Link — Setup",
+  "wizard.title": "Snap2Link · Setup",
   "wizard.welcome.subtitle": "Capture a screen region and instantly get\na Google Drive share link.",
   "wizard.welcome.btn": "Get Started →",
 
   "wizard.connect.title": "Connect Google Drive",
   "wizard.connect.body": "Snap2Link needs access to your Google Drive\nto store your screenshots.\n\nA 'Snap2Link' folder will be created automatically.",
   "wizard.connect.btn": "🔗  Connect Google Drive",
-  "wizard.connect.browser_hint": "A browser window will open — grant access then return here.",
+  "wizard.connect.browser_hint": "A browser window will open. Grant access, then return here.",
   "wizard.connect.loading": "Loading…",
   "wizard.connect.retry": "🔗  Retry",
   "wizard.connect.error": "Error: {msg}",
@@ -15,11 +15,11 @@
   "wizard.success.ready": "Snap2Link is ready.\nThe icon appears in the taskbar.\nAutomatic startup with Windows enabled.",
   "wizard.success.btn": "Finish",
 
-  "settings.title": "Snap2Link — Settings",
+  "settings.title": "Snap2Link · Settings",
   "settings.heading": "Settings",
   "settings.google_account": "Google Account",
   "settings.switch_account": "Switch Account",
-  "settings.switch_account.browser_hint": "A browser will open — sign in with the new account.",
+  "settings.switch_account.browser_hint": "A browser will open. Sign in with the new account.",
   "settings.switch_account.loading": "Loading…",
   "settings.switch_account.success": "✅ Signed in: {email}",
   "settings.switch_account.error": "Error: {msg}",
@@ -37,7 +37,7 @@
   "settings.about_btn": "About",
   "settings.close": "Close",
 
-  "about.title": "Snap2Link — About",
+  "about.title": "Snap2Link · About",
   "about.version": "Version {version}",
   "about.description": "Capture a screen region and instantly get a Google Drive share link.",
   "about.author": "Author",
@@ -64,16 +64,27 @@
   "notify.active.msg": "Shortcut: {shortcut}  •  or click the icon",
   "notify.link_copied": "✅ Link copied to clipboard!",
   "notify.app_name": "Snap2Link",
-  "notify.error": "Snap2Link — Error",
+  "notify.error": "Snap2Link · Error",
   "notify.cleanup": "🗑 {n} old screenshot(s) deleted from Drive.",
 
   "overlay.hint": "Select an area  •  ESC to cancel",
+  "overlay.mode.region": "Region",
+  "overlay.mode.fullscreen": "Full Screen",
+  "overlay.mode.window": "Window",
+  "overlay.mode.hint": "R region  •  F full screen  •  W window  •  ESC cancel",
+  "overlay.fullscreen.cta": "Capture this screen",
+  "overlay.fullscreen.subtitle": "Click anywhere to capture, or pick another mode above.",
+  "overlay.window.title": "Pick a window",
+  "overlay.window.subtitle": "Click a window to capture it.",
+  "overlay.window.empty": "No windows available right now.",
+  "overlay.window.loading": "Listing windows…",
+
   "overlay.prompt.title": "What now?",
   "overlay.prompt.edit": "📝  Edit",
   "overlay.prompt.save": "📤  Save & share",
   "overlay.prompt.hint": "E to edit  •  S to save  •  ESC to cancel",
 
-  "annotator.title": "Snap2Link — Annotate",
+  "annotator.title": "Snap2Link · Annotate",
   "annotator.tool.select": "Select",
   "annotator.tool.pen": "Pen",
   "annotator.tool.rectangle": "Rectangle",
@@ -92,7 +103,7 @@
 
 
   "uploader.title": "Uploading to Google Drive",
-  "uploader.subtitle": "Hold tight — the link is on its way to your clipboard.",
+  "uploader.subtitle": "Hold tight, the link is on its way to your clipboard.",
   "uploader.success.title": "Link copied!",
   "uploader.success.subtitle": "The screenshot link is in your clipboard.",
 
