@@ -156,9 +156,9 @@ Snap2Link only requests the minimum scopes:
 - ✅ winget distribution
 - ✅ **Cross-platform** — Windows, macOS, Linux
 - ✅ **In-app annotations** before upload — pen, rectangle, circle, arrow, text, blur (per-shot Edit / Save prompt)
+- ✅ **Full-screen and window-bound capture modes** alongside region selection: switch with `R` / `F` / `W` from the overlay
 - 🔜 **History pane** — last *N* screenshots with thumbnails and quick re-share
 - 🔜 **More clouds** — Dropbox, OneDrive, S3-compatible
-- 🔜 **Full-screen / window-bound capture modes** alongside region selection
 - 🔜 **More locales** — French, Spanish, German, Portuguese …
 - 🔜 **Homebrew & Scoop** packages
 
