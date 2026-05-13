@@ -116,9 +116,9 @@ You'll need [Rust](https://rustup.rs/) (stable), [Node.js 20+](https://nodejs.or
 ```bash
 git clone https://github.com/amys94fr/Snap2Link
 cd Snap2Link
-npm install
-npm run tauri dev      # hot-reload dev build
-npm run tauri build    # produces a signed installer in src-tauri/target/release/bundle/
+pnpm install
+pnpm tauri dev         # hot-reload dev build
+pnpm tauri build       # produces a signed installer in src-tauri/target/release/bundle/
 ```
 
 ## 💡 Use Cases
@@ -140,7 +140,7 @@ npm run tauri build    # produces a signed installer in src-tauri/target/release
 2. Enable the **Google Drive API**
 3. Credentials → Create OAuth client → **Desktop application**
 4. Download the JSON, rename it `credentials.json`, drop it at the repo root *(gitignored)*
-5. `npm run tauri build`
+5. `pnpm tauri build`
 
 Snap2Link only requests the minimum scopes:
 
@@ -171,9 +171,9 @@ PRs welcome. Quick start for contributors:
 ```bash
 git clone https://github.com/amys94fr/Snap2Link
 cd Snap2Link
-npm install
-npm test                            # 77 frontend tests (Vitest)
-cd src-tauri && cargo test --lib    # 24 backend tests
+pnpm install
+pnpm test                            # 77 frontend tests (Vitest)
+cd src-tauri && cargo test --lib     # 24 backend tests
 ```
 
 CI ([`test.yml`](.github/workflows/test.yml)) runs on every push and PR — tests must stay green for a merge.

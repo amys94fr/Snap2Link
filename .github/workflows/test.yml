@@ -14,18 +14,22 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: "npm"
+          cache: "pnpm"
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       - name: Type-check
-        run: npx tsc --noEmit
+        run: pnpm typecheck
 
       - name: Unit + component tests
-        run: npm test
+        run: pnpm test
 
   backend:
     name: Backend (cargo test)
@@ -33,21 +37,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: "npm"
+          cache: "pnpm"
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Install npm deps
-        run: npm ci
+      - name: Install pnpm deps
+        run: pnpm install --frozen-lockfile
 
       # Tauri's `generate_context!` macro reads the frontendDist path at
       # compile time, so we need a dist/ so the macro doesn't error before
       # we run the actual build.
       - name: Build frontend (so dist/ exists for tauri context)
-        run: npm run build
+        run: pnpm build
 
       # tauri.conf.json declares ../credentials.json as a bundled resource,
       # so the Tauri build script verifies the file exists at compile time.

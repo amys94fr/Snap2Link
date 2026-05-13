@@ -58,10 +58,14 @@ jobs:
             libdrm-dev \
             patchelf
 
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: "npm"
+          cache: "pnpm"
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -70,11 +74,11 @@ jobs:
           # explicitly when the matrix entry asks for it.
           targets: ${{ matrix.platform.rust_targets || matrix.platform.target }}
 
-      - name: Install npm dependencies
-        run: npm ci
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build frontend (so dist/ exists for the tauri context macro)
-        run: npm run build
+        run: pnpm build
 
       - name: Restore credentials.json from secret
         shell: bash
@@ -89,7 +93,7 @@ jobs:
           echo "credentials.json restored ($(printf '%s' "$CREDS" | wc -c) bytes)"
 
       - name: Run frontend tests
-        run: npm test
+        run: pnpm test
 
       - name: Run backend tests
         working-directory: src-tauri
@@ -106,7 +110,7 @@ jobs:
           KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r\n\t "'"'"'' | sed 's/^\xEF\xBB\xBF//')
           export TAURI_SIGNING_PRIVATE_KEY="$KEY"
           echo "Sanitised key length: ${#KEY}"
-          npm run tauri build -- --target ${{ matrix.platform.target }}
+          pnpm tauri build -- --target ${{ matrix.platform.target }}
 
       - name: Upload bundle artefacts
         uses: actions/upload-artifact@v7

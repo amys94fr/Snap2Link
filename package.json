@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.4.0",
   "type": "module",
+  "packageManager": "pnpm@10.15.1",
   "description": "Capture a screen region and instantly get a Google Drive share link.",
   "author": "Steven Abittan",
   "license": "MIT",
