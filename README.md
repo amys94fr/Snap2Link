@@ -164,6 +164,15 @@ Snap2Link only requests the minimum scopes:
 
 Got an idea? [Open an issue](https://github.com/amys94fr/Snap2Link/issues/new) — I read every one.
 
+## 💖 Sponsor
+
+If Snap2Link saves you time in your AI workflow, consider sponsoring its
+development on [GitHub Sponsors](https://github.com/sponsors/amys94fr).
+Even $3/month covers the cost of code-signing certificates and keeps
+the project actively maintained.
+
+A huge thank you to everyone who supports the work.
+
 ## 🤝 Contributing
 
 PRs welcome. Quick start for contributors:
