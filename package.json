@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.3.0",
+    "@tailwindcss/postcss": "^4.3.1",
     "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-autostart": "^2.5.1",
     "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
@@ -32,7 +32,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-i18next": "^17.0.8",
-    "react-konva": "^19.2.4",
+    "react-konva": "^19.2.5",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
@@ -40,7 +40,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
@@ -48,7 +48,7 @@
     "@vitest/ui": "^4.1.8",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vitest": "^4.1.8"
