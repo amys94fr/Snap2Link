@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-autostart": "^2.5.1",
     "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
@@ -31,7 +31,7 @@
     "konva": "^10.3.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-i18next": "^17.0.9",
+    "react-i18next": "^17.0.10",
     "react-konva": "^19.2.5",
     "zustand": "^5.0.14"
   },
@@ -47,10 +47,10 @@
     "@vitest/coverage-v8": "^4.1.10",
     "@vitest/ui": "^4.1.10",
     "jsdom": "^29.1.1",
-    "postcss": "^8.5.18",
-    "tailwindcss": "^4.3.2",
+    "postcss": "^8.5.20",
+    "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.1.4",
+    "vite": "^8.1.5",
     "vitest": "^4.1.10"
   }
 }
