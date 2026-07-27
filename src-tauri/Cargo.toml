@@ -38,7 +38,7 @@ xcap = "0.9"
 url = "2"
 urlencoding = "2"
 tiny_http = "0.12"
-base64 = "0.22"
+base64 = "0.23"
 log = "0.4"
 open = "5"
 
