@@ -46,7 +46,7 @@ open = "5"
 tempfile = "3"
 mockito = "1"
 tokio = { version = "1", features = ["full", "test-util"] }
-serial_test = "3"
+serial_test = "4"
 
 [features]
 default = ["custom-protocol"]
