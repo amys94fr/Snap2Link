@@ -121,12 +121,23 @@ jobs:
           # specification"). Pass `--target` to tauri directly.
           pnpm tauri build --target ${{ matrix.platform.target }}
 
-      # Tauri writes .DirIcon as an absolute symlink to the build-time AppDir
-      # path, which breaks on every other machine and fails the AppImageHub
-      # catalog test (`FATAL: .DirIcon is missing`). We rewrite it to a
-      # relative symlink pointing at the icon already present at AppDir root,
-      # then repack the AppImage over the original artefact.
-      - name: Fix AppImage .DirIcon symlink
+      # The Tauri AppImage bundler leaves two things in a state that fails
+      # the AppImageHub catalog test:
+      #   1. .DirIcon is an absolute symlink to the build-time AppDir path on
+      #      the runner (/home/runner/work/.../Snap2Link.AppDir/Snap2Link.png).
+      #      That path exists nowhere else, so the symlink is dead for every
+      #      end user and the catalog test rejects it with
+      #      `FATAL: .DirIcon is missing`.
+      #   2. AppDir subdirectories are 700 and `AppRun.wrapped` is 770.
+      #      When firejail runs the AppImage as a different user during the
+      #      catalog test, it cannot enter the dirs or exec the wrapped
+      #      binary and the app aborts with
+      #      `/run/firejail/appimage/AppRun: Permission denied`.
+      # We extract the AppImage, repair .DirIcon as a relative symlink to the
+      # icon that is already at the AppDir root, normalise permissions so
+      # every user can read dirs and execute what should be executable, and
+      # repack over the original artefact.
+      - name: Fix AppImage .DirIcon symlink and permissions
         if: matrix.platform.os == 'ubuntu-24.04'
         shell: bash
         run: |
@@ -168,6 +179,14 @@ jobs:
           rm -f "$APPDIR/.DirIcon"
           ln -s "$ICON" "$APPDIR/.DirIcon"
           echo "Fixed .DirIcon -> $ICON (relative)"
+
+          # Normalise perms. `X` means "add x where someone already has x,
+          # or where the entry is a directory": dirs become 755 instead of
+          # 700, AppRun.wrapped becomes 755 instead of 770, regular files
+          # like Snap2Link.png become 644, non-executable scripts stay 644.
+          chmod -R u=rwX,go=rX "$APPDIR"
+          echo "Perms after normalisation:"
+          find "$APPDIR" -maxdepth 1 -printf '%M %f\n'
 
           # Repack over the original path.
           rm -f "$APPIMAGE_PATH"
