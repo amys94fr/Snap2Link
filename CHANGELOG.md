@@ -4,6 +4,12 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] – 2026-10-04
+
+### Fixed
+
+- **Linux AppImage: broken `.DirIcon` symlink.** The Tauri 2.x bundler used to write `.DirIcon` as an absolute symlink to the build-time AppDir path on the GitHub Actions runner (`/home/runner/work/.../Snap2Link.AppDir/Snap2Link.png`), which does not exist on any other machine. The AppImageHub catalog test correctly rejected the file ([`FATAL: .DirIcon is missing`](https://github.com/AppImage/appimage.github.io/pull/9367)). The release workflow now post-processes the AppImage to rewrite `.DirIcon` as a relative symlink to the icon already present at the AppDir root, then repacks via upstream `appimagetool`. No behaviour change for end users; the AppImage now matches the AppDir spec and can be submitted to the AppImage catalog.
+
 ## [1.4.0] – 2026-05-10
 
 ### Added: Full-screen and window-bound capture modes
