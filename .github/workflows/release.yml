@@ -106,11 +106,65 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
         run: |
           # Sanitise the key in case the secret carries a stray BOM/whitespace
-          # (we hit that exact bug earlier — see release.yml history).
+          # (we hit that exact bug earlier, see release.yml history).
           KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r\n\t "'"'"'' | sed 's/^\xEF\xBB\xBF//')
           export TAURI_SIGNING_PRIVATE_KEY="$KEY"
           echo "Sanitised key length: ${#KEY}"
           pnpm tauri build -- --target ${{ matrix.platform.target }}
+
+      # Tauri writes .DirIcon as an absolute symlink to the build-time AppDir
+      # path, which breaks on every other machine and fails the AppImageHub
+      # catalog test (`FATAL: .DirIcon is missing`). We rewrite it to a
+      # relative symlink pointing at the icon already present at AppDir root,
+      # then repack the AppImage over the original artefact.
+      - name: Fix AppImage .DirIcon symlink
+        if: matrix.platform.os == 'ubuntu-24.04'
+        shell: bash
+        run: |
+          set -euo pipefail
+          APPIMAGE_DIR="$PWD/src-tauri/target/${{ matrix.platform.target }}/release/bundle/appimage"
+          APPIMAGE_PATH=$(ls "$APPIMAGE_DIR"/*.AppImage | head -1)
+          echo "Patching $APPIMAGE_PATH"
+
+          # Fetch appimagetool and extract it (no FUSE on the runner).
+          TOOLDIR=$(mktemp -d)
+          (
+            cd "$TOOLDIR"
+            curl -sSL -o appimagetool \
+              "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$(uname -m).AppImage"
+            chmod +x appimagetool
+            ./appimagetool --appimage-extract > /dev/null
+          )
+          APPIMAGETOOL="$TOOLDIR/squashfs-root/AppRun"
+
+          # Extract the Tauri AppImage.
+          WORK=$(mktemp -d)
+          cp "$APPIMAGE_PATH" "$WORK/orig.AppImage"
+          (
+            cd "$WORK"
+            chmod +x orig.AppImage
+            ./orig.AppImage --appimage-extract > /dev/null
+          )
+          APPDIR="$WORK/squashfs-root"
+
+          echo "Original .DirIcon:"
+          ls -la "$APPDIR/.DirIcon" || true
+
+          ICON=$(find "$APPDIR" -maxdepth 1 -name '*.png' -not -name '.*' -printf '%f\n' | head -1)
+          if [ -z "$ICON" ]; then
+            echo "::error::No PNG found at AppImage root; cannot repair .DirIcon"
+            ls -la "$APPDIR"
+            exit 1
+          fi
+          rm -f "$APPDIR/.DirIcon"
+          ln -s "$ICON" "$APPDIR/.DirIcon"
+          echo "Fixed .DirIcon -> $ICON (relative)"
+
+          # Repack over the original path.
+          rm -f "$APPIMAGE_PATH"
+          ARCH="$(uname -m)" "$APPIMAGETOOL" "$APPDIR" "$APPIMAGE_PATH"
+          chmod +x "$APPIMAGE_PATH"
+          ls -lh "$APPIMAGE_PATH"
 
       - name: Upload bundle artefacts
         uses: actions/upload-artifact@v7
