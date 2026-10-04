@@ -4,6 +4,12 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] – 2026-10-04
+
+### Fixed
+
+- **Linux AppImage: permission bits that blocked the AppImageHub firejail test.** The Tauri bundler leaves the AppDir subdirectories at `700` and `AppRun.wrapped` at `770`. When the AppImageHub catalog runs the AppImage inside firejail as a different user, that user cannot enter the dirs or exec the wrapped binary, so the app aborts with `/run/firejail/appimage/AppRun: Permission denied` and `The application exited within 11 seconds instead of showing a window`. The release workflow's post-build repair step now normalises every entry to the standard mask (dirs 755, binaries 755, regular files 644) before repacking the AppImage.
+
 ## [1.4.1] – 2026-10-04
 
 ### Fixed
