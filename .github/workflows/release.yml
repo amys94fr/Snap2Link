@@ -110,7 +110,16 @@ jobs:
           KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r\n\t "'"'"'' | sed 's/^\xEF\xBB\xBF//')
           export TAURI_SIGNING_PRIVATE_KEY="$KEY"
           echo "Sanitised key length: ${#KEY}"
-          pnpm tauri build -- --target ${{ matrix.platform.target }}
+          # pnpm, unlike npm, does NOT strip the leading `--` before passing
+          # args to a script. `pnpm tauri build -- --target X` would reach
+          # tauri as `tauri build -- --target X`, pushing `--target X` into
+          # tauri's cargo-passthrough instead of tauri's own `--target` flag.
+          # The bundler would then look for the binary at the default
+          # `target/release/` while cargo wrote it to `target/<triple>/release/`,
+          # and the macOS meta-target `universal-apple-darwin` would reach
+          # cargo/rustc verbatim and get rejected ("could not find target
+          # specification"). Pass `--target` to tauri directly.
+          pnpm tauri build --target ${{ matrix.platform.target }}
 
       # Tauri writes .DirIcon as an absolute symlink to the build-time AppDir
       # path, which breaks on every other machine and fails the AppImageHub
