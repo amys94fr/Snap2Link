@@ -32,7 +32,7 @@ reqwest = { version = "0.13", default-features = false, features = ["json", "mul
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1"
 thiserror = "2"
-dirs = "6"
+dirs = "7"
 image = "0.25"
 xcap = "0.9"
 url = "2"
