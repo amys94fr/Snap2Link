@@ -1,0 +1,24 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "overlay",
+  "description": "Full-screen capture overlay: capture, upload, copy link.",
+  "windows": ["overlay"],
+  "permissions": [
+    "core:window:default",
+    "core:webview:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:event:allow-emit",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "clipboard-manager:allow-write-text",
+    "notification:default",
+    "allow-debug-log",
+    "allow-list-windows",
+    "allow-capture-region",
+    "allow-capture-full-screen",
+    "allow-capture-window",
+    "allow-upload-screenshot"
+  ]
+}

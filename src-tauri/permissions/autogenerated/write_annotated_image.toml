@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-write-annotated-image"
+description = "Enables the write_annotated_image command without any pre-configured scope."
+commands.allow = ["write_annotated_image"]
+
+[[permission]]
+identifier = "deny-write-annotated-image"
+description = "Denies the write_annotated_image command without any pre-configured scope."
+commands.deny = ["write_annotated_image"]

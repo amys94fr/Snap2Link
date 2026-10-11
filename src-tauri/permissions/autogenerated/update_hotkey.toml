@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-update-hotkey"
+description = "Enables the update_hotkey command without any pre-configured scope."
+commands.allow = ["update_hotkey"]
+
+[[permission]]
+identifier = "deny-update-hotkey"
+description = "Denies the update_hotkey command without any pre-configured scope."
+commands.deny = ["update_hotkey"]

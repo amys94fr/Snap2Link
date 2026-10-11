@@ -85,8 +85,10 @@ export function SettingsWindow({ onClose, onAbout, autoCheckUpdates }: Props) {
   };
 
   const handleHotkeyChange = async (hotkey: string) => {
-    await persistConfig({ ...config, hotkey });
+    // Register first: if the combination is invalid or taken, the error
+    // surfaces before the broken value is written to config.json.
     await invoke("update_hotkey", { hotkey });
+    await persistConfig({ ...config, hotkey });
   };
 
   const handleRetentionToggle = async (auto_delete: boolean) => {

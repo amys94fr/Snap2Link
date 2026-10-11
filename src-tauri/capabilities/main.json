@@ -1,0 +1,32 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Settings, setup wizard, updater UI and About page.",
+  "windows": ["main"],
+  "permissions": [
+    "core:window:default",
+    "core:webview:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "autostart:allow-enable",
+    "autostart:allow-disable",
+    "autostart:allow-is-enabled",
+    "notification:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://github.com/amys94fr*" }]
+    },
+    "allow-get-config",
+    "allow-save-config",
+    "allow-is-authenticated",
+    "allow-authenticate",
+    "allow-get-account-email",
+    "allow-disconnect",
+    "allow-update-hotkey",
+    "allow-check-for-update",
+    "allow-install-update"
+  ]
+}

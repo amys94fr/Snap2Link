@@ -6,7 +6,7 @@ use std::path::Path;
 use tauri::AppHandle;
 
 use crate::commands::config::{load_config_from, save_config_to};
-use crate::utils::{app_data_dir, ensure_dir, token_path_in};
+use crate::utils::{app_data_dir, ensure_private_dir, token_path_in, write_private_file};
 
 pub const SCOPES: &[&str] = &[
     "https://www.googleapis.com/auth/drive.file",
@@ -60,9 +60,9 @@ pub fn load_token_from(dir: &Path) -> Option<TokenData> {
 }
 
 pub fn save_token_to(dir: &Path, token: &TokenData) -> anyhow::Result<()> {
-    ensure_dir(dir)?;
+    ensure_private_dir(dir)?;
     let text = serde_json::to_string_pretty(token)?;
-    fs::write(token_path_in(dir), text)?;
+    write_private_file(&token_path_in(dir), text.as_bytes())?;
     Ok(())
 }
 
@@ -96,57 +96,123 @@ fn read_credentials(_app: &AppHandle) -> Result<ClientSecret, String> {
         .map_err(|e| format!("Invalid credentials.json (compile-time): {e}"))
 }
 
+const OAUTH_CALLBACK_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(300);
+
+fn random_urlsafe(len: usize) -> Result<String, String> {
+    use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+    let mut buf = vec![0u8; len];
+    getrandom::fill(&mut buf).map_err(|e| format!("no secure randomness: {e}"))?;
+    Ok(URL_SAFE_NO_PAD.encode(buf))
+}
+
+/// RFC 7636 S256 code challenge.
+pub fn pkce_challenge(verifier: &str) -> String {
+    use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+    use sha2::{Digest, Sha256};
+    URL_SAFE_NO_PAD.encode(Sha256::digest(verifier.as_bytes()))
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Callback {
+    Code(String),
+    Denied(String),
+    /// Not our redirect (favicon, port scan, wrong or missing state).
+    Ignore,
+}
+
+pub fn parse_callback(is_get: bool, request_url: &str, expected_state: &str) -> Callback {
+    if !is_get {
+        return Callback::Ignore;
+    }
+    let Ok(parsed) = url::Url::parse(&format!("http://127.0.0.1{request_url}")) else {
+        return Callback::Ignore;
+    };
+    if parsed.path() != "/" {
+        return Callback::Ignore;
+    }
+    let param = |name: &str| {
+        parsed
+            .query_pairs()
+            .find(|(k, _)| k == name)
+            .map(|(_, v)| v.into_owned())
+    };
+    if param("state").as_deref() != Some(expected_state) {
+        return Callback::Ignore;
+    }
+    if let Some(err) = param("error") {
+        return Callback::Denied(err);
+    }
+    match param("code") {
+        Some(code) if !code.is_empty() => Callback::Code(code),
+        _ => Callback::Ignore,
+    }
+}
+
+fn wait_for_code(server: tiny_http::Server, state: &str) -> Result<String, String> {
+    use tiny_http::{Header, Method, Response};
+
+    let html = |body: String| {
+        Response::from_string(body).with_header(
+            Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..])
+                .expect("static header"),
+        )
+    };
+    let deadline = std::time::Instant::now() + OAUTH_CALLBACK_TIMEOUT;
+    loop {
+        let remaining = deadline.saturating_duration_since(std::time::Instant::now());
+        if remaining.is_zero() {
+            return Err("Google sign-in timed out. Please try again.".into());
+        }
+        let Some(request) = server.recv_timeout(remaining).map_err(|e| e.to_string())? else {
+            continue;
+        };
+        match parse_callback(*request.method() == Method::Get, request.url(), state) {
+            Callback::Ignore => {
+                let _ = request.respond(Response::empty(404));
+            }
+            Callback::Denied(err) => {
+                let _ = request.respond(html(failure_html()));
+                return Err(format!("Google sign-in was not completed ({err})."));
+            }
+            Callback::Code(code) => {
+                let _ = request.respond(html(success_html()));
+                return Ok(code);
+            }
+        }
+    }
+}
+
 #[tauri::command]
 pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
     use std::net::TcpListener;
-    use tiny_http::{Header, Response, Server};
 
     let creds = read_credentials(&app_handle)?;
 
+    // Keep this listener for the callback server: releasing and re-binding
+    // the port would let another local process grab it in between.
     let listener = TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?;
-    let port = listener
-        .local_addr()
-        .map_err(|e| e.to_string())?
-        .port();
-    drop(listener);
+    let port = listener.local_addr().map_err(|e| e.to_string())?.port();
+    let server = tiny_http::Server::from_listener(listener, None).map_err(|e| e.to_string())?;
 
-    let redirect_uri = format!("http://localhost:{port}");
+    let redirect_uri = format!("http://127.0.0.1:{port}");
     let scope = SCOPES.join(" ");
+    let state = random_urlsafe(32)?;
+    let code_verifier = random_urlsafe(64)?;
 
     let auth_url = format!(
-        "{base}?client_id={cid}&redirect_uri={redir}&response_type=code&scope={scope}&access_type=offline&prompt=select_account",
+        "{base}?client_id={cid}&redirect_uri={redir}&response_type=code&scope={scope}&access_type=offline&prompt=select_account&state={state}&code_challenge={challenge}&code_challenge_method=S256",
         base = creds.installed.auth_uri,
         cid = urlencoding::encode(&creds.installed.client_id),
         redir = urlencoding::encode(&redirect_uri),
         scope = urlencoding::encode(&scope),
+        challenge = pkce_challenge(&code_verifier),
     );
 
     open::that(&auth_url).map_err(|e| format!("Could not open browser: {e}"))?;
 
-    let port_owned = port;
-    let server = Server::http(format!("127.0.0.1:{port}"))
-        .map_err(|e| e.to_string())?;
-
-    let code = tokio::task::spawn_blocking(move || -> Result<String, String> {
-        let request = server.recv().map_err(|e| e.to_string())?;
-        let request_url = format!("http://localhost:{port_owned}{}", request.url());
-
-        let html = success_html();
-        let response = Response::from_string(html).with_header(
-            Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..])
-                .unwrap(),
-        );
-        request.respond(response).ok();
-
-        let parsed = url::Url::parse(&request_url).map_err(|e| e.to_string())?;
-        parsed
-            .query_pairs()
-            .find(|(k, _)| k == "code")
-            .map(|(_, v)| v.to_string())
-            .ok_or_else(|| "No code in callback".to_string())
-    })
-    .await
-    .map_err(|e| e.to_string())??;
+    let code = tokio::task::spawn_blocking(move || wait_for_code(server, &state))
+        .await
+        .map_err(|e| e.to_string())??;
 
     let client = reqwest::Client::new();
     let params = [
@@ -155,6 +221,7 @@ pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
         ("client_secret", creds.installed.client_secret.as_str()),
         ("redirect_uri", redirect_uri.as_str()),
         ("grant_type", "authorization_code"),
+        ("code_verifier", code_verifier.as_str()),
     ];
     let resp: serde_json::Value = client
         .post(&creds.installed.token_uri)
@@ -291,6 +358,24 @@ fn success_html() -> String {
         .to_string()
 }
 
+fn failure_html() -> String {
+    r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Snap2Link</title>
+<style>
+  body{background:#0f172a;color:#f1f5f9;font-family:system-ui;
+       display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+  .card{background:#1e293b;border:1px solid #334155;border-radius:16px;
+        padding:48px 56px;text-align:center;max-width:420px}
+  h1{color:#f87171;font-size:24px;margin-bottom:10px}
+  p{color:#94a3b8;font-size:15px;line-height:1.6}
+</style></head>
+<body><div class="card">
+  <h1>Google Drive was not connected</h1>
+  <p>Sign-in was cancelled. You can close this tab and try again from Snap2Link.</p>
+</div></body></html>"#
+        .to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -362,6 +447,62 @@ mod tests {
         delete_token_from(tmp.path());
         delete_token_from(tmp.path());
         assert!(!tmp.path().join("token.json").exists());
+    }
+
+    #[test]
+    fn pkce_challenge_matches_rfc7636_example() {
+        // RFC 7636 appendix B.
+        assert_eq!(
+            pkce_challenge("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"),
+            "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+        );
+    }
+
+    #[test]
+    fn random_urlsafe_is_unique_and_urlsafe() {
+        let a = random_urlsafe(32).unwrap();
+        let b = random_urlsafe(32).unwrap();
+        assert_ne!(a, b);
+        assert!(a.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-' || c == b'_'));
+    }
+
+    #[test]
+    fn callback_accepts_code_with_matching_state() {
+        assert_eq!(
+            parse_callback(true, "/?state=S1&code=abc&scope=x", "S1"),
+            Callback::Code("abc".into())
+        );
+    }
+
+    #[test]
+    fn callback_ignores_wrong_or_missing_state() {
+        assert_eq!(parse_callback(true, "/?state=evil&code=abc", "S1"), Callback::Ignore);
+        assert_eq!(parse_callback(true, "/?code=abc", "S1"), Callback::Ignore);
+    }
+
+    #[test]
+    fn callback_ignores_other_paths_and_methods() {
+        assert_eq!(parse_callback(true, "/favicon.ico", "S1"), Callback::Ignore);
+        assert_eq!(parse_callback(true, "/x?state=S1&code=abc", "S1"), Callback::Ignore);
+        assert_eq!(parse_callback(false, "/?state=S1&code=abc", "S1"), Callback::Ignore);
+    }
+
+    #[test]
+    fn callback_reports_denied_consent() {
+        assert_eq!(
+            parse_callback(true, "/?state=S1&error=access_denied", "S1"),
+            Callback::Denied("access_denied".into())
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn token_file_is_owner_only() {
+        use std::os::unix::fs::PermissionsExt;
+        let tmp = TempDir::new().unwrap();
+        save_token_to(tmp.path(), &token(None, Some("r"))).unwrap();
+        let mode = std::fs::metadata(tmp.path().join("token.json")).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o600);
     }
 
     #[test]

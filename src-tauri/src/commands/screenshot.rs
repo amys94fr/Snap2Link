@@ -8,29 +8,48 @@
 //! 3. `capture_window` + `list_windows`: pick a specific application
 //!                              window from a list and capture it
 //!
-//! All three save the PNG to the same temp path used by the upload
-//! pipeline (`snap2link_cap.png`) so downstream code is unchanged.
+//! All three save the PNG as a fresh `cap-<n>.png` in the private captures
+//! folder (see `utils::captures_dir`) and return its path.
 //!
 //! Plus a small helper command, `write_annotated_image`, that the
 //! annotator window calls when the user hits "Done": it takes the PNG
-//! bytes the Konva stage exported and stashes them in a temp file so
-//! the existing upload pipeline (which expects a path) stays unchanged.
+//! bytes the Konva stage exported and stores them as `annotated-<n>.png`
+//! in the same folder so the upload pipeline (which expects a path) stays
+//! unchanged.
 
+use image::{ImageFormat, RgbaImage};
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::io::Cursor;
+use std::path::Path;
+use tauri::AppHandle;
 use xcap::{Monitor, Window};
+
+use crate::utils::{
+    captures_dir, is_png, new_capture_path, write_capture_file, MAX_CAPTURE_BYTES,
+};
+
+fn save_capture(dir: &Path, image: &RgbaImage) -> anyhow::Result<String> {
+    let mut png = Vec::new();
+    image.write_to(&mut Cursor::new(&mut png), ImageFormat::Png)?;
+    let path = new_capture_path(dir, "cap-");
+    write_capture_file(&path, &png)?;
+    Ok(path.to_string_lossy().to_string())
+}
 
 #[tauri::command]
 pub fn capture_region(
+    app: AppHandle,
     x: i32,
     y: i32,
     width: u32,
     height: u32,
 ) -> Result<String, String> {
-    capture_region_inner(x, y, width, height).map_err(|e| e.to_string())
+    let dir = captures_dir(&app)?;
+    capture_region_inner(&dir, x, y, width, height).map_err(|e| e.to_string())
 }
 
 pub fn capture_region_inner(
+    dir: &Path,
     x: i32,
     y: i32,
     width: u32,
@@ -52,25 +71,26 @@ pub fn capture_region_inner(
         .find(|m| {
             let mx = m.x().unwrap_or(0);
             let my = m.y().unwrap_or(0);
-            let mw = m.width().unwrap_or(0) as i32;
-            let mh = m.height().unwrap_or(0) as i32;
-            x >= mx && y >= my && x < mx + mw && y < my + mh
+            let mw = m.width().unwrap_or(0) as i64;
+            let mh = m.height().unwrap_or(0) as i64;
+            contains(mx as i64, my as i64, mw, mh, x as i64, y as i64)
         })
         .or_else(|| monitors.first())
         .unwrap();
 
     // Translate global coords to monitor-local coords.
-    let monitor_x = monitor.x().unwrap_or(0);
-    let monitor_y = monitor.y().unwrap_or(0);
-    let local_x = (x - monitor_x).max(0) as u32;
-    let local_y = (y - monitor_y).max(0) as u32;
+    let monitor_x = monitor.x().unwrap_or(0) as i64;
+    let monitor_y = monitor.y().unwrap_or(0) as i64;
+    let local_x = (x as i64 - monitor_x).clamp(0, u32::MAX as i64) as u32;
+    let local_y = (y as i64 - monitor_y).clamp(0, u32::MAX as i64) as u32;
 
     let image = monitor.capture_image()?;
     let cropped = image::imageops::crop_imm(&image, local_x, local_y, width, height).to_image();
+    save_capture(dir, &cropped)
+}
 
-    let tmp = std::env::temp_dir().join("snap2link_cap.png");
-    cropped.save(&tmp)?;
-    Ok(tmp.to_string_lossy().to_string())
+fn contains(mx: i64, my: i64, mw: i64, mh: i64, x: i64, y: i64) -> bool {
+    x >= mx && y >= my && x < mx + mw && y < my + mh
 }
 
 /// Capture the entire monitor whose top-left corner the caller passes
@@ -78,11 +98,12 @@ pub fn capture_region_inner(
 /// gets "their" screen captured rather than an arbitrary primary one).
 /// Pass `x = 0, y = 0` to fall back to the primary monitor.
 #[tauri::command]
-pub fn capture_full_screen(x: i32, y: i32) -> Result<String, String> {
-    capture_full_screen_inner(x, y).map_err(|e| e.to_string())
+pub fn capture_full_screen(app: AppHandle, x: i32, y: i32) -> Result<String, String> {
+    let dir = captures_dir(&app)?;
+    capture_full_screen_inner(&dir, x, y).map_err(|e| e.to_string())
 }
 
-pub fn capture_full_screen_inner(x: i32, y: i32) -> anyhow::Result<String> {
+pub fn capture_full_screen_inner(dir: &Path, x: i32, y: i32) -> anyhow::Result<String> {
     let monitors = Monitor::all()?;
     if monitors.is_empty() {
         anyhow::bail!("No monitor available");
@@ -90,19 +111,17 @@ pub fn capture_full_screen_inner(x: i32, y: i32) -> anyhow::Result<String> {
     let monitor = monitors
         .iter()
         .find(|m| {
-            let mx = m.x().unwrap_or(0);
-            let my = m.y().unwrap_or(0);
-            let mw = m.width().unwrap_or(0) as i32;
-            let mh = m.height().unwrap_or(0) as i32;
-            x >= mx && y >= my && x < mx + mw && y < my + mh
+            let mx = m.x().unwrap_or(0) as i64;
+            let my = m.y().unwrap_or(0) as i64;
+            let mw = m.width().unwrap_or(0) as i64;
+            let mh = m.height().unwrap_or(0) as i64;
+            contains(mx, my, mw, mh, x as i64, y as i64)
         })
         .or_else(|| monitors.first())
         .unwrap();
 
     let image = monitor.capture_image()?;
-    let tmp = std::env::temp_dir().join("snap2link_cap.png");
-    image.save(&tmp)?;
-    Ok(tmp.to_string_lossy().to_string())
+    save_capture(dir, &image)
 }
 
 /// Lightweight info about an open window. Returned by `list_windows` so
@@ -166,11 +185,12 @@ pub fn list_windows_inner() -> anyhow::Result<Vec<WindowInfo>> {
 
 /// Capture a specific window by the id returned from `list_windows`.
 #[tauri::command]
-pub fn capture_window(id: u32) -> Result<String, String> {
-    capture_window_inner(id).map_err(|e| e.to_string())
+pub fn capture_window(app: AppHandle, id: u32) -> Result<String, String> {
+    let dir = captures_dir(&app)?;
+    capture_window_inner(&dir, id).map_err(|e| e.to_string())
 }
 
-pub fn capture_window_inner(id: u32) -> anyhow::Result<String> {
+pub fn capture_window_inner(dir: &Path, id: u32) -> anyhow::Result<String> {
     let windows = Window::all()?;
     let target = windows
         .into_iter()
@@ -178,43 +198,71 @@ pub fn capture_window_inner(id: u32) -> anyhow::Result<String> {
         .ok_or_else(|| anyhow::anyhow!("window {id} not found"))?;
 
     let image = target.capture_image()?;
-    let tmp = std::env::temp_dir().join("snap2link_cap.png");
-    image.save(&tmp)?;
-    Ok(tmp.to_string_lossy().to_string())
+    save_capture(dir, &image)
 }
 
-/// Saves a base64-decoded PNG to a temp file and returns its path. The
-/// annotator window invokes this with the PNG bytes the Konva stage
-/// exported, then chains into `upload_screenshot` with the returned path.
+/// Stores the PNG bytes the annotator's Konva stage exported and returns
+/// the path, which the annotator then hands to `upload_screenshot`.
 #[tauri::command]
-pub fn write_annotated_image(bytes: Vec<u8>) -> Result<String, String> {
-    write_annotated_image_inner(&bytes).map_err(|e| e.to_string())
+pub fn write_annotated_image(app: AppHandle, bytes: Vec<u8>) -> Result<String, String> {
+    let dir = captures_dir(&app)?;
+    write_annotated_image_inner(&dir, &bytes).map_err(|e| e.to_string())
 }
 
-pub fn write_annotated_image_inner(bytes: &[u8]) -> anyhow::Result<String> {
+pub fn write_annotated_image_inner(dir: &Path, bytes: &[u8]) -> anyhow::Result<String> {
     if bytes.is_empty() {
         anyhow::bail!("empty image payload");
     }
-    let tmp = std::env::temp_dir().join("snap2link_annotated.png");
-    fs::write(&tmp, bytes)?;
-    Ok(tmp.to_string_lossy().to_string())
+    if bytes.len() > MAX_CAPTURE_BYTES {
+        anyhow::bail!("image payload too large");
+    }
+    if !is_png(bytes) {
+        anyhow::bail!("image payload is not a PNG");
+    }
+    let path = new_capture_path(dir, "annotated-");
+    write_capture_file(&path, bytes)?;
+    Ok(path.to_string_lossy().to_string())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::TempDir;
+
+    const PNG_MAGIC: [u8; 8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
     #[test]
     fn write_annotated_image_writes_bytes_and_returns_path() {
-        let bytes: Vec<u8> = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]; // PNG magic
-        let path = write_annotated_image_inner(&bytes).unwrap();
-        let read_back = std::fs::read(&path).unwrap();
-        assert_eq!(read_back, bytes);
+        let tmp = TempDir::new().unwrap();
+        let path = write_annotated_image_inner(tmp.path(), &PNG_MAGIC).unwrap();
+        assert!(path.contains("annotated-"));
+        assert_eq!(std::fs::read(&path).unwrap(), PNG_MAGIC);
     }
 
     #[test]
     fn write_annotated_image_rejects_empty_payload() {
-        assert!(write_annotated_image_inner(&[]).is_err());
+        let tmp = TempDir::new().unwrap();
+        assert!(write_annotated_image_inner(tmp.path(), &[]).is_err());
+    }
+
+    #[test]
+    fn write_annotated_image_rejects_non_png() {
+        let tmp = TempDir::new().unwrap();
+        assert!(write_annotated_image_inner(tmp.path(), b"#!/bin/sh\nrm -rf ~").is_err());
+    }
+
+    #[test]
+    fn write_annotated_image_rejects_oversized_payload() {
+        let tmp = TempDir::new().unwrap();
+        let mut big = PNG_MAGIC.to_vec();
+        big.resize(MAX_CAPTURE_BYTES + 1, 0);
+        assert!(write_annotated_image_inner(tmp.path(), &big).is_err());
+    }
+
+    #[test]
+    fn monitor_contains_does_not_overflow_at_extremes() {
+        assert!(!contains(i32::MAX as i64, 0, 10, 10, i32::MIN as i64, 0));
+        assert!(contains(0, 0, 10, 10, 5, 5));
     }
 
     /// Smoke test, only runs if a real display is attached. Headless CI
@@ -245,7 +293,8 @@ mod tests {
     fn capture_window_unknown_id_errors_cleanly() {
         // 0xFFFF_FFFE is unlikely to ever be a real window id; should
         // surface a "not found" error rather than panic.
-        let r = capture_window_inner(u32::MAX - 1);
+        let tmp = TempDir::new().unwrap();
+        let r = capture_window_inner(tmp.path(), u32::MAX - 1);
         // On a headless host this errors with "no display" before even
         // searching; either way we should get an Err, not a panic.
         assert!(r.is_err());

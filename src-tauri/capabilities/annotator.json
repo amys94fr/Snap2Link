@@ -1,0 +1,18 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "annotator",
+  "description": "Annotation editor: export the edited PNG and hand it to the overlay.",
+  "windows": ["annotator"],
+  "permissions": [
+    "core:window:default",
+    "core:webview:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:event:allow-emit",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "notification:default",
+    "allow-write-annotated-image"
+  ]
+}

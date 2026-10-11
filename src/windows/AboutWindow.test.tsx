@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { open } from "@tauri-apps/plugin-shell";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { AboutWindow } from "./AboutWindow";
 
 describe("<AboutWindow />", () => {
@@ -24,12 +24,12 @@ describe("<AboutWindow />", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens the GitHub URL via plugin-shell when the link is clicked", async () => {
+  it("opens the GitHub URL via plugin-opener when the link is clicked", async () => {
     const user = userEvent.setup();
     render(<AboutWindow onClose={() => {}} />);
     const link = screen.getByRole("button", { name: /amys94fr/i });
     await user.click(link);
-    expect(open).toHaveBeenCalledWith("https://github.com/amys94fr");
+    expect(openUrl).toHaveBeenCalledWith("https://github.com/amys94fr");
   });
 
   it("calls onClose when Close is clicked", async () => {

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-capture-full-screen"
+description = "Enables the capture_full_screen command without any pre-configured scope."
+commands.allow = ["capture_full_screen"]
+
+[[permission]]
+identifier = "deny-capture-full-screen"
+description = "Denies the capture_full_screen command without any pre-configured scope."
+commands.deny = ["capture_full_screen"]

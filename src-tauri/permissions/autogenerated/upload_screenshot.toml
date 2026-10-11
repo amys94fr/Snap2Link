@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-upload-screenshot"
+description = "Enables the upload_screenshot command without any pre-configured scope."
+commands.allow = ["upload_screenshot"]
+
+[[permission]]
+identifier = "deny-upload-screenshot"
+description = "Denies the upload_screenshot command without any pre-configured scope."
+commands.deny = ["upload_screenshot"]

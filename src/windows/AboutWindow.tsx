@@ -1,4 +1,4 @@
-import { open } from "@tauri-apps/plugin-shell";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { t } from "@/i18n";
 import logoUrl from "@/assets/logo.png";
 import {
@@ -17,7 +17,7 @@ interface Props {
 
 export function AboutWindow({ onClose }: Props) {
   const handleGithub = () => {
-    void open(APP_GITHUB);
+    void openUrl(APP_GITHUB);
   };
 
   return (

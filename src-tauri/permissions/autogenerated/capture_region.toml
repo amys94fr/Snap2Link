@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-capture-region"
+description = "Enables the capture_region command without any pre-configured scope."
+commands.allow = ["capture_region"]
+
+[[permission]]
+identifier = "deny-capture-region"
+description = "Denies the capture_region command without any pre-configured scope."
+commands.deny = ["capture_region"]

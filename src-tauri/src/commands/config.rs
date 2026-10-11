@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 
-use crate::utils::{app_data_dir, config_path_in, ensure_dir};
+use crate::utils::{app_data_dir, config_path_in, ensure_private_dir, write_private_file};
 
 pub const DEFAULT_HOTKEY: &str = "Ctrl+PrintScreen";
 pub const DEFAULT_RETENTION_DAYS: u32 = 30;
@@ -61,9 +61,9 @@ pub fn load_config_from(dir: &Path) -> AppConfig {
 }
 
 pub fn save_config_to(dir: &Path, cfg: &AppConfig) -> anyhow::Result<()> {
-    ensure_dir(dir)?;
+    ensure_private_dir(dir)?;
     let text = serde_json::to_string_pretty(cfg)?;
-    fs::write(config_path_in(dir), text)?;
+    write_private_file(&config_path_in(dir), text.as_bytes())?;
     Ok(())
 }
 
@@ -82,6 +82,7 @@ pub fn save_config(
     retention_days: u32,
     auto_delete: bool,
 ) -> Result<(), String> {
+    crate::hotkey::parse_hotkey(&hotkey)?;
     let dir = app_data_dir();
     let mut cfg = load_config_from(&dir);
     cfg.hotkey = hotkey;

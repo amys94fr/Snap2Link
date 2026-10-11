@@ -7,7 +7,15 @@ use tauri::AppHandle;
 
 use crate::commands::auth::get_valid_token;
 use crate::commands::config::{load_config_from, save_config_to};
-use crate::utils::app_data_dir;
+use crate::utils::{app_data_dir, resolve_capture_path};
+
+/// Drive file ids are URL-safe base64-ish tokens. Anything else in
+/// config.json was tampered with and must not reach a Drive query.
+pub fn is_valid_drive_id(id: &str) -> bool {
+    !id.is_empty()
+        && id.len() <= 128
+        && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+}
 
 pub const FOLDER_NAME: &str = "Snap2Link";
 
@@ -33,7 +41,7 @@ async fn get_or_create_folder(token: &str, app: &AppHandle) -> Result<String, St
 
     let client = reqwest::Client::new();
 
-    if let Some(id) = cfg.folder_id.as_deref() {
+    if let Some(id) = cfg.folder_id.as_deref().filter(|id| is_valid_drive_id(id)) {
         let resp: Value = client
             .get(format!(
                 "https://www.googleapis.com/drive/v3/files/{}?fields=id,trashed",
@@ -70,7 +78,7 @@ async fn get_or_create_folder(token: &str, app: &AppHandle) -> Result<String, St
         .await
         .map_err(|e| e.to_string())?;
 
-    let folder_id = if let Some(id) = resp["files"][0]["id"].as_str() {
+    let folder_id = if let Some(id) = resp["files"][0]["id"].as_str().filter(|id| is_valid_drive_id(id)) {
         id.to_string()
     } else {
         let body = serde_json::json!({
@@ -89,6 +97,7 @@ async fn get_or_create_folder(token: &str, app: &AppHandle) -> Result<String, St
             .map_err(|e| e.to_string())?;
         created["id"]
             .as_str()
+            .filter(|id| is_valid_drive_id(id))
             .ok_or_else(|| "No folder id in create response".to_string())?
             .to_string()
     };
@@ -104,6 +113,7 @@ pub async fn upload_screenshot(
     app: AppHandle,
     image_path: String,
 ) -> Result<String, String> {
+    let image_path = resolve_capture_path(&app, &image_path)?;
     let token = get_valid_token(&app).await?;
     let folder_id = get_or_create_folder(&token, &app).await?;
 
@@ -159,6 +169,7 @@ pub async fn upload_screenshot(
 
     let file_id = resp["id"]
         .as_str()
+        .filter(|id| is_valid_drive_id(id))
         .ok_or_else(|| format!("No file id in upload response: {resp}"))?
         .to_string();
 
@@ -197,11 +208,6 @@ fn truncate(s: &str, max: usize) -> String {
         let cut: String = s.chars().take(max).collect();
         format!("{cut}…")
     }
-}
-
-#[tauri::command]
-pub async fn cleanup_old_screenshots(app: AppHandle) -> Result<u32, String> {
-    cleanup_old_screenshots_inner(&app).await
 }
 
 pub async fn cleanup_old_screenshots_inner(app: &AppHandle) -> Result<u32, String> {
@@ -243,15 +249,19 @@ pub async fn cleanup_old_screenshots_inner(app: &AppHandle) -> Result<u32, Strin
 
         if let Some(files) = resp["files"].as_array() {
             for file in files {
-                if let Some(id) = file["id"].as_str() {
-                    let _ = client
+                if let Some(id) = file["id"].as_str().filter(|id| is_valid_drive_id(id)) {
+                    let ok = client
                         .delete(format!(
                             "https://www.googleapis.com/drive/v3/files/{id}"
                         ))
                         .bearer_auth(&token)
                         .send()
-                        .await;
-                    deleted += 1;
+                        .await
+                        .map(|r| r.status().is_success())
+                        .unwrap_or(false);
+                    if ok {
+                        deleted += 1;
+                    }
                 }
             }
         }
@@ -283,6 +293,15 @@ mod tests {
         // The /u/0/ variant requires the viewer to be signed in to Google;
         // we want the canonical anonymous-friendly form.
         assert!(!share_link_for("abc").contains("/u/0/"));
+    }
+
+    #[test]
+    fn drive_id_validation() {
+        assert!(is_valid_drive_id("1AbC-dEf_123"));
+        assert!(!is_valid_drive_id(""));
+        assert!(!is_valid_drive_id("x' or name contains '"));
+        assert!(!is_valid_drive_id("../files"));
+        assert!(!is_valid_drive_id(&"a".repeat(129)));
     }
 
     #[test]

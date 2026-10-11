@@ -18,7 +18,6 @@ pub mod utils;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_autostart::init(
@@ -36,7 +35,6 @@ pub fn run() {
             commands::auth::get_account_email,
             commands::auth::disconnect,
             commands::drive::upload_screenshot,
-            commands::drive::cleanup_old_screenshots,
             commands::screenshot::capture_region,
             commands::screenshot::capture_full_screen,
             commands::screenshot::list_windows,
@@ -48,6 +46,10 @@ pub fn run() {
             utils::debug_log,
         ])
         .setup(|app| {
+            if let Ok(dir) = utils::captures_dir(app.handle()) {
+                utils::purge_captures_in(&dir);
+            }
+
             // Tray
             if let Err(e) = tray::setup(app.handle()) {
                 eprintln!("[snap2link] tray setup failed: {e}");

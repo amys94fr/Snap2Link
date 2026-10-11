@@ -50,8 +50,8 @@ vi.mock("@tauri-apps/plugin-autostart", () => ({
   disable: vi.fn(),
 }));
 
-vi.mock("@tauri-apps/plugin-shell", () => ({
-  open: vi.fn(async () => {}),
+vi.mock("@tauri-apps/plugin-opener", () => ({
+  openUrl: vi.fn(async () => {}),
 }));
 
 // PNG/JPG imports via Vite return a URL string at runtime; Vitest doesn't
