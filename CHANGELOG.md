@@ -4,6 +4,24 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] – 2026-10-11
+
+Security hardening release from a full audit of the app and its release pipeline. No known exploit existed (no script-injection point was found), but the app gave its windows far more power than they needed, so a single future bug or compromised dependency could have exposed local files. Updating is recommended.
+
+### Security
+
+- **Uploads are limited to Snap2Link's own captures.** Screenshots are now written to a private folder in the app cache, and the upload command refuses any other file, so nothing else on disk can be published to Drive.
+- **The app windows can no longer read arbitrary files.** The local asset protocol is restricted to that captures folder, and a strict Content Security Policy is enforced in every window.
+- **Least-privilege permissions per window.** The settings window, the capture overlay and the annotator each get only the commands they use. Clipboard reading, system-wide shortcut registration from the UI, process control and the shell plugin were removed.
+- **Google sign-in uses `state` and PKCE.** The local callback server now validates the response, times out after 5 minutes and shows a clear message if sign-in is cancelled.
+- **Token and settings files** are written atomically and readable only by your user on macOS and Linux.
+- **Release pipeline:** actions pinned to commit SHAs, minimal workflow permissions, validated release tags, checksum-verified build tools, and dependency updates now wait for the test suite before merging.
+
+### Fixed
+
+- Changing the capture shortcut to an invalid or already-used combination no longer leaves you without a working shortcut.
+- Old screenshots that were cleaned up on Drive are only counted when the deletion actually succeeded.
+
 ## [1.4.2] – 2026-10-04
 
 ### Fixed
