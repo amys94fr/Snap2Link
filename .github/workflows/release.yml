@@ -7,16 +7,65 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v1.1.0) — must already exist."
+        description: "Existing tag to release, e.g. v1.5.0"
         required: true
 
 permissions:
-  contents: write
+  contents: read
+
+env:
+  # Pinned tools, verified by SHA256 before they run. Bump both lines
+  # together when upgrading.
+  APPIMAGETOOL_URL: https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+  APPIMAGETOOL_SHA256: ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0
+  # Without --runtime-file, appimagetool silently downloads the runtime
+  # from the type2-runtime `continuous` tag.
+  APPIMAGE_RUNTIME_URL: https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64
+  APPIMAGE_RUNTIME_SHA256: 2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d
+  WINGETCREATE_URL: https://github.com/microsoft/winget-create/releases/download/v1.12.13.0/wingetcreate.exe
+  WINGETCREATE_SHA256: 24042bd37915805615e6cf969ac57c6439124c3fe85823327f5f3fb24bd9ffea
 
 jobs:
+  # Validates the tag once. Every later job reads it from this job's
+  # outputs, never from raw event data, so a crafted ref name can't reach
+  # a shell command.
+  resolve:
+    name: Resolve tag
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - id: v
+        shell: bash
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$INPUT_TAG"
+          else
+            if [ "$REF_TYPE" != "tag" ]; then
+              echo "::error::Release must run from a tag"; exit 1
+            fi
+            TAG="$REF_NAME"
+          fi
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag must look like v1.2.3"; exit 1
+          fi
+          if ! git ls-remote --exit-code --tags "https://github.com/${GITHUB_REPOSITORY}" "refs/tags/${TAG}" > /dev/null; then
+            echo "::error::Tag ${TAG} does not exist"; exit 1
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build (${{ matrix.platform.name }})
+    needs: resolve
     runs-on: ${{ matrix.platform.os }}
+    environment: release
     strategy:
       fail-fast: false
       matrix:
@@ -33,9 +82,10 @@ jobs:
             target: x86_64-unknown-linux-gnu
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          ref: refs/tags/${{ needs.resolve.outputs.tag }}
+          persist-credentials: false
 
       - name: Linux system dependencies
         if: matrix.platform.os == 'ubuntu-24.04'
@@ -58,16 +108,16 @@ jobs:
             libdrm-dev \
             patchelf
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
           cache: "pnpm"
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           # universal-apple-darwin is a Tauri meta-target that lipos
           # aarch64 + x86_64 builds; we install the two real targets
@@ -79,6 +129,21 @@ jobs:
 
       - name: Build frontend (so dist/ exists for the tauri context macro)
         run: pnpm build
+
+      - name: Run frontend tests
+        run: pnpm test
+
+      # cargo test compiles the crate, which embeds credentials.json via
+      # include_str!. A stub is enough here; the real secret is only
+      # written right before the release build below.
+      - name: Stub credentials.json for tests
+        shell: bash
+        run: |
+          printf '%s' '{"installed":{"client_id":"stub","project_id":"stub","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","client_secret":"stub","redirect_uris":["http://localhost"]}}' > credentials.json
+
+      - name: Run backend tests
+        working-directory: src-tauri
+        run: cargo test --lib
 
       - name: Restore credentials.json from secret
         shell: bash
@@ -92,16 +157,10 @@ jobs:
           printf '%s' "$CREDS" > credentials.json
           echo "credentials.json restored ($(printf '%s' "$CREDS" | wc -c) bytes)"
 
-      - name: Run frontend tests
-        run: pnpm test
-
-      - name: Run backend tests
-        working-directory: src-tauri
-        run: cargo test --lib
-
       - name: Build signed Tauri bundle
         shell: bash
         env:
+          TARGET: ${{ matrix.platform.target }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
         run: |
@@ -119,7 +178,12 @@ jobs:
           # and the macOS meta-target `universal-apple-darwin` would reach
           # cargo/rustc verbatim and get rejected ("could not find target
           # specification"). Pass `--target` to tauri directly.
-          pnpm tauri build --target ${{ matrix.platform.target }}
+          pnpm tauri build --target "$TARGET"
+
+      - name: Remove credentials.json
+        if: always()
+        shell: bash
+        run: rm -f credentials.json
 
       # The Tauri AppImage bundler leaves two things in a state that fails
       # the AppImageHub catalog test:
@@ -136,28 +200,32 @@ jobs:
       # We extract the AppImage, repair .DirIcon as a relative symlink to the
       # icon that is already at the AppDir root, normalise permissions so
       # every user can read dirs and execute what should be executable, and
-      # repack over the original artefact.
+      # repack over the original artefact with a pinned, checksummed
+      # appimagetool and runtime.
       - name: Fix AppImage .DirIcon symlink and permissions
         if: matrix.platform.os == 'ubuntu-24.04'
         shell: bash
+        env:
+          TARGET: ${{ matrix.platform.target }}
         run: |
           set -euo pipefail
-          APPIMAGE_DIR="$PWD/src-tauri/target/${{ matrix.platform.target }}/release/bundle/appimage"
-          APPIMAGE_PATH=$(ls "$APPIMAGE_DIR"/*.AppImage | head -1)
+          APPIMAGE_DIR="$PWD/src-tauri/target/$TARGET/release/bundle/appimage"
+          APPIMAGE_PATH=$(find "$APPIMAGE_DIR" -maxdepth 1 -name '*.AppImage' | head -1)
           echo "Patching $APPIMAGE_PATH"
 
-          # Fetch appimagetool and extract it (no FUSE on the runner).
           TOOLDIR=$(mktemp -d)
           (
             cd "$TOOLDIR"
-            curl -sSL -o appimagetool \
-              "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$(uname -m).AppImage"
+            curl -sSfL -o appimagetool "$APPIMAGETOOL_URL"
+            curl -sSfL -o runtime "$APPIMAGE_RUNTIME_URL"
+            echo "$APPIMAGETOOL_SHA256  appimagetool" | sha256sum -c -
+            echo "$APPIMAGE_RUNTIME_SHA256  runtime" | sha256sum -c -
             chmod +x appimagetool
+            # Extract instead of running: no FUSE on the runner.
             ./appimagetool --appimage-extract > /dev/null
           )
           APPIMAGETOOL="$TOOLDIR/squashfs-root/AppRun"
 
-          # Extract the Tauri AppImage.
           WORK=$(mktemp -d)
           cp "$APPIMAGE_PATH" "$WORK/orig.AppImage"
           (
@@ -188,14 +256,13 @@ jobs:
           echo "Perms after normalisation:"
           find "$APPDIR" -maxdepth 1 -printf '%M %f\n'
 
-          # Repack over the original path.
           rm -f "$APPIMAGE_PATH"
-          ARCH="$(uname -m)" "$APPIMAGETOOL" "$APPDIR" "$APPIMAGE_PATH"
+          ARCH="$(uname -m)" "$APPIMAGETOOL" --runtime-file "$TOOLDIR/runtime" "$APPDIR" "$APPIMAGE_PATH"
           chmod +x "$APPIMAGE_PATH"
           ls -lh "$APPIMAGE_PATH"
 
       - name: Upload bundle artefacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bundle-${{ matrix.platform.name }}
           if-no-files-found: error
@@ -211,28 +278,26 @@ jobs:
 
   release:
     name: Create GitHub release
-    needs: build
+    needs: [resolve, build]
     runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.resolve.outputs.tag }}
+      VERSION: ${{ needs.resolve.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          ref: refs/tags/${{ needs.resolve.outputs.tag }}
+          persist-credentials: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
 
-      - name: Resolve version from tag
-        id: version
-        run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          VERSION="${TAG#v}"
-          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Tag: $TAG, Version: $VERSION"
-
       - name: Download all build artefacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: artefacts
 
@@ -242,14 +307,14 @@ jobs:
       - name: Generate latest.json
         run: |
           node scripts/make_latest_json.mjs \
-            --version "${{ steps.version.outputs.VERSION }}" \
-            --notes "Automated release ${{ steps.version.outputs.TAG }}. See the release description for details."
+            --version "$VERSION" \
+            --notes "Automated release $TAG. See the release description for details."
 
       - name: Generate release body from CHANGELOG
         run: |
           node scripts/make_release_body.mjs \
-            --tag "${{ steps.version.outputs.TAG }}" \
-            --repo "${{ github.repository }}"
+            --tag "$TAG" \
+            --repo "$GITHUB_REPOSITORY"
 
       - name: Flatten artefacts for the release
         run: |
@@ -266,36 +331,35 @@ jobs:
           ls -lh release-files/
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
-          tag_name: ${{ steps.version.outputs.TAG }}
-          name: Snap2Link ${{ steps.version.outputs.TAG }}
+          tag_name: ${{ needs.resolve.outputs.tag }}
+          name: Snap2Link ${{ needs.resolve.outputs.tag }}
           body_path: scripts/release-out/release-body.md
           fail_on_unmatched_files: true
           files: release-files/*
 
   submit-winget:
     name: Submit winget update PR
-    needs: release
+    needs: [resolve, release]
     runs-on: windows-latest
+    environment: release
     if: ${{ vars.SUBMIT_WINGET == 'true' }}
+    env:
+      TAG: ${{ needs.resolve.outputs.tag }}
+      VERSION: ${{ needs.resolve.outputs.version }}
     steps:
-      - name: Resolve version
-        id: version
-        shell: bash
-        run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_OUTPUT"
-
-      - name: Install wingetcreate
+      - name: Install wingetcreate (pinned, checksum-verified)
         shell: pwsh
         run: |
           # wingetcreate 1.12.x prints both the version line and the
           # full help, then exits 1, so neither `version` nor `--version`
-          # can be used as a self-test. We just download the binary; the
-          # real validation is the `update` call in the next step.
-          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          # can be used as a self-test. The checksum is the real gate.
+          Invoke-WebRequest -Uri $env:WINGETCREATE_URL -OutFile wingetcreate.exe
+          $hash = (Get-FileHash wingetcreate.exe -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $env:WINGETCREATE_SHA256) {
+            throw "wingetcreate.exe checksum mismatch: $hash"
+          }
 
       - name: Submit update to microsoft/winget-pkgs
         shell: pwsh
@@ -305,9 +369,9 @@ jobs:
           if (-not $env:WINGET_PAT) {
             throw "Missing secret WINGET_PAT."
           }
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.TAG }}/Snap2Link_${{ steps.version.outputs.VERSION }}_x64-setup.exe"
+          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:TAG/Snap2Link_$($env:VERSION)_x64-setup.exe"
           .\wingetcreate.exe update amys94fr.Snap2Link `
-            --version "${{ steps.version.outputs.VERSION }}" `
+            --version "$env:VERSION" `
             --urls "$url" `
             --submit `
             --token "$env:WINGET_PAT"

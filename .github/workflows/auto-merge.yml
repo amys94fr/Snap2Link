@@ -3,13 +3,18 @@ name: Auto-merge
 # Auto-merge Dependabot PRs as soon as the Tests workflow goes green.
 #
 # Decision matrix:
-#   patch / minor (any ecosystem)  -> merge immediately, no human in the loop
-#   major (any ecosystem)          -> NO auto-merge — wait for review (Claude
-#                                     cron or a human will triage). Majors are
-#                                     where breaking changes live (we hit this
-#                                     with Tailwind 4 and TS 6).
+#   patch / minor (npm, cargo)     -> queued for auto-merge; the `main`
+#                                     ruleset holds it until the Tests
+#                                     workflow is green
+#   github-actions (any bump)      -> NO auto-merge: an action runs with the
+#                                     release secrets, so a human reviews it
+#   major (any ecosystem)          -> NO auto-merge, wait for review. Majors
+#                                     are where breaking changes live (we hit
+#                                     this with Tailwind 4 and TS 6).
 #
 # Non-Dependabot PRs are ignored entirely; they always need human review.
+# The check is on the PR author, not `github.actor`, which can be whoever
+# re-ran the workflow.
 
 on:
   pull_request_target:
@@ -23,18 +28,20 @@ jobs:
   dependabot-auto-merge:
     name: Squash-merge if patch/minor + CI green
     runs-on: ubuntu-24.04
-    if: github.actor == 'dependabot[bot]'
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v3
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge for patch/minor
         if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          steps.metadata.outputs.package-ecosystem != 'github_actions' && (
+            steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+            steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          )
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}

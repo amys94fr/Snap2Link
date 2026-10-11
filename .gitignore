@@ -30,6 +30,14 @@ scripts/release-out/
 # Secrets
 credentials.json
 *.local
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+token*.json
+.claude/
 # Tauri updater signing keys — never commit the private key.
 .tauri-keys/*.key
 !.tauri-keys/*.key.pub

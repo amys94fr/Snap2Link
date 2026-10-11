@@ -7,18 +7,23 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   frontend:
     name: Frontend (Vitest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
           cache: "pnpm"
@@ -31,22 +36,27 @@ jobs:
       - name: Unit + component tests
         run: pnpm test
 
+      - name: Dependency audit
+        run: pnpm audit --audit-level high
+
   backend:
     name: Backend (cargo test)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
           cache: "pnpm"
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
 
       - name: Install pnpm deps
         run: pnpm install --frozen-lockfile
@@ -57,9 +67,8 @@ jobs:
       - name: Build frontend (so dist/ exists for tauri context)
         run: pnpm build
 
-      # tauri.conf.json declares ../credentials.json as a bundled resource,
-      # so the Tauri build script verifies the file exists at compile time.
-      # The unit tests don't actually open it, so a placeholder works fine
+      # credentials.json is embedded with include_str! at compile time.
+      # The unit tests don't actually use it, so a placeholder works fine
       # and avoids needing the real Google secret on PR runs from forks.
       - name: Stub credentials.json
         shell: pwsh
