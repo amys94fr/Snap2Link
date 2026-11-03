@@ -31,7 +31,7 @@ reqwest = { version = "0.13", default-features = false, features = ["json", "mul
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1"
 thiserror = "2"
-dirs = "6"
+dirs = "7"
 image = "0.25"
 xcap = "0.9"
 url = "2"
@@ -47,7 +47,7 @@ open = "5"
 tempfile = "3"
 mockito = "1"
 tokio = { version = "1", features = ["full", "test-util"] }
-serial_test = "3"
+serial_test = "4"
 
 [features]
 default = ["custom-protocol"]
