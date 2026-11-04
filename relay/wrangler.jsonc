@@ -23,5 +23,7 @@
   },
   // Links are refused the moment they expire: this only frees the space.
   "triggers": { "crons": ["*/30 * * * *"] },
-  "observability": { "enabled": true }
+  // Invocation logs would keep each request's headers, addresses included, for
+  // days. Only what the code logs is kept: the privacy page promises that.
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } }
 }
