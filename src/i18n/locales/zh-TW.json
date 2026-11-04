@@ -188,6 +188,10 @@
   "uploader.error.too_large": "此截圖過大，超出 Snap2Link 代管服務的限制（最大 5 MB）。",
   "uploader.error.unreachable": "無法連線到 Snap2Link 代管服務，請檢查您的網路連線。",
   "uploader.error.drive_not_connected": "Google Drive 尚未連接，請在設定中連接。",
+  "uploader.error.verification_cancelled": "檢查已取消。使用 Snap2Link 代管服務需要完成一次檢查。",
+  "uploader.error.verification_failed": "安全檢查未通過。請再試一次，或在設定中切換到 Google Drive。",
+  "uploader.error.banned": "此安裝已無法使用 Snap2Link 代管服務。請在設定中切換到 Google Drive。",
+  "guest.window_title": "快速安全檢查",
 
   "oauth.success.title": "Google Drive 已連接！",
   "oauth.success.body": "您可以關閉此分頁\n並返回 Snap2Link。",

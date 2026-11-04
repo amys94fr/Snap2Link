@@ -188,6 +188,10 @@
   "uploader.error.too_large": "هذه اللقطة كبيرة جدًا على استضافة Snap2Link (الحد الأقصى 5 ميغابايت).",
   "uploader.error.unreachable": "تعذّر الوصول إلى استضافة Snap2Link. تحقق من اتصالك.",
   "uploader.error.drive_not_connected": "Google Drive غير مرتبط. اربطه من الإعدادات.",
+  "uploader.error.verification_cancelled": "أُلغي الفحص. يلزم إجراؤه مرة واحدة لاستخدام استضافة Snap2Link.",
+  "uploader.error.verification_failed": "فشل الفحص الأمني. حاول مرة أخرى، أو انتقل إلى Google Drive من الإعدادات.",
+  "uploader.error.banned": "لم يعد بإمكان هذا التثبيت استخدام استضافة Snap2Link. انتقل إلى Google Drive من الإعدادات.",
+  "guest.window_title": "فحص أمني سريع",
 
   "oauth.success.title": "تم ربط Google Drive!",
   "oauth.success.body": "يمكنك إغلاق علامة التبويب هذه\nوالعودة إلى Snap2Link.",

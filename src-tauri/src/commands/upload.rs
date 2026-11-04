@@ -7,7 +7,7 @@ use tauri::AppHandle;
 
 use crate::commands::auth::is_authenticated_inner;
 use crate::commands::config::{load_config, Hosting};
-use crate::commands::{drive, relay};
+use crate::commands::{drive, guest, relay};
 use crate::utils::resolve_capture_path;
 
 /// The latest upload. The toast's Delete button can only reach this one, so
@@ -36,7 +36,14 @@ pub async fn upload_screenshot(app: AppHandle, image_path: String) -> Result<Str
         Hosting::Snap2link => {
             let base = cfg.relay_url();
             let bytes = fs::read(&image_path).map_err(|e| e.to_string())?;
-            let created = relay::upload(&base, bytes).await?;
+            let token = guest::token(&app, &base).await?;
+            let created = match relay::upload(&base, &token, bytes.clone()).await {
+                Err(code) if code == relay::GUEST_REQUIRED => {
+                    let token = guest::renew(&app, &base, &token).await?;
+                    relay::upload(&base, &token, bytes).await?
+                }
+                result => result?,
+            };
             let last = LastUpload::Relay {
                 base,
                 id: created.id,

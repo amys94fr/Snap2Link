@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Dieser Screenshot ist zu groß für das Snap2Link-Hosting (maximal 5 MB).",
   "uploader.error.unreachable": "Das Snap2Link-Hosting ist nicht erreichbar. Prüfen Sie Ihre Verbindung.",
   "uploader.error.drive_not_connected": "Google Drive ist nicht verbunden. Verbinden Sie es in den Einstellungen.",
+  "uploader.error.verification_cancelled": "Prüfung abgebrochen. Sie ist einmalig nötig, um das Snap2Link-Hosting zu nutzen.",
+  "uploader.error.verification_failed": "Die Sicherheitsprüfung ist fehlgeschlagen. Versuchen Sie es erneut oder wechseln Sie in den Einstellungen zu Google Drive.",
+  "uploader.error.banned": "Diese Installation kann das Snap2Link-Hosting nicht mehr nutzen. Wechseln Sie in den Einstellungen zu Google Drive.",
+  "guest.window_title": "Kurze Sicherheitsprüfung",
 
   "oauth.success.title": "Google Drive verbunden!",
   "oauth.success.body": "Sie können diesen Tab schließen\nund zu Snap2Link zurückkehren.",

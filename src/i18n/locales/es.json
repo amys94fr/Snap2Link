@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Esta captura es demasiado grande para el alojamiento de Snap2Link (5 MB como máximo).",
   "uploader.error.unreachable": "No se puede conectar con el alojamiento de Snap2Link. Comprueba tu conexión.",
   "uploader.error.drive_not_connected": "Google Drive no está conectado. Conéctalo en los ajustes.",
+  "uploader.error.verification_cancelled": "Comprobación cancelada. Hace falta una vez para usar el alojamiento de Snap2Link.",
+  "uploader.error.verification_failed": "La comprobación de seguridad ha fallado. Inténtalo de nuevo o cambia a Google Drive en los ajustes.",
+  "uploader.error.banned": "Esta instalación ya no puede usar el alojamiento de Snap2Link. Cambia a Google Drive en los ajustes.",
+  "guest.window_title": "Comprobación rápida",
 
   "oauth.success.title": "¡Google Drive conectado!",
   "oauth.success.body": "Puedes cerrar esta pestaña\ny volver a Snap2Link.",

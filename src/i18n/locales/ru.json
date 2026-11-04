@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Этот снимок слишком большой для хостинга Snap2Link (максимум 5 МБ).",
   "uploader.error.unreachable": "Не удаётся подключиться к хостингу Snap2Link. Проверьте соединение.",
   "uploader.error.drive_not_connected": "Google Drive не подключён. Подключите его в настройках.",
+  "uploader.error.verification_cancelled": "Проверка отменена. Она нужна один раз, чтобы пользоваться хостингом Snap2Link.",
+  "uploader.error.verification_failed": "Проверка не пройдена. Попробуйте ещё раз или переключитесь на Google Drive в настройках.",
+  "uploader.error.banned": "Эта установка больше не может пользоваться хостингом Snap2Link. Переключитесь на Google Drive в настройках.",
+  "guest.window_title": "Быстрая проверка",
 
   "oauth.success.title": "Google Drive подключён!",
   "oauth.success.body": "Можете закрыть эту вкладку\nи вернуться в Snap2Link.",

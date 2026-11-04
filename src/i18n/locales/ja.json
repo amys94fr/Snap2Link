@@ -188,6 +188,10 @@
   "uploader.error.too_large": "このキャプチャは Snap2Link のホスティングには大きすぎます（最大 5 MB）。",
   "uploader.error.unreachable": "Snap2Link のホスティングに接続できません。ネットワーク接続を確認してください。",
   "uploader.error.drive_not_connected": "Google Drive が接続されていません。設定で接続してください。",
+  "uploader.error.verification_cancelled": "確認がキャンセルされました。Snap2Link のホスティングを使うには、一度だけ確認が必要です。",
+  "uploader.error.verification_failed": "セキュリティの確認に失敗しました。もう一度試すか、設定で Google Drive に切り替えてください。",
+  "uploader.error.banned": "このインストールでは Snap2Link のホスティングを利用できなくなりました。設定で Google Drive に切り替えてください。",
+  "guest.window_title": "セキュリティの簡単な確認",
 
   "oauth.success.title": "Google Drive に接続しました！",
   "oauth.success.body": "このタブを閉じて、\nSnap2Link に戻ってください。",

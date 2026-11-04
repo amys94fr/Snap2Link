@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Ten zrzut jest za duży dla hostingu Snap2Link (maksymalnie 5 MB).",
   "uploader.error.unreachable": "Nie można połączyć się z hostingiem Snap2Link. Sprawdź połączenie.",
   "uploader.error.drive_not_connected": "Nie połączono z Google Drive. Połącz go w ustawieniach.",
+  "uploader.error.verification_cancelled": "Weryfikacja anulowana. Jest potrzebna jeden raz, aby korzystać z hostingu Snap2Link.",
+  "uploader.error.verification_failed": "Weryfikacja nie powiodła się. Spróbuj ponownie lub przejdź na Google Drive w ustawieniach.",
+  "uploader.error.banned": "Ta instalacja nie może już korzystać z hostingu Snap2Link. Przejdź na Google Drive w ustawieniach.",
+  "guest.window_title": "Szybka weryfikacja",
 
   "oauth.success.title": "Połączono z Google Drive!",
   "oauth.success.body": "Możesz zamknąć tę kartę\ni wrócić do Snap2Link.",

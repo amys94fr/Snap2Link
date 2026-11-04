@@ -57,6 +57,10 @@ const UPLOAD_ERRORS: Record<string, string> = {
   relay_service_busy: "uploader.error.service_busy",
   relay_too_large: "uploader.error.too_large",
   relay_unreachable: "uploader.error.unreachable",
+  relay_guest_required: "uploader.error.verification_failed",
+  relay_verification_failed: "uploader.error.verification_failed",
+  relay_guest_cancelled: "uploader.error.verification_cancelled",
+  relay_guest_banned: "uploader.error.banned",
   drive_not_connected: "uploader.error.drive_not_connected",
 };
 

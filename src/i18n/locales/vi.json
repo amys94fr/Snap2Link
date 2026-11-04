@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Ảnh chụp này quá lớn cho dịch vụ lưu trữ Snap2Link (tối đa 5 MB).",
   "uploader.error.unreachable": "Không thể kết nối đến dịch vụ lưu trữ Snap2Link. Hãy kiểm tra kết nối của bạn.",
   "uploader.error.drive_not_connected": "Google Drive chưa được kết nối. Hãy kết nối trong phần cài đặt.",
+  "uploader.error.verification_cancelled": "Đã hủy kiểm tra. Bước này cần thực hiện một lần để dùng dịch vụ lưu trữ Snap2Link.",
+  "uploader.error.verification_failed": "Kiểm tra bảo mật không thành công. Hãy thử lại hoặc chuyển sang Google Drive trong phần cài đặt.",
+  "uploader.error.banned": "Bản cài đặt này không thể dùng dịch vụ lưu trữ Snap2Link nữa. Hãy chuyển sang Google Drive trong phần cài đặt.",
+  "guest.window_title": "Kiểm tra nhanh",
 
   "oauth.success.title": "Đã kết nối Google Drive!",
   "oauth.success.body": "Bạn có thể đóng tab này\nvà quay lại Snap2Link.",

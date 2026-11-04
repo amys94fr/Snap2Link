@@ -257,6 +257,10 @@ describe("<OverlayWindow />", () => {
     ["relay_service_busy", /busy right now/i],
     ["relay_too_large", /too large/i],
     ["relay_unreachable", /can't be reached/i],
+    ["relay_guest_required", /check failed/i],
+    ["relay_verification_failed", /check failed/i],
+    ["relay_guest_cancelled", /check cancelled/i],
+    ["relay_guest_banned", /can no longer use/i],
     ["drive_not_connected", /isn't connected/i],
   ])("explains %s in plain words", async (code, message) => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {

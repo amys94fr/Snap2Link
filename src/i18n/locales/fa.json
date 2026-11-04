@@ -188,6 +188,10 @@
   "uploader.error.too_large": "این تصویر برای میزبانی Snap2Link بیش از حد بزرگ است (حداکثر 5 مگابایت).",
   "uploader.error.unreachable": "دسترسی به میزبانی Snap2Link ممکن نیست. اتصال خود را بررسی کنید.",
   "uploader.error.drive_not_connected": "Google Drive متصل نیست. آن را در تنظیمات متصل کنید.",
+  "uploader.error.verification_cancelled": "بررسی لغو شد. برای استفاده از میزبانی Snap2Link یک بار لازم است.",
+  "uploader.error.verification_failed": "بررسی امنیتی ناموفق بود. دوباره تلاش کنید یا در تنظیمات به Google Drive بروید.",
+  "uploader.error.banned": "این نصب دیگر نمی‌تواند از میزبانی Snap2Link استفاده کند. در تنظیمات به Google Drive بروید.",
+  "guest.window_title": "بررسی سریع امنیتی",
 
   "oauth.success.title": "Google Drive متصل شد!",
   "oauth.success.body": "می‌توانید این زبانه را ببندید\nو به Snap2Link برگردید.",

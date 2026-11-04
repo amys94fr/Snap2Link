@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Cette capture est trop volumineuse pour l’hébergement Snap2Link (5 Mo maximum).",
   "uploader.error.unreachable": "L’hébergement Snap2Link est injoignable. Vérifiez votre connexion.",
   "uploader.error.drive_not_connected": "Google Drive n’est pas connecté. Connectez-le dans les paramètres.",
+  "uploader.error.verification_cancelled": "Vérification annulée. Elle est nécessaire une fois pour utiliser l’hébergement Snap2Link.",
+  "uploader.error.verification_failed": "La vérification a échoué. Réessayez, ou passez à Google Drive dans les paramètres.",
+  "uploader.error.banned": "Cette installation ne peut plus utiliser l’hébergement Snap2Link. Passez à Google Drive dans les paramètres.",
+  "guest.window_title": "Vérification rapide",
 
   "oauth.success.title": "Google Drive connecté !",
   "oauth.success.body": "Vous pouvez fermer cet onglet\net revenir à Snap2Link.",

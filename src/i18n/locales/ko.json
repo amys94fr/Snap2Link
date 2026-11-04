@@ -188,6 +188,10 @@
   "uploader.error.too_large": "이 캡처는 Snap2Link 호스팅에 올리기에 너무 큽니다(최대 5MB).",
   "uploader.error.unreachable": "Snap2Link 호스팅에 연결할 수 없습니다. 연결 상태를 확인하세요.",
   "uploader.error.drive_not_connected": "Google Drive가 연결되어 있지 않습니다. 설정에서 연결하세요.",
+  "uploader.error.verification_cancelled": "확인이 취소되었습니다. Snap2Link 호스팅을 사용하려면 한 번은 확인이 필요합니다.",
+  "uploader.error.verification_failed": "보안 확인에 실패했습니다. 다시 시도하거나 설정에서 Google Drive로 전환하세요.",
+  "uploader.error.banned": "이 설치에서는 더 이상 Snap2Link 호스팅을 사용할 수 없습니다. 설정에서 Google Drive로 전환하세요.",
+  "guest.window_title": "간단한 보안 확인",
 
   "oauth.success.title": "Google Drive가 연결되었습니다!",
   "oauth.success.body": "이 탭을 닫고\nSnap2Link로 돌아가셔도 됩니다.",

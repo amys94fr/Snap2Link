@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Tangkapan layar ini terlalu besar untuk hosting Snap2Link (maksimal 5 MB).",
   "uploader.error.unreachable": "Hosting Snap2Link tidak dapat dijangkau. Periksa koneksi Anda.",
   "uploader.error.drive_not_connected": "Google Drive tidak terhubung. Hubungkan di pengaturan.",
+  "uploader.error.verification_cancelled": "Pemeriksaan dibatalkan. Ini diperlukan sekali untuk memakai hosting Snap2Link.",
+  "uploader.error.verification_failed": "Pemeriksaan keamanan gagal. Coba lagi, atau beralih ke Google Drive di pengaturan.",
+  "uploader.error.banned": "Instalasi ini tidak bisa lagi memakai hosting Snap2Link. Beralihlah ke Google Drive di pengaturan.",
+  "guest.window_title": "Pemeriksaan singkat",
 
   "oauth.success.title": "Google Drive terhubung!",
   "oauth.success.body": "Anda bisa menutup tab ini\ndan kembali ke Snap2Link.",

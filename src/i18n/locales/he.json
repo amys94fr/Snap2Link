@@ -188,6 +188,10 @@
   "uploader.error.too_large": "הצילום הזה גדול מדי לאירוח של Snap2Link (עד 5 מגה-בייט).",
   "uploader.error.unreachable": "אין גישה לשירות האירוח של Snap2Link. כדאי לבדוק את החיבור.",
   "uploader.error.drive_not_connected": "Google Drive לא מחובר. אפשר לחבר אותו בהגדרות.",
+  "uploader.error.verification_cancelled": "הבדיקה בוטלה. היא נדרשת פעם אחת כדי להשתמש באירוח של Snap2Link.",
+  "uploader.error.verification_failed": "בדיקת האבטחה נכשלה. אפשר לנסות שוב, או לעבור ל-Google Drive בהגדרות.",
+  "uploader.error.banned": "ההתקנה הזו כבר לא יכולה להשתמש באירוח של Snap2Link. אפשר לעבור ל-Google Drive בהגדרות.",
+  "guest.window_title": "בדיקת אבטחה מהירה",
 
   "oauth.success.title": "Google Drive מחובר!",
   "oauth.success.body": "אפשר לסגור את הכרטיסייה הזו\nולחזור ל-Snap2Link.",

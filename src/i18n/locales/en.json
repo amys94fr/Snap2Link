@@ -188,6 +188,10 @@
   "uploader.error.too_large": "This capture is too large for Snap2Link hosting (5 MB maximum).",
   "uploader.error.unreachable": "Snap2Link hosting can't be reached. Check your connection.",
   "uploader.error.drive_not_connected": "Google Drive isn't connected. Connect it in the settings.",
+  "uploader.error.verification_cancelled": "Check cancelled. It's needed once to use Snap2Link hosting.",
+  "uploader.error.verification_failed": "The security check failed. Try again, or switch to Google Drive in the settings.",
+  "uploader.error.banned": "This install can no longer use Snap2Link hosting. Switch to Google Drive in the settings.",
+  "guest.window_title": "Quick security check",
 
   "oauth.success.title": "Google Drive connected!",
   "oauth.success.body": "You can close this tab\nand return to Snap2Link.",

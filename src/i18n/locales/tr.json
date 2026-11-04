@@ -188,6 +188,10 @@
   "uploader.error.too_large": "Bu görüntü Snap2Link barındırma hizmeti için çok büyük (en fazla 5 MB).",
   "uploader.error.unreachable": "Snap2Link barındırma hizmetine ulaşılamıyor. Bağlantınızı kontrol edin.",
   "uploader.error.drive_not_connected": "Google Drive bağlı değil. Ayarlardan bağlayın.",
+  "uploader.error.verification_cancelled": "Denetim iptal edildi. Snap2Link barındırma hizmetini kullanmak için bir kez gerekiyor.",
+  "uploader.error.verification_failed": "Güvenlik denetimi başarısız oldu. Yeniden deneyin veya ayarlardan Google Drive'a geçin.",
+  "uploader.error.banned": "Bu kurulum artık Snap2Link barındırma hizmetini kullanamıyor. Ayarlardan Google Drive'a geçin.",
+  "guest.window_title": "Hızlı güvenlik denetimi",
 
   "oauth.success.title": "Google Drive bağlandı!",
   "oauth.success.body": "Bu sekmeyi kapatıp\nSnap2Link'e dönebilirsiniz.",
