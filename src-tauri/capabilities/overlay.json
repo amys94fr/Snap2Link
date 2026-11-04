@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "overlay",
   "description": "Full-screen capture overlay: capture, upload, copy link.",
-  "windows": ["overlay"],
+  "windows": [
+    "overlay"
+  ],
   "permissions": [
     "core:window:default",
     "core:webview:default",
@@ -19,6 +21,12 @@
     "allow-capture-region",
     "allow-capture-full-screen",
     "allow-capture-window",
-    "allow-upload-screenshot"
+    "allow-upload-screenshot",
+    "allow-capture-at-cursor",
+    "allow-capture-active-window",
+    "allow-save-last-choice",
+    "allow-get-language",
+    "allow-show-toast",
+    "allow-hide-toast"
   ]
 }

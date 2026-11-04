@@ -6,82 +6,57 @@ import {
   APP_VERSION,
   APP_AUTHOR,
   APP_GITHUB,
-  APP_DESCRIPTION,
   APP_LICENSE,
   APP_LICENSE_TEXT,
 } from "@/version";
+import { Card, Row, Section } from "./settings/ui";
 
-interface Props {
-  onClose: () => void;
-}
-
-export function AboutWindow({ onClose }: Props) {
-  const handleGithub = () => {
-    void openUrl(APP_GITHUB);
-  };
-
+export function AboutWindow() {
   return (
-    <div className="bg-slate-950 text-slate-100 h-screen overflow-y-auto px-8 py-7 flex flex-col">
-      <div className="flex flex-col items-center text-center mb-4">
+    <Section>
+      <div className="flex items-center gap-4">
         <img
           src={logoUrl}
           alt=""
           aria-hidden="true"
-          className="w-16 h-16 mb-2 select-none drop-shadow-md"
+          className="size-16 select-none drop-shadow-md"
           draggable={false}
         />
-        <h1 className="text-2xl font-bold">{APP_NAME}</h1>
-        <p className="text-xs text-slate-400 mt-1">
-          {t("about.version", { version: APP_VERSION })}
-        </p>
+        <div>
+          <h2 className="text-lg font-bold">{APP_NAME}</h2>
+          <p className="text-[13px] text-slate-300">
+            {t("about.version", { version: APP_VERSION })}
+          </p>
+        </div>
       </div>
 
-      <hr className="border-slate-800 mb-4" />
+      <p className="text-slate-300">{t("about.description")}</p>
 
-      <p className="text-sm text-slate-400 text-center mb-4 leading-relaxed">
-        {APP_DESCRIPTION}
-      </p>
+      <Card>
+        <Row label={t("about.author")}>
+          <span data-testid="author">{APP_AUTHOR}</span>
+        </Row>
+        <Row label={t("about.github")}>
+          <button
+            type="button"
+            dir="ltr"
+            onClick={() => void openUrl(APP_GITHUB)}
+            className="min-h-11 text-blue-300 hover:underline cursor-pointer"
+          >
+            {APP_GITHUB.replace(/^https?:\/\/github\.com\//, "")}
+          </button>
+        </Row>
+        <Row label={t("about.license")}>
+          <span>{APP_LICENSE}</span>
+        </Row>
+      </Card>
 
-      <hr className="border-slate-800 mb-4" />
-
-      <dl className="text-sm space-y-2 mb-4">
-        <div className="flex">
-          <dt className="w-20 text-slate-400 text-xs">{t("about.author")}</dt>
-          <dd data-testid="author">{APP_AUTHOR}</dd>
-        </div>
-        <div className="flex items-center">
-          <dt className="w-20 text-slate-400 text-xs">{t("about.github")}</dt>
-          <dd>
-            <button
-              type="button"
-              onClick={handleGithub}
-              className="text-brand hover:underline cursor-pointer"
-            >
-              {APP_GITHUB.replace(/^https?:\/\/github\.com\//, "")}
-            </button>
-          </dd>
-        </div>
-        <div className="flex">
-          <dt className="w-20 text-slate-400 text-xs">{t("about.license")}</dt>
-          <dd>{APP_LICENSE}</dd>
-        </div>
-      </dl>
-
-      <hr className="border-slate-800 mb-2" />
-
-      <pre className="flex-1 min-h-[110px] max-h-[160px] overflow-y-auto text-[10px] font-mono leading-relaxed text-slate-400 whitespace-pre-wrap mb-4">
+      <pre
+        dir="ltr"
+        className="max-h-40 overflow-y-auto p-3 text-[11px] font-mono leading-relaxed text-slate-300 whitespace-pre-wrap bg-slate-900 border border-slate-800 rounded-[10px]"
+      >
         {APP_LICENSE_TEXT}
       </pre>
-
-      <div className="flex justify-center mt-auto">
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn bg-brand hover:bg-brand-dark text-white px-8 py-2 text-sm rounded-lg"
-        >
-          {t("about.close")}
-        </button>
-      </div>
-    </div>
+    </Section>
   );
 }

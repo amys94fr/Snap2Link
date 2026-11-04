@@ -3,35 +3,30 @@
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Emitter, Manager,
+    AppHandle, Emitter, Manager, Wry,
 };
 
-pub fn setup(app: &AppHandle) -> tauri::Result<()> {
-    let screenshot = MenuItem::with_id(
-        app,
-        "screenshot",
-        "Take Screenshot",
-        true,
-        None::<&str>,
-    )?;
-    let settings = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
-    let check_updates = MenuItem::with_id(
-        app,
-        "check-updates",
-        "Check for Updates",
-        true,
-        None::<&str>,
-    )?;
-    let about = MenuItem::with_id(
-        app,
-        "about",
-        format!("About Snap2Link  •  v{}", env!("CARGO_PKG_VERSION")),
-        true,
-        None::<&str>,
-    )?;
-    let quit = MenuItem::with_id(app, "quit", "Quit Snap2Link", true, None::<&str>)?;
+use crate::{
+    commands::config::{AfterCapture, CaptureMode},
+    hotkey, i18n,
+};
 
-    let menu = Menu::with_items(
+const TRAY_ID: &str = "main";
+
+fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
+    let lang = i18n::current();
+    let item = |id: &str, label: String| MenuItem::with_id(app, id, label, true, None::<&str>);
+
+    let screenshot = item("screenshot", i18n::tr(lang, "tray.screenshot"))?;
+    let settings = item("settings", i18n::tr(lang, "tray.settings"))?;
+    let check_updates = item("check-updates", i18n::tr(lang, "tray.check_updates"))?;
+    let about = item(
+        "about",
+        i18n::tr(lang, "tray.about").replace("{version}", env!("CARGO_PKG_VERSION")),
+    )?;
+    let quit = item("quit", i18n::tr(lang, "tray.quit"))?;
+
+    Menu::with_items(
         app,
         &[
             &screenshot,
@@ -42,7 +37,19 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
             &PredefinedMenuItem::separator(app)?,
             &quit,
         ],
-    )?;
+    )
+}
+
+/// Rebuilds the menu after a language change.
+pub fn refresh_menu(app: &AppHandle) -> tauri::Result<()> {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        tray.set_menu(Some(build_menu(app)?))?;
+    }
+    Ok(())
+}
+
+pub fn setup(app: &AppHandle) -> tauri::Result<()> {
+    let menu = build_menu(app)?;
 
     // Try the runtime-supplied icon first (it picks the right size for the
     // platform); fall back to a known PNG bundled at compile time so the tray
@@ -56,7 +63,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
         }
     };
 
-    TrayIconBuilder::new()
+    TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .menu(&menu)
         .show_menu_on_left_click(false)
@@ -64,7 +71,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
         .on_menu_event(|app, event| match event.id.as_ref() {
             "screenshot" => {
                 eprintln!("[snap2link] tray menu: screenshot");
-                let _ = app.emit("trigger-screenshot", ());
+                hotkey::trigger(app, CaptureMode::Ask, AfterCapture::Ask);
             }
             "settings" => show_main(app, "settings"),
             "check-updates" => show_main(app, "check-updates"),
@@ -80,7 +87,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
             } = event
             {
                 eprintln!("[snap2link] tray icon: left-click");
-                let _ = tray.app_handle().emit("trigger-screenshot", ());
+                hotkey::trigger(tray.app_handle(), CaptureMode::Ask, AfterCapture::Ask);
             }
         })
         .build(app)?;

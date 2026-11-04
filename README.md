@@ -41,7 +41,8 @@ You're working with Claude Code, Cursor, or ChatGPT in a terminal — maybe on a
 | 🤖 **Built for AI workflows** | Paste screenshots into Claude Code, Cursor, ChatGPT, Aider, or any tool that accepts an image URL |
 | 🖱️ **Drag-to-capture overlay** | Fullscreen, semi-transparent, live size readout, ESC to cancel |
 | ⚡ **Instant share link** | Upload → make public → clipboard, all in the background, < 1 s on broadband |
-| ⌨️ **Global hotkey** | Default `Ctrl + Print Screen`, fully rebindable from Settings |
+| ⌨️ **Global hotkeys** | Default `Ctrl + Print Screen`, up to 3 shortcuts, each with its own capture mode and next step |
+| 🌍 **20 languages** | Follows your system language, with right-to-left support |
 | 🖥️ **Cross-platform** | Windows, macOS, and Linux — single codebase, native everywhere |
 | 🗂️ **Auto-cleanup on Drive** | Deletes screenshots older than *N* days (default 30) — your Drive stays tidy |
 | 🚀 **Built-in auto-updater** | Signed updates pulled from GitHub Releases — Settings → Check for Updates |

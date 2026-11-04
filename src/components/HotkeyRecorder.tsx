@@ -5,15 +5,30 @@ import clsx from "clsx";
 
 interface Props {
   current: string;
-  onChange: (combo: string) => void;
+  /** Resolves to false when the combination was refused: the parent shows why. */
+  onChange: (combo: string) => void | Promise<boolean | void>;
   onCancel?: () => void;
+  /** Starts listening right away, for a shortcut that doesn't exist yet. */
+  autoStart?: boolean;
 }
 
 type Hint = { kind: "info" | "success"; text: string };
 
-export function HotkeyRecorder({ current, onChange, onCancel }: Props) {
-  const [recording, setRecording] = useState(false);
-  const [hint, setHint] = useState<Hint | null>(null);
+const recordingHint = (): Hint => ({
+  kind: "info",
+  text: t("settings.shortcut.recording"),
+});
+
+export function HotkeyRecorder({
+  current,
+  onChange,
+  onCancel,
+  autoStart = false,
+}: Props) {
+  const [recording, setRecording] = useState(autoStart);
+  const [hint, setHint] = useState<Hint | null>(
+    autoStart ? recordingHint() : null,
+  );
 
   useEffect(() => {
     if (!recording) return;
@@ -39,16 +54,24 @@ export function HotkeyRecorder({ current, onChange, onCancel }: Props) {
       if (!combo) return;
 
       setRecording(false);
-      setHint({ kind: "success", text: t("settings.shortcut.saved") });
-      onChange(combo);
-
-      const id = window.setTimeout(() => setHint(null), 3000);
-      return () => window.clearTimeout(id);
+      setHint(null);
+      void Promise.resolve(onChange(combo)).then((accepted) => {
+        if (accepted === false) {
+          // Nothing to fall back on yet: stay ready, Cancel remains available.
+          if (autoStart) {
+            setRecording(true);
+            setHint(recordingHint());
+          }
+          return;
+        }
+        setHint({ kind: "success", text: t("settings.shortcut.saved") });
+        window.setTimeout(() => setHint(null), 3000);
+      });
     };
 
     document.addEventListener("keydown", handler, true);
     return () => document.removeEventListener("keydown", handler, true);
-  }, [recording, onChange, onCancel]);
+  }, [recording, onChange, onCancel, autoStart]);
 
   const toggleRecording = () => {
     if (recording) {
@@ -57,16 +80,17 @@ export function HotkeyRecorder({ current, onChange, onCancel }: Props) {
       onCancel?.();
     } else {
       setRecording(true);
-      setHint({ kind: "info", text: t("settings.shortcut.recording") });
+      setHint(recordingHint());
     }
   };
 
   return (
-    <div className="mt-1 mb-3">
+    <div>
       <div className="flex items-center gap-3">
         <span
           data-testid="hotkey-display"
-          className="font-bold text-sm tabular-nums min-w-[140px]"
+          dir="ltr"
+          className="font-mono text-[13px] tabular-nums"
         >
           {recording ? "…" : formatCombo(current)}
         </span>
@@ -74,10 +98,10 @@ export function HotkeyRecorder({ current, onChange, onCancel }: Props) {
           type="button"
           onClick={toggleRecording}
           className={clsx(
-            "btn text-xs px-3 py-1.5 rounded-lg",
+            "btn min-h-11 px-3.5 text-[13px] text-white whitespace-nowrap",
             recording
-              ? "bg-brand text-white"
-              : "bg-slate-800 hover:bg-brand text-white",
+              ? "bg-brand"
+              : "bg-slate-800 hover:bg-slate-700 border border-slate-600",
           )}
         >
           {recording
@@ -89,7 +113,7 @@ export function HotkeyRecorder({ current, onChange, onCancel }: Props) {
         <p
           className={clsx(
             "text-xs mt-1",
-            hint.kind === "success" ? "text-success" : "text-brand",
+            hint.kind === "success" ? "text-green-300" : "text-blue-300",
           )}
         >
           {hint.text}

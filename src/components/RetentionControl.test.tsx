@@ -13,9 +13,9 @@ describe("<RetentionControl />", () => {
         onSave={() => {}}
       />,
     );
-    const input = screen.getByLabelText(/keep screenshots for/i);
+    const input = screen.getByLabelText(/keep captures for/i);
     expect(input).toHaveValue(30);
-    const toggle = screen.getByRole("checkbox", { name: /auto-delete/i });
+    const toggle = screen.getByRole("switch", { name: /automatic deletion/i });
     expect(toggle).toBeChecked();
   });
 
@@ -30,11 +30,11 @@ describe("<RetentionControl />", () => {
         onSave={() => {}}
       />,
     );
-    await user.click(screen.getByRole("checkbox", { name: /auto-delete/i }));
+    await user.click(screen.getByRole("switch", { name: /automatic deletion/i }));
     expect(onToggle).toHaveBeenCalledWith(false);
   });
 
-  it("disables the input and the OK button when not enabled", () => {
+  it("hides the delay when automatic deletion is off", () => {
     render(
       <RetentionControl
         days={30}
@@ -43,8 +43,8 @@ describe("<RetentionControl />", () => {
         onSave={() => {}}
       />,
     );
-    expect(screen.getByLabelText(/keep screenshots for/i)).toBeDisabled();
-    expect(screen.getByRole("button", { name: /ok/i })).toBeDisabled();
+    expect(screen.queryByLabelText(/keep captures for/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^save$/i })).not.toBeInTheDocument();
   });
 
   it("clicking OK calls onSave with the entered days", async () => {
@@ -58,10 +58,10 @@ describe("<RetentionControl />", () => {
         onSave={onSave}
       />,
     );
-    const input = screen.getByLabelText(/keep screenshots for/i);
+    const input = screen.getByLabelText(/keep captures for/i);
     await user.clear(input);
     await user.type(input, "60");
-    await user.click(screen.getByRole("button", { name: /ok/i }));
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
     expect(onSave).toHaveBeenCalledWith(60);
   });
 
@@ -76,16 +76,16 @@ describe("<RetentionControl />", () => {
         onSave={onSave}
       />,
     );
-    const input = screen.getByLabelText(/keep screenshots for/i);
+    const input = screen.getByLabelText(/keep captures for/i);
 
     await user.clear(input);
     await user.type(input, "0");
-    await user.click(screen.getByRole("button", { name: /ok/i }));
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
     expect(onSave).toHaveBeenLastCalledWith(1);
 
     await user.clear(input);
     await user.type(input, "9999");
-    await user.click(screen.getByRole("button", { name: /ok/i }));
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
     expect(onSave).toHaveBeenLastCalledWith(3650);
   });
 
@@ -99,9 +99,9 @@ describe("<RetentionControl />", () => {
         onSave={() => {}}
       />,
     );
-    await user.click(screen.getByRole("button", { name: /ok/i }));
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
     expect(
-      screen.getByText(/screenshots deleted after 30 days/i),
+      screen.getByText(/deleted after 30 days/i),
     ).toBeInTheDocument();
   });
 });

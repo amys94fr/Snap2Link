@@ -7,11 +7,16 @@ import {
   getCurrentWebviewWindow,
   WebviewWindow,
 } from "@tauri-apps/api/webviewWindow";
+import clsx from "clsx";
 import { t } from "@/i18n";
-import { UploaderToast } from "./UploaderToast";
+import type {
+  LastAfter,
+  LastMode,
+  ProfileAfter,
+  ProfileMode,
+} from "@/lib/config";
 
 const MIN_SELECTION_PX = 10;
-const SUCCESS_DISPLAY_MS = 1800;
 const HIDE_BEFORE_CAPTURE_MS = 100;
 
 interface Point {
@@ -31,13 +36,27 @@ interface WindowInfo {
  * The overall flow stage:
  *   selecting  : the overlay is up, user picks region / mode
  *   prompting  : capture saved, asking the user "Edit or Save"
- *   uploading  : direct upload in flight (toast on screen)
- *   success    : "link copied" toast for a beat
+ * Uploads run with the overlay hidden: the toast window reports them.
  */
-type Mode = "selecting" | "prompting" | "uploading" | "success";
+type Mode = "selecting" | "prompting";
 
 /** Which capture mode the overlay is in while `mode === "selecting"`. */
-type CaptureMode = "region" | "fullScreen" | "window";
+type CaptureMode = LastMode;
+
+/** Sent by Rust when a shortcut or the tray starts a capture. */
+interface CaptureRequest {
+  mode: ProfileMode;
+  after: ProfileAfter;
+  last_mode: LastMode | null;
+  last_after: LastAfter | null;
+}
+
+const ASK_EVERYTHING: CaptureRequest = {
+  mode: "ask",
+  after: "ask",
+  last_mode: null,
+  last_after: null,
+};
 
 /** Forward a log line to the Rust dev terminal. The overlay window's
  *  DevTools are unreachable because the window hides on success. */
@@ -56,6 +75,13 @@ export function OverlayWindow() {
    *  annotator (Edit) or upload_screenshot (Save). */
   const pendingPathRef = useRef<string | null>(null);
   const busyRef = useRef(false);
+  /** What the shortcut asked for, read once the image exists. */
+  const requestRef = useRef<CaptureRequest>(ASK_EVERYTHING);
+  /** Overlay tab that produced the pending capture. */
+  const usedModeRef = useRef<CaptureMode>("region");
+  /** Prompt button Enter validates. */
+  const [preferred, setPreferred] = useState<LastAfter>("save");
+  const preferredRef = useRef<LastAfter>("save");
 
   // Strip the opaque html/body background that the main stylesheet
   // applies, so the underlying desktop is visible through this
@@ -132,6 +158,26 @@ export function OverlayWindow() {
     }
   };
 
+  /** Follows what the shortcut set for the step after the capture. */
+  const finishCapture = async (imagePath: string) => {
+    pendingPathRef.current = imagePath;
+    const { after } = requestRef.current;
+    if (after === "share") await chooseSave();
+    else if (after === "annotate") await chooseEdit();
+    else await enterPromptMode(imagePath);
+  };
+
+  /** Only steps left on "Ask" are remembered, once the capture went through. */
+  const remember = (after: LastAfter) => {
+    const request = requestRef.current;
+    const mode = request.mode === "ask" ? usedModeRef.current : null;
+    const choice = request.after === "ask" ? after : null;
+    if (!mode && !choice) return;
+    void Promise.resolve(
+      invoke("save_last_choice", { mode, after: choice }),
+    ).catch((err) => dlog(`[overlay] save_last_choice FAILED: ${err}`));
+  };
+
   /** Shared error path for capture failures. Notify, hide overlay,
    *  reset to selecting region mode. */
   const handleCaptureError = async (err: unknown) => {
@@ -169,6 +215,7 @@ export function OverlayWindow() {
     try {
       await win.hide();
       await new Promise((r) => window.setTimeout(r, HIDE_BEFORE_CAPTURE_MS));
+      usedModeRef.current = "region";
       dlog(`[overlay] capture_region x=${x} y=${y} w=${width} h=${height}`);
       const path = await invoke<string>("capture_region", {
         x,
@@ -177,7 +224,7 @@ export function OverlayWindow() {
         height,
       });
       dlog(`[overlay] captured to: ${path}`);
-      await enterPromptMode(path);
+      await finishCapture(path);
     } catch (err) {
       await handleCaptureError(err);
     }
@@ -196,10 +243,11 @@ export function OverlayWindow() {
       const y = Math.round(window.screenY);
       await win.hide();
       await new Promise((r) => window.setTimeout(r, HIDE_BEFORE_CAPTURE_MS));
+      usedModeRef.current = "fullScreen";
       dlog(`[overlay] capture_full_screen at x=${x} y=${y}`);
       const path = await invoke<string>("capture_full_screen", { x, y });
       dlog(`[overlay] captured to: ${path}`);
-      await enterPromptMode(path);
+      await finishCapture(path);
     } catch (err) {
       await handleCaptureError(err);
     }
@@ -215,19 +263,86 @@ export function OverlayWindow() {
       // Window capture wants the overlay AND any of our own windows out
       // of the way before xcap reads the framebuffer.
       await new Promise((r) => window.setTimeout(r, HIDE_BEFORE_CAPTURE_MS));
+      usedModeRef.current = "window";
       dlog(`[overlay] capture_window id=${id}`);
       const path = await invoke<string>("capture_window", { id });
       dlog(`[overlay] captured to: ${path}`);
-      await enterPromptMode(path);
+      await finishCapture(path);
     } catch (err) {
       await handleCaptureError(err);
     }
   };
 
+  const showOverlay = async () => {
+    const win = getCurrentWebviewWindow();
+    try {
+      await win.show();
+      await win.setFocus();
+    } catch (err) {
+      dlog(`[overlay] could not open: ${err}`);
+    }
+  };
+
+  /** Full screen or active window, set in advance: no overlay at all. */
+  const captureDirect = async (mode: "full_screen" | "active_window") => {
+    busyRef.current = true;
+    try {
+      const command =
+        mode === "full_screen" ? "capture_at_cursor" : "capture_active_window";
+      dlog(`[overlay] ${command}`);
+      await finishCapture(await invoke<string>(command));
+    } catch (err) {
+      // Nothing in front (desktop, or the OS won't say): let the user pick.
+      if (mode === "active_window" && String(err).includes("no_active_window")) {
+        busyRef.current = false;
+        switchCaptureMode("window");
+        await showOverlay();
+        return;
+      }
+      await handleCaptureError(err);
+    }
+  };
+
+  const handleTrigger = async (request: CaptureRequest) => {
+    if (busyRef.current) return;
+    requestRef.current = request;
+    preferredRef.current = request.last_after ?? "save";
+    setPreferred(preferredRef.current);
+    setMode("selecting");
+
+    // A toast left on screen must not end up in the capture.
+    try {
+      if (await invoke<boolean>("hide_toast")) {
+        await new Promise((r) => window.setTimeout(r, HIDE_BEFORE_CAPTURE_MS));
+      }
+    } catch {
+      /* ignored */
+    }
+
+    if (request.mode === "full_screen" || request.mode === "active_window") {
+      await captureDirect(request.mode);
+      return;
+    }
+    switchCaptureMode(
+      request.mode === "region" ? "region" : (request.last_mode ?? "region"),
+    );
+    await showOverlay();
+  };
+
+  useEffect(() => {
+    const off = listen<CaptureRequest>("trigger-screenshot", (e) => {
+      void handleTrigger(e.payload);
+    });
+    return () => {
+      void off.then((fn) => fn());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Keyboard shortcuts.
   //   ESC  : cancel from any state
   //   while selecting: R / F / W switch capture mode
-  //   while prompting: E edit, S save
+  //   while prompting: E edit, S save, Enter confirms the preselected choice
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -257,6 +372,9 @@ export function OverlayWindow() {
         } else if (e.key === "s" || e.key === "S") {
           e.preventDefault();
           void chooseSave();
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          void (preferredRef.current === "edit" ? chooseEdit() : chooseSave());
         }
       }
     };
@@ -307,6 +425,7 @@ export function OverlayWindow() {
       }
       await emit("annotator-load", { path });
       dlog(`[overlay] -> annotator: ${path}`);
+      remember("edit");
     } catch (err) {
       dlog(`[overlay] open annotator FAILED: ${err}`);
     } finally {
@@ -316,35 +435,42 @@ export function OverlayWindow() {
     }
   };
 
-  /** Upload a path through the existing toast flow. Used both by Save
-   *  and by the annotator's Done click (which emits `upload-from-path`
-   *  so the toast stays in the overlay window). */
+  const toast = async (state: "uploading" | "copied") => {
+    try {
+      await invoke("show_toast", { state });
+      return true;
+    } catch (err) {
+      dlog(`[overlay] toast failed (non-fatal): ${err}`);
+      return false;
+    }
+  };
+
+  /** Uploads with the overlay gone: nothing covers the screen meanwhile. Also
+   *  used by the annotator's Done click, through `upload-from-path`. */
   const uploadAndToast = async (path: string) => {
     const win = getCurrentWebviewWindow();
     busyRef.current = true;
+    let uploaded = false;
     try {
-      setMode("uploading");
-      await new Promise((r) => window.setTimeout(r, 0));
-      await win.show();
-      await win.setFocus();
+      setMode("selecting");
+      await win.hide();
+      await toast("uploading");
       const link = await invoke<string>("upload_screenshot", {
         imagePath: path,
       });
       dlog(`[overlay] upload OK, link: ${link}`);
       await writeText(link);
-      setMode("success");
-      try {
+      uploaded = true;
+      if (!(await toast("copied"))) {
         sendNotification({
           title: t("notify.app_name"),
           body: t("notify.link_copied"),
         });
-      } catch (notifyErr) {
-        dlog(`[overlay] notification failed (non-fatal): ${notifyErr}`);
       }
-      await new Promise((r) => window.setTimeout(r, SUCCESS_DISPLAY_MS));
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       dlog(`[overlay] upload FAILED: ${msg}`);
+      void Promise.resolve(invoke("hide_toast")).catch(() => {});
       try {
         sendNotification({
           title: t("notify.error"),
@@ -354,22 +480,18 @@ export function OverlayWindow() {
         /* ignored */
       }
     } finally {
-      try {
-        await win.hide();
-      } catch {
-        /* ignored */
-      }
       setMode("selecting");
       setCaptureMode("region");
       busyRef.current = false;
     }
+    return uploaded;
   };
 
   const chooseSave = async () => {
     const path = pendingPathRef.current;
     if (!path) return;
     pendingPathRef.current = null;
-    await uploadAndToast(path);
+    if (await uploadAndToast(path)) remember("save");
   };
 
   // Listen for the annotator's "Done" hand-off.
@@ -477,16 +599,18 @@ export function OverlayWindow() {
               <button
                 type="button"
                 data-testid="prompt-edit"
+                data-preferred={preferred === "edit"}
                 onClick={() => void chooseEdit()}
-                className="px-5 py-2.5 rounded-lg bg-brand hover:bg-brand-dark text-white text-sm font-medium"
+                className={promptButton(preferred === "edit")}
               >
                 {t("overlay.prompt.edit")}
               </button>
               <button
                 type="button"
                 data-testid="prompt-save"
+                data-preferred={preferred === "save"}
                 onClick={() => void chooseSave()}
-                className="px-5 py-2.5 rounded-lg bg-success hover:bg-emerald-600 text-white text-sm font-medium"
+                className={promptButton(preferred === "save")}
               >
                 {t("overlay.prompt.save")}
               </button>
@@ -498,9 +622,6 @@ export function OverlayWindow() {
         </div>
       )}
 
-      {(mode === "uploading" || mode === "success") && (
-        <UploaderToast state={mode} />
-      )}
     </div>
   );
 }
@@ -508,6 +629,16 @@ export function OverlayWindow() {
 // ────────────────────────────────────────────────────────────────────────
 // Sub-components
 // ────────────────────────────────────────────────────────────────────────
+
+/** The preselected choice stands out: it is what Enter confirms. */
+function promptButton(preferred: boolean) {
+  return clsx(
+    "min-h-11 px-5 rounded-lg text-sm font-medium text-white",
+    preferred
+      ? "bg-brand hover:bg-brand-dark ring-2 ring-blue-300"
+      : "bg-slate-800 hover:bg-slate-700",
+  );
+}
 
 function ModeToolbar({
   mode,
@@ -629,7 +760,7 @@ function WindowPicker({
                 type="button"
                 data-testid={`window-card-${w.id}`}
                 onClick={() => void onPick(w.id)}
-                className="text-left bg-slate-900/95 border border-slate-700 hover:border-brand hover:bg-slate-900 rounded-xl px-4 py-3 transition shadow-lg flex flex-col gap-1"
+                className="text-start bg-slate-900/95 border border-slate-700 hover:border-brand hover:bg-slate-900 rounded-xl px-4 py-3 transition shadow-lg flex flex-col gap-1"
               >
                 <span className="text-sm font-medium text-white truncate">
                   {w.title || w.app_name || `#${w.id}`}

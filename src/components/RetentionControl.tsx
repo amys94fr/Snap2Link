@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { t } from "@/i18n";
+import { BUTTON, Row, Switch } from "@/windows/settings/ui";
 
 interface Props {
   days: number;
@@ -38,47 +39,55 @@ export function RetentionControl({ days, enabled, onToggle, onSave }: Props) {
   };
 
   return (
-    <div className="mt-2">
-      <label className="flex items-center justify-between cursor-pointer">
-        <span className="text-sm font-medium">{t("settings.auto_delete")}</span>
-        <input
-          type="checkbox"
-          aria-label={t("settings.auto_delete")}
+    <>
+      <Row
+        label={t("settings.auto_delete")}
+        hint={
+          enabled
+            ? t("settings.hosting.auto_delete_on")
+            : t("settings.hosting.auto_delete_off")
+        }
+      >
+        <Switch
+          label={t("settings.auto_delete")}
           checked={enabled}
-          onChange={(e) => onToggle(e.target.checked)}
-          className="w-10 h-5 accent-brand cursor-pointer"
+          onChange={onToggle}
         />
-      </label>
+      </Row>
 
-      <div className="flex items-center gap-2 mt-2">
-        <label htmlFor="retention-days" className="text-xs text-slate-400">
-          {t("settings.keep_for")}
-        </label>
-        <input
-          id="retention-days"
-          type="number"
-          min={MIN_DAYS}
-          max={MAX_DAYS}
-          value={draft}
-          disabled={!enabled}
-          onChange={(e) => setDraft(e.target.value)}
-          className="w-16 text-center bg-slate-900 border border-slate-800 rounded px-1 py-0.5 text-sm disabled:opacity-40"
-        />
-        <span className="text-xs text-slate-400">{t("settings.days")}</span>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!enabled}
-          className="text-xs bg-slate-800 hover:bg-brand text-white px-3 py-1 rounded disabled:opacity-40"
+      {enabled && (
+        <Row
+          label={t("settings.keep_for")}
+          hint={
+            savedDays !== null ? (
+              <span className="text-green-300">
+                {t("settings.delete_saved", { days: savedDays })}
+              </span>
+            ) : (
+              t("settings.hosting.keep_hint")
+            )
+          }
+          htmlFor="retention-days"
         >
-          OK
-        </button>
-      </div>
-      {savedDays !== null && (
-        <p className="text-xs text-success mt-1">
-          {t("settings.delete_saved", { days: savedDays })}
-        </p>
+          <div className="flex items-center gap-2">
+            <input
+              id="retention-days"
+              type="number"
+              min={MIN_DAYS}
+              max={MAX_DAYS}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              className="w-20 min-h-11 text-center bg-slate-950 border border-slate-600 rounded-lg text-sm"
+            />
+            <span className="text-[13px] text-slate-300">
+              {t("settings.days")}
+            </span>
+            <button type="button" onClick={handleSave} className={BUTTON}>
+              {t("settings.save")}
+            </button>
+          </div>
+        </Row>
       )}
-    </div>
+    </>
   );
 }

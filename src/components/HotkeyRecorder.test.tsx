@@ -14,7 +14,7 @@ describe("<HotkeyRecorder />", () => {
   it("toggles to recording mode when Edit is clicked", async () => {
     const user = userEvent.setup();
     render(<HotkeyRecorder current="Ctrl+S" onChange={() => {}} />);
-    expect(screen.getByRole("button")).toHaveTextContent(/edit/i);
+    expect(screen.getByRole("button")).toHaveTextContent(/change keys/i);
 
     await user.click(screen.getByRole("button"));
     expect(screen.getByRole("button")).toHaveTextContent(/cancel/i);
@@ -33,7 +33,7 @@ describe("<HotkeyRecorder />", () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith("Ctrl+Shift+P");
     // Recording exits after a successful capture
-    expect(screen.getByRole("button")).toHaveTextContent(/edit/i);
+    expect(screen.getByRole("button")).toHaveTextContent(/change keys/i);
   });
 
   it("Escape cancels recording without calling onChange", async () => {
@@ -44,7 +44,7 @@ describe("<HotkeyRecorder />", () => {
     await user.keyboard("{Escape}");
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button")).toHaveTextContent(/edit/i);
+    expect(screen.getByRole("button")).toHaveTextContent(/change keys/i);
   });
 
   it("clicking Cancel during recording exits without calling onChange", async () => {
@@ -55,7 +55,7 @@ describe("<HotkeyRecorder />", () => {
     await user.click(screen.getByRole("button")); // Cancel
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button")).toHaveTextContent(/edit/i);
+    expect(screen.getByRole("button")).toHaveTextContent(/change keys/i);
   });
 
   it("ignores presses of modifier keys alone while recording", async () => {

@@ -58,7 +58,9 @@ export function UpdateChecker({ autoStart = false }: Props) {
   };
 
   useEffect(() => {
-    if (autoStart && !startedRef.current) {
+    if (!autoStart) {
+      startedRef.current = false;
+    } else if (!startedRef.current) {
       startedRef.current = true;
       void runCheck();
     }
@@ -74,7 +76,7 @@ export function UpdateChecker({ autoStart = false }: Props) {
           type="button"
           onClick={runCheck}
           disabled={isBusy}
-          className="btn text-xs bg-slate-800 hover:bg-brand text-white px-3 py-1.5 rounded-lg whitespace-nowrap disabled:opacity-50"
+          className="btn min-h-11 px-3.5 text-[13px] bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-50 whitespace-nowrap"
         >
           {status.kind === "checking"
             ? t("updater.checking")
@@ -83,25 +85,25 @@ export function UpdateChecker({ autoStart = false }: Props) {
       </div>
 
       {status.kind === "up_to_date" && (
-        <p className="text-xs text-slate-400">
+        <p className="text-[13px] text-slate-300">
           {t("updater.up_to_date", { version: status.current })}
         </p>
       )}
 
       {status.kind === "available" && (
         <div className="flex flex-col gap-2 mt-1 p-3 rounded-lg bg-slate-900 border border-slate-800">
-          <p className="text-xs font-semibold text-success">
+          <p className="text-[13px] font-semibold text-green-300">
             {t("updater.available", { version: status.latest })}
           </p>
           {status.notes && (
-            <pre className="text-[11px] text-slate-400 whitespace-pre-wrap font-sans max-h-24 overflow-y-auto">
+            <pre className="text-xs text-slate-300 whitespace-pre-wrap font-sans max-h-24 overflow-y-auto">
               {status.notes}
             </pre>
           )}
           <button
             type="button"
             onClick={runInstall}
-            className="btn bg-success hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg self-start"
+            className="btn min-h-11 px-3.5 bg-brand hover:bg-brand-dark text-white text-[13px] self-start"
           >
             {t("updater.install")}
           </button>
@@ -109,12 +111,12 @@ export function UpdateChecker({ autoStart = false }: Props) {
       )}
 
       {status.kind === "installing" && (
-        <p className="text-xs text-brand">{t("updater.installing")}</p>
+        <p className="text-[13px] text-blue-300">{t("updater.installing")}</p>
       )}
 
       {status.kind === "error" && (
         <p
-          className={clsx("text-xs text-danger break-words")}
+          className={clsx("text-[13px] text-red-300 break-words")}
           title={status.message}
         >
           {t("updater.error", { msg: status.message.slice(0, 120) })}

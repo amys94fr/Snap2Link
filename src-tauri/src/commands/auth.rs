@@ -337,43 +337,44 @@ pub fn disconnect() {
     let _ = save_config_to(&dir, &cfg);
 }
 
-fn success_html() -> String {
-    r#"<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Snap2Link</title>
+const RESULT_PAGE: &str = r#"<!DOCTYPE html>
+<html lang="{lang}" dir="{dir}"><head><meta charset="utf-8"><title>Snap2Link</title>
 <style>
   body{background:#0f172a;color:#f1f5f9;font-family:system-ui;
        display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
   .card{background:#1e293b;border:1px solid #334155;border-radius:16px;
         padding:48px 56px;text-align:center;max-width:420px}
-  h1{color:#22c55e;font-size:24px;margin-bottom:10px}
-  p{color:#94a3b8;font-size:15px;line-height:1.6}
+  h1{color:{color};font-size:24px;margin-bottom:10px}
+  p{color:#cbd5e1;font-size:15px;line-height:1.6;white-space:pre-line}
 </style></head>
 <body><div class="card">
-  <div style="font-size:56px">✅</div>
-  <h1>Google Drive connected!</h1>
-  <p>You can close this tab and return to Snap2Link.</p>
-</div>
-<script>setTimeout(()=>window.close(),3000)</script>
-</body></html>"#
-        .to_string()
+  <h1>{title}</h1>
+  <p>{body}</p>
+</div>{script}
+</body></html>"#;
+
+fn result_page(color: &str, title_key: &str, body_key: &str, script: &str) -> String {
+    let lang = crate::i18n::current();
+    RESULT_PAGE
+        .replace("{lang}", lang)
+        .replace("{dir}", if crate::i18n::is_rtl(lang) { "rtl" } else { "ltr" })
+        .replace("{color}", color)
+        .replace("{title}", &crate::i18n::tr(lang, title_key))
+        .replace("{body}", &crate::i18n::tr(lang, body_key))
+        .replace("{script}", script)
+}
+
+fn success_html() -> String {
+    result_page(
+        "#22c55e",
+        "oauth.success.title",
+        "oauth.success.body",
+        "<script>setTimeout(()=>window.close(),3000)</script>",
+    )
 }
 
 fn failure_html() -> String {
-    r#"<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Snap2Link</title>
-<style>
-  body{background:#0f172a;color:#f1f5f9;font-family:system-ui;
-       display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-  .card{background:#1e293b;border:1px solid #334155;border-radius:16px;
-        padding:48px 56px;text-align:center;max-width:420px}
-  h1{color:#f87171;font-size:24px;margin-bottom:10px}
-  p{color:#94a3b8;font-size:15px;line-height:1.6}
-</style></head>
-<body><div class="card">
-  <h1>Google Drive was not connected</h1>
-  <p>Sign-in was cancelled. You can close this tab and try again from Snap2Link.</p>
-</div></body></html>"#
-        .to_string()
+    result_page("#f87171", "oauth.failure.title", "oauth.failure.body", "")
 }
 
 #[cfg(test)]

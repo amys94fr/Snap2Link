@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-reset-last-choice"
+description = "Enables the reset_last_choice command without any pre-configured scope."
+commands.allow = ["reset_last_choice"]
+
+[[permission]]
+identifier = "deny-reset-last-choice"
+description = "Denies the reset_last_choice command without any pre-configured scope."
+commands.deny = ["reset_last_choice"]

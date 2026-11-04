@@ -8,7 +8,10 @@
 //! 3. `capture_window` + `list_windows`: pick a specific application
 //!                              window from a list and capture it
 //!
-//! All three save the PNG as a fresh `cap-<n>.png` in the private captures
+//! Direct captures skip the overlay: `capture_at_cursor` takes the screen
+//! under the mouse and `capture_active_window` the window in front.
+//!
+//! All of them save the PNG as a fresh `cap-<n>.png` in the private captures
 //! folder (see `utils::captures_dir`) and return its path.
 //!
 //! Plus a small helper command, `write_annotated_image`, that the
@@ -121,6 +124,37 @@ pub fn capture_full_screen_inner(dir: &Path, x: i32, y: i32) -> anyhow::Result<S
         .unwrap();
 
     let image = monitor.capture_image()?;
+    save_capture(dir, &image)
+}
+
+/// Full screen without the overlay: the monitor under the mouse. If the OS
+/// won't report the cursor (Wayland), this falls back to the first monitor.
+#[tauri::command]
+pub fn capture_at_cursor(app: AppHandle) -> Result<String, String> {
+    let dir = captures_dir(&app)?;
+    let (x, y) = app
+        .cursor_position()
+        .map(|p| (p.x as i32, p.y as i32))
+        .unwrap_or((0, 0));
+    capture_full_screen_inner(&dir, x, y).map_err(|e| e.to_string())
+}
+
+/// Error code the overlay recognises to fall back on the window picker.
+pub const NO_ACTIVE_WINDOW: &str = "no_active_window";
+
+/// Captures the window in front, without any selection step.
+#[tauri::command]
+pub fn capture_active_window(app: AppHandle) -> Result<String, String> {
+    let dir = captures_dir(&app)?;
+    capture_active_window_inner(&dir).map_err(|e| e.to_string())
+}
+
+pub fn capture_active_window_inner(dir: &Path) -> anyhow::Result<String> {
+    let target = Window::all()?
+        .into_iter()
+        .find(|w| w.is_focused().unwrap_or(false) && !w.is_minimized().unwrap_or(false))
+        .ok_or_else(|| anyhow::anyhow!(NO_ACTIVE_WINDOW))?;
+    let image = target.capture_image()?;
     save_capture(dir, &image)
 }
 

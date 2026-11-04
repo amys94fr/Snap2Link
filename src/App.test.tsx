@@ -4,13 +4,27 @@ import { invoke } from "@tauri-apps/api/core";
 import App from "./App";
 import { useAppStore } from "./store/appStore";
 
+const CONFIG = {
+  hotkey: "Ctrl+PrintScreen",
+  retention_days: 30,
+  auto_delete: true,
+  profiles: [{ hotkey: "Ctrl+PrintScreen", mode: "ask", after: "ask" }],
+  last_choice: {},
+  language: "auto",
+  notify_link: true,
+};
+
 beforeEach(() => {
-  useAppStore.setState({ page: "wizard", isAuthenticated: false });
+  useAppStore.setState({
+    page: "wizard",
+    category: "capture",
+    isAuthenticated: false,
+  });
   vi.mocked(invoke).mockImplementation(async (cmd: string) => {
     if (cmd === "is_authenticated") return false;
     if (cmd === "get_account_email") return "user@example.com";
     if (cmd === "get_config") {
-      return { hotkey: "Ctrl+PrintScreen", retention_days: 30, auto_delete: true };
+      return CONFIG;
     }
     return undefined;
   });
@@ -35,7 +49,7 @@ describe("<App /> routing", () => {
       if (cmd === "is_authenticated") return true;
       if (cmd === "get_account_email") return "user@example.com";
       if (cmd === "get_config") {
-        return { hotkey: "Ctrl+PrintScreen", retention_days: 30, auto_delete: true };
+        return CONFIG;
       }
       return undefined;
     });
@@ -44,17 +58,19 @@ describe("<App /> routing", () => {
     render(<App />);
     await waitFor(() =>
       expect(
-        screen.getByRole("heading", { name: /^settings$/i }),
+        screen.getByRole("heading", { name: /^capture$/i }),
       ).toBeInTheDocument(),
     );
   });
 
-  it("renders the AboutWindow when authenticated and page=about", async () => {
+  it("opens the About category when the tray asks for it", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
       if (cmd === "is_authenticated") return true;
+      if (cmd === "get_config") return CONFIG;
       return undefined;
     });
-    useAppStore.setState({ page: "about", isAuthenticated: true });
+    useAppStore.getState().setAuthenticated(true);
+    useAppStore.getState().setPage("about");
 
     render(<App />);
     await waitFor(() =>
@@ -62,6 +78,6 @@ describe("<App /> routing", () => {
         screen.getByRole("heading", { name: /snap2link/i }),
       ).toBeInTheDocument(),
     );
-    expect(screen.getByText(/version 1\.0\.0/i)).toBeInTheDocument();
+    expect(screen.getByText(/^version \d+\.\d+\.\d+$/i)).toBeInTheDocument();
   });
 });
