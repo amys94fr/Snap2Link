@@ -558,11 +558,16 @@ describe("guests", () => {
     expect(await nonce()).not.toBe(await nonce());
   });
 
-  it("ends in a plain page when no app catches the navigation", async () => {
-    const response = await call("/guest/done?turnstile=abc");
+  it("keeps the result in the fragment, away from the server", async () => {
+    const page = await (await call("/guest")).text();
+    expect(page).toContain('"/guest/done#"');
+    expect(page).not.toContain('"/guest/done?"');
+  });
+
+  it("ends in a plain page when no app stops the navigation", async () => {
+    const response = await call("/guest/done");
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(await response.text()).not.toContain("abc");
   });
 });
 

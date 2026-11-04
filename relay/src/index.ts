@@ -210,7 +210,8 @@ async function handleGuest(request: Request, env: Env): Promise<Response> {
 /**
  * Opened by the app in a window of its own. The page has no text to translate
  * and no link to the app: it ends by going to `/guest/done`, a navigation the
- * app catches, so the page needs no access to the app.
+ * app reads, so the page needs no access to the app. The result is in the
+ * fragment, which a browser never sends: it stays out of requests and logs.
  */
 function guestPage(env: Env): Response {
   const nonce = randomToken();
@@ -232,7 +233,7 @@ body { margin: 0; min-height: 100vh; display: grid; place-items: center; }
 <div id="challenge"></div>
 <script nonce="${nonce}">
 const finish = (name, value) =>
-  location.replace("/guest/done?" + new URLSearchParams({ [name]: value }));
+  location.replace("/guest/done#" + new URLSearchParams({ [name]: value }));
 function start() {
   turnstile.render("#challenge", {
     ...${options},
@@ -264,7 +265,7 @@ function start() {
   );
 }
 
-/** The app stops the navigation before it gets here. A browser ends up here. */
+/** What's left on screen if the app doesn't stop the navigation in time. */
 function guestDone(): Response {
   return new Response("You can close this window.\n", {
     headers: {

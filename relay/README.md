@@ -8,7 +8,7 @@ The app ships no secret: anything it contained could be extracted. Each install 
 
 ### `GET /guest`
 
-The page the app opens in its own window. It runs Turnstile, then goes to `/guest/done?turnstile=<token>` or `/guest/done?error=<code>`. The app catches that navigation and keeps the token, so the page has no access to the app.
+The page the app opens in its own window. It runs Turnstile, then goes to `/guest/done#turnstile=<token>` or `/guest/done#error=<code>`. The app reads that navigation and keeps the token, so the page has no access to the app. The result is in the fragment, so it never reaches the server or its logs.
 
 ### `POST /v1/guests`
 
