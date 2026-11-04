@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "snap2link-relay",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "ef10db43-da4a-4a29-a53a-6d07c9eea85f",
       "migrations_dir": "migrations"
     }
   ],
