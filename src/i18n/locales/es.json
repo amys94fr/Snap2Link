@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "Captura una región de la pantalla y obtén al instante\nun enlace para compartir de Google Drive.",
-  "wizard.welcome.btn": "Empezar",
+  "wizard.welcome.subtitle": "Captura tu pantalla y obtén al instante\nun enlace que puedes pegar donde quieras.",
+  "wizard.welcome.no_account": "Empezar sin cuenta",
+  "wizard.welcome.no_account_hint": "Los enlaces duran 6 horas, hasta 5 capturas al día.",
+  "wizard.welcome.drive": "Usar mi Google Drive",
 
   "wizard.connect.title": "Conectar Google Drive",
   "wizard.connect.body": "Snap2Link necesita acceso a tu Google Drive\npara guardar tus capturas.\n\nSe creará automáticamente una carpeta «Snap2Link».",
@@ -19,6 +21,9 @@
   "settings.saved": "Guardado automáticamente",
   "settings.active_host": "Alojamiento activo",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "Sin cuenta",
+  "settings.host.not_connected": "No conectado",
 
   "settings.nav.capture": "Captura",
   "settings.nav.hosting": "Alojamiento",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "Con «Preguntar», tu última elección aparece preseleccionada. No se comparte nada sin tu confirmación.",
   "settings.memory.reset": "Restablecer",
 
-  "settings.hosting.desc": "Tus capturas se envían a tu Google Drive.",
+  "settings.hosting.desc": "Solo se muestran las opciones del alojamiento elegido.",
+  "settings.hosting.choose": "Dónde alojar las capturas",
+  "settings.hosting.snap2link_card": "No necesitas cuenta. Enlaces temporales.",
+  "settings.hosting.drive_card": "Tu cuenta de Google. Las capturas permanecen en tu Drive.",
+  "settings.hosting.plan": "Tu plan",
+  "settings.hosting.plan_hint": "5 capturas al día, hasta 5 MB cada una. Pronto habrá cuentas y más capturas.",
+  "settings.hosting.link_life": "Los enlaces duran 6 horas",
+  "settings.hosting.link_life_hint": "Pasado este plazo, el enlace deja de funcionar y la captura se borra.",
+  "settings.hosting.connect": "Conectar Google Drive",
+  "settings.hosting.connect_hint": "Conecta tu cuenta para enviar las capturas a tu Drive.",
   "settings.hosting.account": "Cuenta de Google",
   "settings.hosting.account_hint": "Las capturas se envían a esta cuenta.",
   "settings.hosting.disconnect": "Cerrar sesión",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "Las capturas se eliminan después de {days} días",
 
   "about.version": "Versión {version}",
-  "about.description": "Captura una región de la pantalla y obtén al instante un enlace para compartir de Google Drive.",
+  "about.description": "Captura tu pantalla y obtén al instante un enlace que puedes pegar donde quieras.",
   "about.author": "Autor",
   "about.github": "GitHub",
   "about.license": "Licencia",
@@ -159,7 +173,7 @@
   "annotator.done": "Listo",
   "annotator.loading": "Cargando captura…",
 
-  "uploader.title": "Subiendo a Google Drive",
+  "uploader.title": "Subiendo tu captura",
   "uploader.subtitle": "Un momento, el enlace va camino de tu portapapeles.",
   "uploader.success.title": "¡Enlace copiado!",
   "uploader.success.subtitle": "El enlace de la captura está en tu portapapeles.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "El enlace ya no funciona.",
   "uploader.delete_failed.title": "No se pudo eliminar la captura",
   "uploader.delete_failed.subtitle": "El enlace sigue funcionando. Inténtalo de nuevo.",
+  "uploader.error.daily_limit": "Límite diario alcanzado: 5 capturas al día sin cuenta.",
+  "uploader.error.service_busy": "El alojamiento de Snap2Link está saturado en este momento. Inténtalo más tarde.",
+  "uploader.error.too_large": "Esta captura es demasiado grande para el alojamiento de Snap2Link (5 MB como máximo).",
+  "uploader.error.unreachable": "No se puede conectar con el alojamiento de Snap2Link. Comprueba tu conexión.",
+  "uploader.error.drive_not_connected": "Google Drive no está conectado. Conéctalo en los ajustes.",
 
   "oauth.success.title": "¡Google Drive conectado!",
   "oauth.success.body": "Puedes cerrar esta pestaña\ny volver a Snap2Link.",

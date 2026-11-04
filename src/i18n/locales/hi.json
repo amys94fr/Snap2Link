@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "स्क्रीन का कोई क्षेत्र कैप्चर करें और तुरंत\nGoogle Drive शेयर लिंक पाएँ।",
-  "wizard.welcome.btn": "शुरू करें",
+  "wizard.welcome.subtitle": "अपनी स्क्रीन कैप्चर करें और तुरंत\nऐसा लिंक पाएँ जिसे कहीं भी पेस्ट किया जा सके।",
+  "wizard.welcome.no_account": "बिना खाते के शुरू करें",
+  "wizard.welcome.no_account_hint": "लिंक 6 घंटे तक काम करते हैं, हर दिन 5 कैप्चर तक।",
+  "wizard.welcome.drive": "मेरा Google Drive इस्तेमाल करें",
 
   "wizard.connect.title": "Google Drive कनेक्ट करें",
   "wizard.connect.body": "आपके स्क्रीनशॉट सेव करने के लिए Snap2Link को\nआपके Google Drive का एक्सेस चाहिए।\n\n'Snap2Link' नाम का फ़ोल्डर अपने आप बन जाएगा।",
@@ -19,6 +21,9 @@
   "settings.saved": "अपने आप सेव हो गया",
   "settings.active_host": "एक्टिव होस्टिंग",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "बिना खाते के",
+  "settings.host.not_connected": "कनेक्ट नहीं है",
 
   "settings.nav.capture": "कैप्चर",
   "settings.nav.hosting": "होस्टिंग",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "“पूछें” के साथ, आपका पिछला विकल्प पहले से चुना रहता है। आपकी पुष्टि के बिना कुछ भी शेयर नहीं होता।",
   "settings.memory.reset": "रीसेट करें",
 
-  "settings.hosting.desc": "आपके कैप्चर आपके Google Drive पर भेजे जाते हैं।",
+  "settings.hosting.desc": "सिर्फ़ चुनी गई होस्टिंग के विकल्प दिखाए जाते हैं।",
+  "settings.hosting.choose": "कैप्चर कहाँ होस्ट करें",
+  "settings.hosting.snap2link_card": "खाते की ज़रूरत नहीं। अस्थायी लिंक।",
+  "settings.hosting.drive_card": "आपका Google खाता। कैप्चर आपके Drive में ही रहते हैं।",
+  "settings.hosting.plan": "आपका प्लान",
+  "settings.hosting.plan_hint": "हर दिन 5 कैप्चर, हर कैप्चर 5 MB तक। खाते और ज़्यादा कैप्चर जल्द आ रहे हैं।",
+  "settings.hosting.link_life": "लिंक 6 घंटे तक काम करते हैं",
+  "settings.hosting.link_life_hint": "इस अवधि के बाद, लिंक काम करना बंद कर देता है और कैप्चर मिटा दिया जाता है।",
+  "settings.hosting.connect": "Google Drive कनेक्ट करें",
+  "settings.hosting.connect_hint": "कैप्चर अपने Drive पर भेजने के लिए अपना खाता कनेक्ट करें।",
   "settings.hosting.account": "Google खाता",
   "settings.hosting.account_hint": "कैप्चर इसी खाते में भेजे जाते हैं।",
   "settings.hosting.disconnect": "साइन आउट करें",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "कैप्चर {days} दिन बाद हटा दिए जाते हैं",
 
   "about.version": "वर्शन {version}",
-  "about.description": "स्क्रीन का कोई क्षेत्र कैप्चर करें और तुरंत Google Drive शेयर लिंक पाएँ।",
+  "about.description": "अपनी स्क्रीन कैप्चर करें और तुरंत ऐसा लिंक पाएँ जिसे कहीं भी पेस्ट किया जा सके।",
   "about.author": "डेवलपर",
   "about.github": "GitHub",
   "about.license": "लाइसेंस",
@@ -159,7 +173,7 @@
   "annotator.done": "हो गया",
   "annotator.loading": "कैप्चर लोड हो रहा है…",
 
-  "uploader.title": "Google Drive पर अपलोड हो रहा है",
+  "uploader.title": "आपका कैप्चर अपलोड हो रहा है",
   "uploader.subtitle": "बस एक पल, लिंक आपके क्लिपबोर्ड पर आ रहा है।",
   "uploader.success.title": "लिंक कॉपी हो गया!",
   "uploader.success.subtitle": "स्क्रीनशॉट का लिंक आपके क्लिपबोर्ड में है।",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "लिंक अब काम नहीं करता।",
   "uploader.delete_failed.title": "कैप्चर नहीं हटाया जा सका",
   "uploader.delete_failed.subtitle": "लिंक अब भी काम करता है। फिर से कोशिश करें।",
+  "uploader.error.daily_limit": "दैनिक सीमा पूरी हो गई: बिना खाते के हर दिन 5 कैप्चर।",
+  "uploader.error.service_busy": "Snap2Link होस्टिंग अभी व्यस्त है। बाद में फिर से कोशिश करें।",
+  "uploader.error.too_large": "यह कैप्चर Snap2Link होस्टिंग के लिए बहुत बड़ा है (अधिकतम 5 MB)।",
+  "uploader.error.unreachable": "Snap2Link होस्टिंग तक नहीं पहुँचा जा सका। अपना कनेक्शन जाँचें।",
+  "uploader.error.drive_not_connected": "Google Drive कनेक्ट नहीं है। इसे सेटिंग्स में कनेक्ट करें।",
 
   "oauth.success.title": "Google Drive कनेक्ट हो गया!",
   "oauth.success.body": "अब आप यह टैब बंद करके\nSnap2Link पर लौट सकते हैं।",

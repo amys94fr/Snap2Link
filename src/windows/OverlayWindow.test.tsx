@@ -252,6 +252,30 @@ describe("<OverlayWindow />", () => {
     expect(invoke).toHaveBeenCalledWith("hide_toast");
   });
 
+  it.each([
+    ["relay_daily_limit", /daily limit reached/i],
+    ["relay_service_busy", /busy right now/i],
+    ["relay_too_large", /too large/i],
+    ["relay_unreachable", /can't be reached/i],
+    ["drive_not_connected", /isn't connected/i],
+  ])("explains %s in plain words", async (code, message) => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") throw code;
+      return undefined;
+    });
+
+    render(<OverlayWindow />);
+    dragRegion();
+    fireEvent.click(await screen.findByTestId("prompt-save"));
+
+    await waitFor(() => {
+      expect(sendNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringMatching(message) }),
+      );
+    });
+  });
+
   // ────────────────────────────────────────────────────────────────────
   // Shortcuts set in advance
   // ────────────────────────────────────────────────────────────────────

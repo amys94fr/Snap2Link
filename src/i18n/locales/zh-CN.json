@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "框选屏幕区域截图，\n立即获得 Google Drive 分享链接。",
-  "wizard.welcome.btn": "开始使用",
+  "wizard.welcome.subtitle": "截取屏幕，\n立即获得可粘贴到任何地方的链接。",
+  "wizard.welcome.no_account": "无需账号，直接开始",
+  "wizard.welcome.no_account_hint": "链接有效期 6 小时，每天最多 5 张截图。",
+  "wizard.welcome.drive": "使用我的 Google Drive",
 
   "wizard.connect.title": "连接 Google Drive",
   "wizard.connect.body": "Snap2Link 需要访问你的 Google Drive\n以保存截图。\n\n将自动创建“Snap2Link”文件夹。",
@@ -19,6 +21,9 @@
   "settings.saved": "已自动保存",
   "settings.active_host": "当前托管服务",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "无账号",
+  "settings.host.not_connected": "未连接",
 
   "settings.nav.capture": "截图",
   "settings.nav.hosting": "托管",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "选择“询问”时，会预选你上次的选择。未经你确认，不会分享任何内容。",
   "settings.memory.reset": "重置",
 
-  "settings.hosting.desc": "你的截图会上传到你的 Google Drive。",
+  "settings.hosting.desc": "仅显示所选托管服务的选项。",
+  "settings.hosting.choose": "选择截图的托管位置",
+  "settings.hosting.snap2link_card": "无需账号，链接临时有效。",
+  "settings.hosting.drive_card": "使用你的 Google 账号，截图保留在你的 Drive 中。",
+  "settings.hosting.plan": "你的套餐",
+  "settings.hosting.plan_hint": "每天 5 张截图，每张最大 5 MB。账号功能和更多截图额度即将推出。",
+  "settings.hosting.link_life": "链接有效期 6 小时",
+  "settings.hosting.link_life_hint": "超过此期限后，链接将失效，截图也会被清除。",
+  "settings.hosting.connect": "连接 Google Drive",
+  "settings.hosting.connect_hint": "连接你的账号，即可将截图上传到你的 Drive。",
   "settings.hosting.account": "Google 账号",
   "settings.hosting.account_hint": "截图会上传到此账号。",
   "settings.hosting.disconnect": "退出登录",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "截图将在 {days} 天后删除",
 
   "about.version": "版本 {version}",
-  "about.description": "框选屏幕区域截图，立即获得 Google Drive 分享链接。",
+  "about.description": "截取屏幕，立即获得可粘贴到任何地方的链接。",
   "about.author": "作者",
   "about.github": "GitHub",
   "about.license": "许可证",
@@ -159,7 +173,7 @@
   "annotator.done": "完成",
   "annotator.loading": "正在加载截图…",
 
-  "uploader.title": "正在上传到 Google Drive",
+  "uploader.title": "正在上传你的截图",
   "uploader.subtitle": "请稍候，链接马上就到你的剪贴板。",
   "uploader.success.title": "链接已复制！",
   "uploader.success.subtitle": "截图链接已在你的剪贴板中。",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "链接已失效。",
   "uploader.delete_failed.title": "无法删除截图",
   "uploader.delete_failed.subtitle": "链接仍然有效，请重试。",
+  "uploader.error.daily_limit": "已达每日上限：无账号时每天最多 5 张截图。",
+  "uploader.error.service_busy": "Snap2Link 托管服务当前繁忙，请稍后重试。",
+  "uploader.error.too_large": "此截图过大，超出 Snap2Link 托管服务的限制（最大 5 MB）。",
+  "uploader.error.unreachable": "无法连接 Snap2Link 托管服务，请检查网络连接。",
+  "uploader.error.drive_not_connected": "Google Drive 未连接，请在设置中连接。",
 
   "oauth.success.title": "Google Drive 已连接！",
   "oauth.success.body": "你可以关闭此标签页\n并返回 Snap2Link。",

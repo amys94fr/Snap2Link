@@ -21,7 +21,6 @@ interface Props {
   /** Runs an update check as soon as the General page opens (tray entry). */
   autoCheckUpdates?: boolean;
   onUpdatesChecked?: () => void;
-  onSignedOut?: () => void;
 }
 
 const CATEGORIES: ReadonlyArray<{
@@ -38,7 +37,6 @@ const CATEGORIES: ReadonlyArray<{
 export function SettingsWindow({
   autoCheckUpdates,
   onUpdatesChecked,
-  onSignedOut,
 }: Props) {
   const { category, setCategory } = useAppStore();
   const [config, setConfig] = useState<AppConfig | null>(null);
@@ -52,6 +50,7 @@ export function SettingsWindow({
   }, []);
 
   const current = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
+  const onDrive = config?.hosting === "drive";
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 text-sm">
@@ -99,10 +98,18 @@ export function SettingsWindow({
           <span className="text-xs text-slate-300">
             {t("settings.active_host")}
           </span>
-          <span className="font-semibold">{t("settings.host.drive")}</span>
-          <span dir="ltr" className="text-xs text-slate-300 truncate text-start">
-            {email}
+          <span className="font-semibold">
+            {t(onDrive ? "settings.host.drive" : "settings.host.snap2link")}
           </span>
+          {onDrive && email ? (
+            <span dir="ltr" className="text-xs text-slate-300 truncate text-start">
+              {email}
+            </span>
+          ) : (
+            <span className="text-xs text-slate-300">
+              {t(onDrive ? "settings.host.not_connected" : "settings.host.no_account")}
+            </span>
+          )}
         </button>
       </nav>
 
@@ -133,7 +140,6 @@ export function SettingsWindow({
                 onConfig={setConfig}
                 email={email}
                 onEmail={setEmail}
-                onSignedOut={() => onSignedOut?.()}
               />
             )}
             {current.id === "general" && (

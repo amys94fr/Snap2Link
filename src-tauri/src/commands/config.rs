@@ -13,7 +13,9 @@ use std::fs;
 use std::path::Path;
 use tauri::{AppHandle, Emitter};
 
-use crate::utils::{app_data_dir, config_path_in, ensure_private_dir, write_private_file};
+use crate::utils::{
+    app_data_dir, config_path_in, ensure_private_dir, token_path_in, write_private_file,
+};
 
 pub const DEFAULT_HOTKEY: &str = "Ctrl+PrintScreen";
 pub const DEFAULT_RETENTION_DAYS: u32 = 30;
@@ -21,6 +23,15 @@ pub const MIN_RETENTION_DAYS: u32 = 1;
 pub const MAX_RETENTION_DAYS: u32 = 3650;
 pub const MAX_PROFILES: usize = 3;
 pub const LANGUAGE_AUTO: &str = "auto";
+pub const DEFAULT_RELAY_URL: &str = "https://i.snap2link.app";
+
+/// Where captures are sent.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum Hosting {
+    Snap2link,
+    Drive,
+}
 
 /// What a shortcut captures. `Ask` opens the overlay on the last mode used.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -97,6 +108,12 @@ pub struct AppConfig {
     pub language: String,
     #[serde(default = "default_true")]
     pub notify_link: bool,
+    /// Set when the file is loaded if it isn't saved yet, see `load_config_from`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hosting: Option<Hosting>,
+    /// Own relay, for forks. Only set by editing config.json for now.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relay_url: Option<String>,
 }
 
 fn default_language() -> String {
@@ -126,12 +143,34 @@ impl Default for AppConfig {
             last_choice: LastChoice::default(),
             language: default_language(),
             notify_link: true,
+            hosting: None,
+            relay_url: None,
         }
         .normalized()
     }
 }
 
+fn is_relay_url(url: &str) -> bool {
+    ["https://", "http://localhost", "http://127.0.0.1"]
+        .iter()
+        .any(|prefix| url.starts_with(prefix))
+}
+
 impl AppConfig {
+    pub fn hosting(&self) -> Hosting {
+        self.hosting.unwrap_or(Hosting::Snap2link)
+    }
+
+    /// Plain HTTP is only accepted on this machine: captures can be private.
+    pub fn relay_url(&self) -> String {
+        self.relay_url
+            .as_deref()
+            .filter(|url| is_relay_url(url))
+            .unwrap_or(DEFAULT_RELAY_URL)
+            .trim_end_matches('/')
+            .to_string()
+    }
+
     /// Guarantees at least one profile, at most `MAX_PROFILES`, and keeps the
     /// legacy `hotkey` field equal to the first one.
     fn normalized(mut self) -> Self {
@@ -154,12 +193,27 @@ pub fn clamp_retention(days: u32) -> u32 {
 
 pub fn load_config_from(dir: &Path) -> AppConfig {
     let path = config_path_in(dir);
-    match fs::read_to_string(&path) {
+    let mut cfg = match fs::read_to_string(&path) {
         Ok(text) => serde_json::from_str::<AppConfig>(&text)
             .map(AppConfig::normalized)
             .unwrap_or_default(),
         Err(_) => AppConfig::default(),
+    };
+    // Installs from before hosting existed are connected to Drive: they stay
+    // on it. Everyone else starts without an account.
+    if cfg.hosting.is_none() {
+        cfg.hosting = Some(if token_path_in(dir).exists() {
+            Hosting::Drive
+        } else {
+            Hosting::Snap2link
+        });
     }
+    cfg
+}
+
+/// Nothing saved yet: neither settings nor a Google sign-in.
+pub fn is_first_run_in(dir: &Path) -> bool {
+    !config_path_in(dir).exists() && !token_path_in(dir).exists()
 }
 
 pub fn save_config_to(dir: &Path, cfg: &AppConfig) -> anyhow::Result<()> {
@@ -260,6 +314,16 @@ pub fn reset_last_choice() -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn is_first_run() -> bool {
+    is_first_run_in(&app_data_dir())
+}
+
+#[tauri::command]
+pub fn set_hosting(hosting: Hosting) -> Result<(), String> {
+    update_config(|cfg| cfg.hosting = Some(hosting)).map(|_| ())
+}
+
+#[tauri::command]
 pub fn save_notify_link(enabled: bool) -> Result<(), String> {
     update_config(|cfg| cfg.notify_link = enabled).map(|_| ())
 }
@@ -294,6 +358,57 @@ mod tests {
             mode,
             after,
         }
+    }
+
+    fn new_install() -> AppConfig {
+        AppConfig {
+            hosting: Some(Hosting::Snap2link),
+            ..AppConfig::default()
+        }
+    }
+
+    #[test]
+    fn a_new_install_starts_without_an_account() {
+        let tmp = TempDir::new().unwrap();
+        assert!(is_first_run_in(tmp.path()));
+        assert_eq!(load_config_from(tmp.path()).hosting(), Hosting::Snap2link);
+    }
+
+    #[test]
+    fn an_install_signed_in_to_google_stays_on_drive() {
+        let tmp = TempDir::new().unwrap();
+        std::fs::write(tmp.path().join("token.json"), "{}").unwrap();
+        std::fs::write(tmp.path().join("config.json"), r#"{ "hotkey": "Ctrl+S" }"#).unwrap();
+        assert!(!is_first_run_in(tmp.path()));
+        assert_eq!(load_config_from(tmp.path()).hosting(), Hosting::Drive);
+    }
+
+    #[test]
+    fn a_chosen_host_wins_over_the_token() {
+        let tmp = TempDir::new().unwrap();
+        std::fs::write(tmp.path().join("token.json"), "{}").unwrap();
+        std::fs::write(tmp.path().join("config.json"), r#"{ "hosting": "snap2link" }"#).unwrap();
+        assert_eq!(load_config_from(tmp.path()).hosting(), Hosting::Snap2link);
+    }
+
+    #[test]
+    fn saved_settings_end_the_first_run() {
+        let tmp = TempDir::new().unwrap();
+        save_config_to(tmp.path(), &AppConfig::default()).unwrap();
+        assert!(!is_first_run_in(tmp.path()));
+    }
+
+    #[test]
+    fn relay_url_falls_back_on_the_default_and_refuses_plain_http() {
+        let with = |url: &str| AppConfig {
+            relay_url: Some(url.into()),
+            ..AppConfig::default()
+        };
+        assert_eq!(AppConfig::default().relay_url(), DEFAULT_RELAY_URL);
+        assert_eq!(with("https://relay.example/").relay_url(), "https://relay.example");
+        assert_eq!(with("http://localhost:8787").relay_url(), "http://localhost:8787");
+        assert_eq!(with("http://relay.example").relay_url(), DEFAULT_RELAY_URL);
+        assert_eq!(with("ftp://relay.example").relay_url(), DEFAULT_RELAY_URL);
     }
 
     #[test]
@@ -400,7 +515,7 @@ mod tests {
     fn load_returns_defaults_when_file_missing() {
         let tmp = TempDir::new().unwrap();
         let cfg = load_config_from(tmp.path());
-        assert_eq!(cfg, AppConfig::default());
+        assert_eq!(cfg, new_install());
     }
 
     #[test]
@@ -418,6 +533,8 @@ mod tests {
             },
             language: "fr".into(),
             notify_link: false,
+            hosting: Some(Hosting::Drive),
+            relay_url: Some("https://relay.example".into()),
         };
         save_config_to(tmp.path(), &cfg).unwrap();
         let loaded = load_config_from(tmp.path());
@@ -437,7 +554,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         std::fs::write(tmp.path().join("config.json"), "{ not json }").unwrap();
         let cfg = load_config_from(tmp.path());
-        assert_eq!(cfg, AppConfig::default());
+        assert_eq!(cfg, new_install());
     }
 
     #[test]

@@ -3,12 +3,12 @@
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 use std::fs;
-use std::sync::Mutex;
+use std::path::Path;
 use tauri::AppHandle;
 
 use crate::commands::auth::get_valid_token;
 use crate::commands::config::{load_config_from, save_config_to};
-use crate::utils::{app_data_dir, resolve_capture_path};
+use crate::utils::app_data_dir;
 
 /// Drive file ids are URL-safe base64-ish tokens. Anything else in
 /// config.json was tampered with and must not reach a Drive query.
@@ -19,10 +19,6 @@ pub fn is_valid_drive_id(id: &str) -> bool {
 }
 
 pub const FOLDER_NAME: &str = "Snap2Link";
-
-/// Drive id of the latest upload. The toast's Delete button can only reach
-/// this file, so that window never gets to name an arbitrary Drive file.
-static LAST_UPLOAD: Mutex<Option<String>> = Mutex::new(None);
 
 /// Public direct-download share link for a Drive file ID.
 /// Uses the canonical `drive.google.com/uc` form (no `/u/0/`) so a viewer
@@ -113,17 +109,13 @@ async fn get_or_create_folder(token: &str, app: &AppHandle) -> Result<String, St
     Ok(folder_id)
 }
 
-#[tauri::command]
-pub async fn upload_screenshot(
-    app: AppHandle,
-    image_path: String,
-) -> Result<String, String> {
-    let image_path = resolve_capture_path(&app, &image_path)?;
-    let token = get_valid_token(&app).await?;
-    let folder_id = get_or_create_folder(&token, &app).await?;
+/// Uploads a capture, makes it public and returns its Drive id.
+pub async fn upload_file(app: &AppHandle, image_path: &Path) -> Result<String, String> {
+    let token = get_valid_token(app).await?;
+    let folder_id = get_or_create_folder(&token, app).await?;
 
     let filename = screenshot_filename(Utc::now());
-    let bytes = fs::read(&image_path).map_err(|e| e.to_string())?;
+    let bytes = fs::read(image_path).map_err(|e| e.to_string())?;
 
     let metadata = serde_json::json!({
         "name": filename,
@@ -201,47 +193,25 @@ pub async fn upload_screenshot(
         ));
     }
 
-    let _ = fs::remove_file(&image_path);
-
-    if let Ok(mut last) = LAST_UPLOAD.lock() {
-        *last = Some(file_id.clone());
-    }
-
-    Ok(share_link_for(&file_id))
+    Ok(file_id)
 }
 
-/// Deletes the capture that was just shared: its link stops working at once.
-#[tauri::command]
-pub async fn delete_last_upload(app: AppHandle) -> Result<(), String> {
-    let file_id = LAST_UPLOAD
-        .lock()
-        .map_err(|_| "upload state poisoned".to_string())?
-        .take()
-        .ok_or_else(|| "nothing to delete".to_string())?;
+pub async fn delete_file(app: &AppHandle, file_id: &str) -> Result<(), String> {
+    let token = get_valid_token(app).await?;
+    let response = reqwest::Client::new()
+        .delete(format!(
+            "https://www.googleapis.com/drive/v3/files/{file_id}"
+        ))
+        .bearer_auth(&token)
+        .send()
+        .await
+        .map_err(|e| format!("delete network error: {e}"))?;
 
-    let failure = match get_valid_token(&app).await {
-        Ok(token) => {
-            let resp = reqwest::Client::new()
-                .delete(format!(
-                    "https://www.googleapis.com/drive/v3/files/{file_id}"
-                ))
-                .bearer_auth(&token)
-                .send()
-                .await;
-            match resp {
-                Ok(r) if r.status().is_success() => return Ok(()),
-                Ok(r) => format!("Drive delete failed ({})", r.status()),
-                Err(e) => format!("delete network error: {e}"),
-            }
-        }
-        Err(e) => e,
-    };
-
-    // Keep the id so the user can retry from the same toast.
-    if let Ok(mut last) = LAST_UPLOAD.lock() {
-        last.get_or_insert(file_id);
+    if response.status().is_success() {
+        Ok(())
+    } else {
+        Err(format!("Drive delete failed ({})", response.status()))
     }
-    Err(failure)
 }
 
 fn truncate(s: &str, max: usize) -> String {

@@ -20,7 +20,7 @@ It needs Node.js 20 or newer on the machine where Claude Code runs. Snap2Link it
 
 ## Security
 
-- The tool only accepts Snap2Link links, and only follows redirects to Google Drive hosts. A link can't make it reach another address or your local network.
+- The tool only accepts Snap2Link links, and only follows redirects to Google Drive hosts. Links on `i.snap2link.app` are never redirected. A link can't make it reach another address or your local network.
 - It keeps a file only if it's a real PNG of 50 MB at most.
 - Text in a capture is treated as data, not as instructions.
 

@@ -6,18 +6,33 @@ import { enable } from "@tauri-apps/plugin-autostart";
 import { SetupWizard } from "./SetupWizard";
 
 describe("<SetupWizard />", () => {
+  it("can start without any account", async () => {
+    const onComplete = vi.fn();
+    const user = userEvent.setup();
+    render(<SetupWizard onComplete={onComplete} />);
+
+    await user.click(
+      screen.getByRole("button", { name: /start without an account/i }),
+    );
+
+    expect(invoke).toHaveBeenCalledWith("set_hosting", { hosting: "snap2link" });
+    expect(invoke).not.toHaveBeenCalledWith("authenticate");
+    expect(enable).toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
   it("starts on the welcome step", () => {
     render(<SetupWizard onComplete={() => {}} />);
     expect(screen.getByRole("heading", { name: /snap2link/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /get started/i }),
+      screen.getByRole("button", { name: /use my google drive/i }),
     ).toBeInTheDocument();
   });
 
-  it("advances to the connect step when 'Get Started' is clicked", async () => {
+  it("advances to the connect step for Google Drive", async () => {
     const user = userEvent.setup();
     render(<SetupWizard onComplete={() => {}} />);
-    await user.click(screen.getByRole("button", { name: /get started/i }));
+    await user.click(screen.getByRole("button", { name: /use my google drive/i }));
     expect(
       screen.getByRole("heading", { name: /connect google drive/i }),
     ).toBeInTheDocument();
@@ -30,7 +45,7 @@ describe("<SetupWizard />", () => {
     vi.mocked(invoke).mockResolvedValueOnce("user@example.com" as never);
     const user = userEvent.setup();
     render(<SetupWizard onComplete={() => {}} />);
-    await user.click(screen.getByRole("button", { name: /get started/i }));
+    await user.click(screen.getByRole("button", { name: /use my google drive/i }));
     await user.click(
       screen.getByRole("button", { name: /connect google drive/i }),
     );
@@ -41,7 +56,7 @@ describe("<SetupWizard />", () => {
     vi.mocked(invoke).mockResolvedValueOnce("user@example.com" as never);
     const user = userEvent.setup();
     render(<SetupWizard onComplete={() => {}} />);
-    await user.click(screen.getByRole("button", { name: /get started/i }));
+    await user.click(screen.getByRole("button", { name: /use my google drive/i }));
     await user.click(
       screen.getByRole("button", { name: /connect google drive/i }),
     );
@@ -56,7 +71,7 @@ describe("<SetupWizard />", () => {
     vi.mocked(invoke).mockRejectedValueOnce(new Error("network down"));
     const user = userEvent.setup();
     render(<SetupWizard onComplete={() => {}} />);
-    await user.click(screen.getByRole("button", { name: /get started/i }));
+    await user.click(screen.getByRole("button", { name: /use my google drive/i }));
     await user.click(
       screen.getByRole("button", { name: /connect google drive/i }),
     );
@@ -72,7 +87,7 @@ describe("<SetupWizard />", () => {
     const onComplete = vi.fn();
     const user = userEvent.setup();
     render(<SetupWizard onComplete={onComplete} />);
-    await user.click(screen.getByRole("button", { name: /get started/i }));
+    await user.click(screen.getByRole("button", { name: /use my google drive/i }));
     await user.click(
       screen.getByRole("button", { name: /connect google drive/i }),
     );

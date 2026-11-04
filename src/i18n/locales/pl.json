@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "Zrób zrzut obszaru ekranu i od razu otrzymaj\nlink do udostępniania z Google Drive.",
-  "wizard.welcome.btn": "Rozpocznij",
+  "wizard.welcome.subtitle": "Zrób zrzut ekranu i od razu otrzymaj\nlink, który wkleisz w dowolnym miejscu.",
+  "wizard.welcome.no_account": "Rozpocznij bez konta",
+  "wizard.welcome.no_account_hint": "Linki działają przez 6 godzin, do 5 zrzutów dziennie.",
+  "wizard.welcome.drive": "Użyj mojego Google Drive",
 
   "wizard.connect.title": "Połącz z Google Drive",
   "wizard.connect.body": "Snap2Link potrzebuje dostępu do Twojego Google Drive,\naby przechowywać zrzuty.\n\nFolder „Snap2Link” zostanie utworzony automatycznie.",
@@ -19,6 +21,9 @@
   "settings.saved": "Zapisywane automatycznie",
   "settings.active_host": "Aktywny hosting",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "Bez konta",
+  "settings.host.not_connected": "Nie połączono",
 
   "settings.nav.capture": "Zrzuty",
   "settings.nav.hosting": "Hosting",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "Przy opcji „Pytaj” Twój ostatni wybór jest zaznaczony domyślnie. Nic nie zostanie udostępnione bez Twojego potwierdzenia.",
   "settings.memory.reset": "Resetuj",
 
-  "settings.hosting.desc": "Zrzuty trafiają na Twój Google Drive.",
+  "settings.hosting.desc": "Widoczne są tylko opcje wybranego hostingu.",
+  "settings.hosting.choose": "Gdzie hostować zrzuty",
+  "settings.hosting.snap2link_card": "Konto nie jest potrzebne. Linki tymczasowe.",
+  "settings.hosting.drive_card": "Twoje konto Google. Zrzuty zostają na Twoim Drive.",
+  "settings.hosting.plan": "Twój plan",
+  "settings.hosting.plan_hint": "5 zrzutów dziennie, do 5 MB każdy. Wkrótce pojawią się konta i większy limit zrzutów.",
+  "settings.hosting.link_life": "Linki działają przez 6 godzin",
+  "settings.hosting.link_life_hint": "Po tym czasie link przestaje działać, a zrzut jest usuwany.",
+  "settings.hosting.connect": "Połącz z Google Drive",
+  "settings.hosting.connect_hint": "Połącz konto, aby wysyłać zrzuty na Twój Drive.",
   "settings.hosting.account": "Konto Google",
   "settings.hosting.account_hint": "Zrzuty trafiają na to konto.",
   "settings.hosting.disconnect": "Wyloguj",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "Czas przechowywania zrzutów (dni): {days}",
 
   "about.version": "Wersja {version}",
-  "about.description": "Zrób zrzut obszaru ekranu i od razu otrzymaj link do udostępniania z Google Drive.",
+  "about.description": "Zrób zrzut ekranu i od razu otrzymaj link, który wkleisz w dowolnym miejscu.",
   "about.author": "Autor",
   "about.github": "GitHub",
   "about.license": "Licencja",
@@ -159,7 +173,7 @@
   "annotator.done": "Gotowe",
   "annotator.loading": "Ładowanie zrzutu…",
 
-  "uploader.title": "Przesyłanie na Google Drive",
+  "uploader.title": "Przesyłanie zrzutu",
   "uploader.subtitle": "Chwileczkę, link jest już w drodze do schowka.",
   "uploader.success.title": "Link skopiowany!",
   "uploader.success.subtitle": "Link do zrzutu jest w schowku.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "Link już nie działa.",
   "uploader.delete_failed.title": "Nie udało się usunąć zrzutu",
   "uploader.delete_failed.subtitle": "Link nadal działa. Spróbuj ponownie.",
+  "uploader.error.daily_limit": "Osiągnięto dzienny limit: 5 zrzutów dziennie bez konta.",
+  "uploader.error.service_busy": "Hosting Snap2Link jest teraz przeciążony. Spróbuj później.",
+  "uploader.error.too_large": "Ten zrzut jest za duży dla hostingu Snap2Link (maksymalnie 5 MB).",
+  "uploader.error.unreachable": "Nie można połączyć się z hostingiem Snap2Link. Sprawdź połączenie.",
+  "uploader.error.drive_not_connected": "Nie połączono z Google Drive. Połącz go w ustawieniach.",
 
   "oauth.success.title": "Połączono z Google Drive!",
   "oauth.success.body": "Możesz zamknąć tę kartę\ni wrócić do Snap2Link.",

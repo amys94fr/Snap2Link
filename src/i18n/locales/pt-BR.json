@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "Capture uma região da tela e receba na hora\num link de compartilhamento do Google Drive.",
-  "wizard.welcome.btn": "Começar",
+  "wizard.welcome.subtitle": "Capture sua tela e receba na hora\num link para colar onde quiser.",
+  "wizard.welcome.no_account": "Começar sem conta",
+  "wizard.welcome.no_account_hint": "Os links duram 6 horas, até 5 capturas por dia.",
+  "wizard.welcome.drive": "Usar meu Google Drive",
 
   "wizard.connect.title": "Conectar o Google Drive",
   "wizard.connect.body": "O Snap2Link precisa de acesso ao seu Google Drive\npara armazenar suas capturas.\n\nUma pasta “Snap2Link” será criada automaticamente.",
@@ -19,6 +21,9 @@
   "settings.saved": "Salvo automaticamente",
   "settings.active_host": "Hospedagem ativa",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "Sem conta",
+  "settings.host.not_connected": "Não conectado",
 
   "settings.nav.capture": "Captura",
   "settings.nav.hosting": "Hospedagem",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "Com “Perguntar”, sua última escolha vem pré-selecionada. Nada é compartilhado sem a sua confirmação.",
   "settings.memory.reset": "Redefinir",
 
-  "settings.hosting.desc": "Suas capturas são enviadas para o seu Google Drive.",
+  "settings.hosting.desc": "Só as opções da hospedagem escolhida são exibidas.",
+  "settings.hosting.choose": "Onde hospedar as capturas",
+  "settings.hosting.snap2link_card": "Não precisa de conta. Links temporários.",
+  "settings.hosting.drive_card": "Sua conta do Google. As capturas ficam no seu Drive.",
+  "settings.hosting.plan": "Seu plano",
+  "settings.hosting.plan_hint": "5 capturas por dia, até 5 MB cada. Contas e mais capturas em breve.",
+  "settings.hosting.link_life": "Os links duram 6 horas",
+  "settings.hosting.link_life_hint": "Depois desse prazo, o link para de funcionar e a captura é apagada.",
+  "settings.hosting.connect": "Conectar o Google Drive",
+  "settings.hosting.connect_hint": "Conecte sua conta para enviar as capturas para o seu Drive.",
   "settings.hosting.account": "Conta do Google",
   "settings.hosting.account_hint": "As capturas são enviadas para esta conta.",
   "settings.hosting.disconnect": "Sair",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "As capturas são excluídas após {days} dias",
 
   "about.version": "Versão {version}",
-  "about.description": "Capture uma região da tela e receba na hora um link de compartilhamento do Google Drive.",
+  "about.description": "Capture sua tela e receba na hora um link para colar onde quiser.",
   "about.author": "Autor",
   "about.github": "GitHub",
   "about.license": "Licença",
@@ -159,7 +173,7 @@
   "annotator.done": "Concluído",
   "annotator.loading": "Carregando captura…",
 
-  "uploader.title": "Enviando para o Google Drive",
+  "uploader.title": "Enviando sua captura",
   "uploader.subtitle": "Só um instante, o link está a caminho da sua área de transferência.",
   "uploader.success.title": "Link copiado!",
   "uploader.success.subtitle": "O link da captura está na sua área de transferência.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "O link não funciona mais.",
   "uploader.delete_failed.title": "Não foi possível excluir a captura",
   "uploader.delete_failed.subtitle": "O link continua funcionando. Tente novamente.",
+  "uploader.error.daily_limit": "Limite diário atingido: 5 capturas por dia sem conta.",
+  "uploader.error.service_busy": "A hospedagem do Snap2Link está sobrecarregada no momento. Tente novamente mais tarde.",
+  "uploader.error.too_large": "Esta captura é grande demais para a hospedagem do Snap2Link (máximo de 5 MB).",
+  "uploader.error.unreachable": "Não foi possível acessar a hospedagem do Snap2Link. Verifique sua conexão.",
+  "uploader.error.drive_not_connected": "O Google Drive não está conectado. Conecte-o nas configurações.",
 
   "oauth.success.title": "Google Drive conectado!",
   "oauth.success.body": "Você pode fechar esta aba\ne voltar ao Snap2Link.",

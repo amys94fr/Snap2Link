@@ -25,6 +25,8 @@ const COMMANDS: &[&str] = &[
     "save_notify_link",
     "get_language",
     "set_language",
+    "is_first_run",
+    "set_hosting",
     "show_toast",
     "hide_toast",
     "debug_log",

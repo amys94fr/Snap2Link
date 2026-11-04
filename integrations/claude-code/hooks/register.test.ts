@@ -2,6 +2,7 @@ import { expect, test } from 'claude-code/testing'
 
 const LINK = 'https://drive.google.com/uc?id=abc_123&export=download'
 const OTHER = 'https://drive.google.com/uc?id=def_456&export=download'
+const RELAY = 'https://i.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ.png'
 
 function engine(on: Parameters<Parameters<typeof test>[1]>[1]) {
   const seen = { toasts: [] as string[], context: undefined as readonly string[] | undefined }
@@ -42,4 +43,13 @@ test('a prompt without a link is left alone', async ($, on) => {
 
   expect(seen.toasts).toEqual([])
   expect(seen.context).toBe(undefined)
+})
+
+test('a relay link is detected too', async ($, on) => {
+  const seen = engine(on)
+
+  await $.prompt.submit({ text: `look at ${RELAY} please` })
+
+  expect(seen.toasts).toEqual(['Snap2Link capture detected'])
+  expect(seen.context?.[0]).toContain(RELAY)
 })

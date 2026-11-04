@@ -20,7 +20,7 @@ describe("<AboutWindow />", () => {
     render(<AboutWindow />);
     expect(
       screen.getByText(
-        /capture a screen region and instantly get a google drive share link/i,
+        /capture your screen and instantly get a link/i,
       ),
     ).toBeInTheDocument();
   });

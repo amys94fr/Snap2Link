@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { MAX_CAPTURE_BYTES, downloadCapture, isShareLink } from "./capture";
 
 const LINK = "https://drive.google.com/uc?id=abc_123-XYZ&export=download";
+const RELAY_LINK = "https://i.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ.png";
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 
 const redirectTo = (location: string) => new Response(null, { status: 303, headers: { location } });
@@ -21,6 +22,21 @@ function fetcherOf(...responses: Response[]) {
 describe("isShareLink", () => {
   it("accepts the link the app generates", () => {
     expect(isShareLink(LINK)).toBe(true);
+  });
+
+  it("accepts a relay link", () => {
+    expect(isShareLink(RELAY_LINK)).toBe(true);
+  });
+
+  it.each([
+    ["plain http", "http://i.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ.png"],
+    ["another subdomain", "https://x.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ.png"],
+    ["a lookalike host", "https://i.snap2link.app.evil.example/4fGh2kLm9PqRs7TuVw1XyZ.png"],
+    ["a short id", "https://i.snap2link.app/abc.png"],
+    ["a path", "https://i.snap2link.app/v1/4fGh2kLm9PqRs7TuVw1XyZ.png"],
+    ["a query", "https://i.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ.png?a=1"],
+  ])("rejects a relay link with %s", (_, url) => {
+    expect(isShareLink(url)).toBe(false);
   });
 
   it.each([
@@ -100,5 +116,23 @@ describe("downloadCapture", () => {
     const { fetcher } = fetcherOf(new Response(body));
 
     await expect(downloadCapture(LINK, fetcher)).rejects.toThrow("too large");
+  });
+});
+
+describe("downloadCapture from the relay", () => {
+  it("reads the image", async () => {
+    const { fetcher, urls } = fetcherOf(new Response(PNG));
+    expect(await downloadCapture(RELAY_LINK, fetcher)).toEqual(PNG);
+    expect(urls).toEqual([RELAY_LINK]);
+  });
+
+  it("says when the link has expired", async () => {
+    const { fetcher } = fetcherOf(new Response(null, { status: 404 }));
+    await expect(downloadCapture(RELAY_LINK, fetcher)).rejects.toThrow(/deleted or expired/);
+  });
+
+  it("refuses a redirect to anything but Google Drive", async () => {
+    const { fetcher } = fetcherOf(redirectTo("https://evil.example/x.png"));
+    await expect(downloadCapture(RELAY_LINK, fetcher)).rejects.toThrow(/Refused a redirect/);
   });
 });

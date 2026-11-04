@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "Chụp một vùng màn hình và nhận ngay\nliên kết chia sẻ Google Drive.",
-  "wizard.welcome.btn": "Bắt đầu",
+  "wizard.welcome.subtitle": "Chụp màn hình và nhận ngay\nliên kết để dán ở bất cứ đâu.",
+  "wizard.welcome.no_account": "Bắt đầu không cần tài khoản",
+  "wizard.welcome.no_account_hint": "Liên kết có hiệu lực trong 6 giờ, tối đa 5 ảnh chụp mỗi ngày.",
+  "wizard.welcome.drive": "Dùng Google Drive của tôi",
 
   "wizard.connect.title": "Kết nối Google Drive",
   "wizard.connect.body": "Snap2Link cần quyền truy cập Google Drive của bạn\nđể lưu ảnh chụp màn hình.\n\nThư mục “Snap2Link” sẽ được tạo tự động.",
@@ -19,6 +21,9 @@
   "settings.saved": "Đã tự động lưu",
   "settings.active_host": "Dịch vụ lưu trữ đang dùng",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "Không có tài khoản",
+  "settings.host.not_connected": "Chưa kết nối",
 
   "settings.nav.capture": "Chụp",
   "settings.nav.hosting": "Lưu trữ",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "Với “Hỏi”, lựa chọn gần nhất của bạn sẽ được chọn sẵn. Không có gì được chia sẻ khi chưa có xác nhận của bạn.",
   "settings.memory.reset": "Đặt lại",
 
-  "settings.hosting.desc": "Ảnh chụp của bạn được gửi đến Google Drive của bạn.",
+  "settings.hosting.desc": "Chỉ hiển thị các tùy chọn của dịch vụ lưu trữ đã chọn.",
+  "settings.hosting.choose": "Nơi lưu trữ ảnh chụp",
+  "settings.hosting.snap2link_card": "Không cần tài khoản. Liên kết tạm thời.",
+  "settings.hosting.drive_card": "Tài khoản Google của bạn. Ảnh chụp được giữ trong Drive của bạn.",
+  "settings.hosting.plan": "Gói của bạn",
+  "settings.hosting.plan_hint": "5 ảnh chụp mỗi ngày, tối đa 5 MB mỗi ảnh. Tài khoản và thêm lượt chụp sắp ra mắt.",
+  "settings.hosting.link_life": "Liên kết có hiệu lực trong 6 giờ",
+  "settings.hosting.link_life_hint": "Sau thời gian này, liên kết ngừng hoạt động và ảnh chụp bị xóa.",
+  "settings.hosting.connect": "Kết nối Google Drive",
+  "settings.hosting.connect_hint": "Kết nối tài khoản của bạn để gửi ảnh chụp đến Drive.",
   "settings.hosting.account": "Tài khoản Google",
   "settings.hosting.account_hint": "Ảnh chụp được gửi đến tài khoản này.",
   "settings.hosting.disconnect": "Đăng xuất",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "Ảnh chụp sẽ bị xóa sau {days} ngày",
 
   "about.version": "Phiên bản {version}",
-  "about.description": "Chụp một vùng màn hình và nhận ngay liên kết chia sẻ Google Drive.",
+  "about.description": "Chụp màn hình và nhận ngay liên kết để dán ở bất cứ đâu.",
   "about.author": "Tác giả",
   "about.github": "GitHub",
   "about.license": "Giấy phép",
@@ -159,7 +173,7 @@
   "annotator.done": "Xong",
   "annotator.loading": "Đang tải ảnh chụp…",
 
-  "uploader.title": "Đang tải lên Google Drive",
+  "uploader.title": "Đang tải lên ảnh chụp của bạn",
   "uploader.subtitle": "Chờ một chút, liên kết sắp được đưa vào bộ nhớ tạm của bạn.",
   "uploader.success.title": "Đã sao chép liên kết!",
   "uploader.success.subtitle": "Liên kết ảnh chụp màn hình đã có trong bộ nhớ tạm.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "Liên kết không còn hoạt động.",
   "uploader.delete_failed.title": "Không thể xóa ảnh chụp",
   "uploader.delete_failed.subtitle": "Liên kết vẫn hoạt động. Hãy thử lại.",
+  "uploader.error.daily_limit": "Đã đạt giới hạn hằng ngày: 5 ảnh chụp mỗi ngày khi không có tài khoản.",
+  "uploader.error.service_busy": "Dịch vụ lưu trữ Snap2Link hiện đang bận. Hãy thử lại sau.",
+  "uploader.error.too_large": "Ảnh chụp này quá lớn cho dịch vụ lưu trữ Snap2Link (tối đa 5 MB).",
+  "uploader.error.unreachable": "Không thể kết nối đến dịch vụ lưu trữ Snap2Link. Hãy kiểm tra kết nối của bạn.",
+  "uploader.error.drive_not_connected": "Google Drive chưa được kết nối. Hãy kết nối trong phần cài đặt.",
 
   "oauth.success.title": "Đã kết nối Google Drive!",
   "oauth.success.body": "Bạn có thể đóng tab này\nvà quay lại Snap2Link.",

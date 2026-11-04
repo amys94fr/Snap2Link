@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "Cattura un’area dello schermo e ottieni subito\nun link di condivisione di Google Drive.",
-  "wizard.welcome.btn": "Inizia",
+  "wizard.welcome.subtitle": "Cattura lo schermo e ottieni subito\nun link da incollare ovunque.",
+  "wizard.welcome.no_account": "Inizia senza account",
+  "wizard.welcome.no_account_hint": "I link durano 6 ore, fino a 5 screenshot al giorno.",
+  "wizard.welcome.drive": "Usa il mio Google Drive",
 
   "wizard.connect.title": "Connetti Google Drive",
   "wizard.connect.body": "Snap2Link ha bisogno di accedere al tuo Google Drive\nper archiviare i tuoi screenshot.\n\nVerrà creata automaticamente una cartella «Snap2Link».",
@@ -19,6 +21,9 @@
   "settings.saved": "Salvato automaticamente",
   "settings.active_host": "Hosting attivo",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "Senza account",
+  "settings.host.not_connected": "Non connesso",
 
   "settings.nav.capture": "Screenshot",
   "settings.nav.hosting": "Hosting",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "Con «Chiedi», l’ultima scelta è preselezionata. Nulla viene condiviso senza la tua conferma.",
   "settings.memory.reset": "Reimposta",
 
-  "settings.hosting.desc": "I tuoi screenshot vengono inviati al tuo Google Drive.",
+  "settings.hosting.desc": "Vengono mostrate solo le opzioni dell’hosting scelto.",
+  "settings.hosting.choose": "Dove ospitare gli screenshot",
+  "settings.hosting.snap2link_card": "Nessun account richiesto. Link temporanei.",
+  "settings.hosting.drive_card": "Il tuo account Google. Gli screenshot restano nel tuo Drive.",
+  "settings.hosting.plan": "Il tuo piano",
+  "settings.hosting.plan_hint": "5 screenshot al giorno, fino a 5 MB ciascuno. Account e più screenshot in arrivo.",
+  "settings.hosting.link_life": "I link durano 6 ore",
+  "settings.hosting.link_life_hint": "Trascorso questo periodo, il link smette di funzionare e lo screenshot viene cancellato.",
+  "settings.hosting.connect": "Connetti Google Drive",
+  "settings.hosting.connect_hint": "Connetti il tuo account per inviare gli screenshot al tuo Drive.",
   "settings.hosting.account": "Account Google",
   "settings.hosting.account_hint": "Gli screenshot vengono inviati a questo account.",
   "settings.hosting.disconnect": "Esci",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "Gli screenshot vengono eliminati dopo {days} giorni",
 
   "about.version": "Versione {version}",
-  "about.description": "Cattura un’area dello schermo e ottieni subito un link di condivisione di Google Drive.",
+  "about.description": "Cattura lo schermo e ottieni subito un link da incollare ovunque.",
   "about.author": "Autore",
   "about.github": "GitHub",
   "about.license": "Licenza",
@@ -159,7 +173,7 @@
   "annotator.done": "Fine",
   "annotator.loading": "Caricamento dello screenshot…",
 
-  "uploader.title": "Caricamento su Google Drive",
+  "uploader.title": "Caricamento dello screenshot",
   "uploader.subtitle": "Un attimo, il link sta arrivando negli appunti.",
   "uploader.success.title": "Link copiato!",
   "uploader.success.subtitle": "Il link dello screenshot è negli appunti.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "Il link non funziona più.",
   "uploader.delete_failed.title": "Impossibile eliminare lo screenshot",
   "uploader.delete_failed.subtitle": "Il link funziona ancora. Riprova.",
+  "uploader.error.daily_limit": "Limite giornaliero raggiunto: 5 screenshot al giorno senza account.",
+  "uploader.error.service_busy": "L’hosting di Snap2Link è sovraccarico in questo momento. Riprova più tardi.",
+  "uploader.error.too_large": "Questo screenshot è troppo grande per l’hosting di Snap2Link (massimo 5 MB).",
+  "uploader.error.unreachable": "Impossibile raggiungere l’hosting di Snap2Link. Controlla la connessione.",
+  "uploader.error.drive_not_connected": "Google Drive non è connesso. Connettilo nelle impostazioni.",
 
   "oauth.success.title": "Google Drive connesso!",
   "oauth.success.body": "Puoi chiudere questa scheda\ne tornare a Snap2Link.",

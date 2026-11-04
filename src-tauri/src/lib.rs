@@ -40,12 +40,14 @@ pub fn run() {
             commands::config::save_notify_link,
             commands::config::get_language,
             commands::config::set_language,
+            commands::config::is_first_run,
+            commands::config::set_hosting,
             commands::auth::is_authenticated,
             commands::auth::authenticate,
             commands::auth::get_account_email,
             commands::auth::disconnect,
-            commands::drive::upload_screenshot,
-            commands::drive::delete_last_upload,
+            commands::upload::upload_screenshot,
+            commands::upload::delete_last_upload,
             commands::screenshot::capture_region,
             commands::screenshot::capture_full_screen,
             commands::screenshot::capture_at_cursor,
@@ -87,11 +89,13 @@ pub fn run() {
                 eprintln!("[snap2link] global shortcuts failed: {e}");
             }
 
-            if !commands::auth::is_authenticated_inner() {
+            let on_drive = cfg.hosting() == commands::config::Hosting::Drive;
+            let connected = commands::auth::is_authenticated_inner();
+            if commands::config::is_first_run() || (on_drive && !connected) {
                 if let Some(window) = tauri::Manager::get_webview_window(app, "main") {
                     window.show().ok();
                 }
-            } else {
+            } else if on_drive {
                 let handle = app.handle().clone();
                 tauri::async_runtime::spawn(async move {
                     let _ = commands::drive::cleanup_old_screenshots_inner(&handle).await;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { enable } from "@tauri-apps/plugin-autostart";
 import { t } from "@/i18n";
+import type { Hosting } from "@/lib/config";
 import { APP_NAME } from "@/version";
 import logoUrl from "@/assets/logo.png";
 
@@ -31,7 +32,9 @@ export function SetupWizard({ onComplete }: Props) {
     }
   };
 
-  const handleFinish = async () => {
+  const finish = async (hosting: Hosting) => {
+    // Saving the choice is also what marks the first run as over.
+    await invoke("set_hosting", { hosting });
     try {
       await enable();
     } catch {
@@ -57,10 +60,20 @@ export function SetupWizard({ onComplete }: Props) {
           </p>
           <button
             type="button"
-            onClick={() => setStep("connect")}
-            className="btn-primary"
+            onClick={() => void finish("snap2link")}
+            className="btn-primary w-72"
           >
-            {t("wizard.welcome.btn")}
+            {t("wizard.welcome.no_account")}
+          </button>
+          <p className="text-xs text-slate-300 mt-2 mb-6">
+            {t("wizard.welcome.no_account_hint")}
+          </p>
+          <button
+            type="button"
+            onClick={() => setStep("connect")}
+            className="btn-secondary w-72"
+          >
+            {t("wizard.welcome.drive")}
           </button>
         </>
       )}
@@ -121,7 +134,7 @@ export function SetupWizard({ onComplete }: Props) {
           </p>
           <button
             type="button"
-            onClick={handleFinish}
+            onClick={() => void finish("drive")}
             className="btn-success"
           >
             {t("wizard.success.btn")}

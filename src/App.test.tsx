@@ -12,16 +12,17 @@ const CONFIG = {
   last_choice: {},
   language: "auto",
   notify_link: true,
+  hosting: "snap2link",
 };
 
 beforeEach(() => {
   useAppStore.setState({
     page: "wizard",
     category: "capture",
-    isAuthenticated: false,
+    setupDone: false,
   });
   vi.mocked(invoke).mockImplementation(async (cmd: string) => {
-    if (cmd === "is_authenticated") return false;
+    if (cmd === "is_first_run") return true;
     if (cmd === "get_account_email") return "user@example.com";
     if (cmd === "get_config") {
       return CONFIG;
@@ -31,29 +32,29 @@ beforeEach(() => {
 });
 
 describe("<App /> routing", () => {
-  it("renders the SetupWizard when not authenticated", async () => {
+  it("renders the SetupWizard on the first run", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
-      if (cmd === "is_authenticated") return false;
+      if (cmd === "is_first_run") return true;
       return undefined;
     });
     render(<App />);
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: /get started/i }),
+        screen.getByRole("button", { name: /start without an account/i }),
       ).toBeInTheDocument(),
     );
   });
 
-  it("renders the SettingsWindow when authenticated and page=settings", async () => {
+  it("renders the SettingsWindow once set up", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
-      if (cmd === "is_authenticated") return true;
+      if (cmd === "is_first_run") return false;
       if (cmd === "get_account_email") return "user@example.com";
       if (cmd === "get_config") {
         return CONFIG;
       }
       return undefined;
     });
-    useAppStore.setState({ page: "settings", isAuthenticated: true });
+    useAppStore.setState({ page: "settings", setupDone: true });
 
     render(<App />);
     await waitFor(() =>
@@ -65,11 +66,11 @@ describe("<App /> routing", () => {
 
   it("opens the About category when the tray asks for it", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
-      if (cmd === "is_authenticated") return true;
+      if (cmd === "is_first_run") return false;
       if (cmd === "get_config") return CONFIG;
       return undefined;
     });
-    useAppStore.getState().setAuthenticated(true);
+    useAppStore.getState().setSetupDone(true);
     useAppStore.getState().setPage("about");
 
     render(<App />);

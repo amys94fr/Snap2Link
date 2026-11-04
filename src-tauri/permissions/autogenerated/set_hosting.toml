@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-hosting"
+description = "Enables the set_hosting command without any pre-configured scope."
+commands.allow = ["set_hosting"]
+
+[[permission]]
+identifier = "deny-set-hosting"
+description = "Denies the set_hosting command without any pre-configured scope."
+commands.deny = ["set_hosting"]

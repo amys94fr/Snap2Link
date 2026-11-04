@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "Зробіть знімок області екрана й одразу отримайте\nпосилання на нього в Google Drive.",
-  "wizard.welcome.btn": "Почати",
+  "wizard.welcome.subtitle": "Зробіть знімок екрана й одразу отримайте\nпосилання, яке можна вставити будь-де.",
+  "wizard.welcome.no_account": "Почати без облікового запису",
+  "wizard.welcome.no_account_hint": "Посилання працюють 6 годин, до 5 знімків на день.",
+  "wizard.welcome.drive": "Використати мій Google Drive",
 
   "wizard.connect.title": "Підключіть Google Drive",
   "wizard.connect.body": "Snap2Link потрібен доступ до вашого Google Drive\nдля зберігання знімків.\n\nПапку «Snap2Link» буде створено автоматично.",
@@ -19,6 +21,9 @@
   "settings.saved": "Зберігається автоматично",
   "settings.active_host": "Активний хостинг",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "Без облікового запису",
+  "settings.host.not_connected": "Не підключено",
 
   "settings.nav.capture": "Знімки",
   "settings.nav.hosting": "Хостинг",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "У режимі «Запитати» ваш останній вибір позначено заздалегідь. Без вашого підтвердження нічого не публікується.",
   "settings.memory.reset": "Скинути",
 
-  "settings.hosting.desc": "Знімки надсилаються на ваш Google Drive.",
+  "settings.hosting.desc": "Показано лише параметри вибраного хостингу.",
+  "settings.hosting.choose": "Де розміщувати знімки",
+  "settings.hosting.snap2link_card": "Обліковий запис не потрібен. Тимчасові посилання.",
+  "settings.hosting.drive_card": "Ваш обліковий запис Google. Знімки залишаються на вашому Drive.",
+  "settings.hosting.plan": "Ваш тариф",
+  "settings.hosting.plan_hint": "5 знімків на день, до 5 МБ кожен. Незабаром з’являться облікові записи й більший ліміт знімків.",
+  "settings.hosting.link_life": "Посилання працюють 6 годин",
+  "settings.hosting.link_life_hint": "Після цього терміну посилання перестає працювати, а знімок видаляється.",
+  "settings.hosting.connect": "Підключити Google Drive",
+  "settings.hosting.connect_hint": "Підключіть обліковий запис, щоб надсилати знімки на ваш Drive.",
   "settings.hosting.account": "Обліковий запис Google",
   "settings.hosting.account_hint": "Знімки надсилаються в цей обліковий запис.",
   "settings.hosting.disconnect": "Вийти",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "Термін зберігання знімків (днів): {days}",
 
   "about.version": "Версія {version}",
-  "about.description": "Зробіть знімок області екрана й одразу отримайте посилання на нього в Google Drive.",
+  "about.description": "Зробіть знімок екрана й одразу отримайте посилання, яке можна вставити будь-де.",
   "about.author": "Автор",
   "about.github": "GitHub",
   "about.license": "Ліцензія",
@@ -159,7 +173,7 @@
   "annotator.done": "Готово",
   "annotator.loading": "Завантаження знімка…",
 
-  "uploader.title": "Завантаження на Google Drive",
+  "uploader.title": "Завантаження знімка",
   "uploader.subtitle": "Секунду, посилання вже прямує до буфера обміну.",
   "uploader.success.title": "Посилання скопійовано!",
   "uploader.success.subtitle": "Посилання на знімок у буфері обміну.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "Посилання більше не працює.",
   "uploader.delete_failed.title": "Не вдалося видалити знімок",
   "uploader.delete_failed.subtitle": "Посилання все ще працює. Спробуйте ще раз.",
+  "uploader.error.daily_limit": "Денний ліміт вичерпано: 5 знімків на день без облікового запису.",
+  "uploader.error.service_busy": "Хостинг Snap2Link зараз перевантажений. Спробуйте пізніше.",
+  "uploader.error.too_large": "Цей знімок завеликий для хостингу Snap2Link (максимум 5 МБ).",
+  "uploader.error.unreachable": "Не вдається підключитися до хостингу Snap2Link. Перевірте з’єднання.",
+  "uploader.error.drive_not_connected": "Google Drive не підключено. Підключіть його в налаштуваннях.",
 
   "oauth.success.title": "Google Drive підключено!",
   "oauth.success.body": "Можете закрити цю вкладку\nі повернутися до Snap2Link.",

@@ -1,6 +1,8 @@
 {
-  "wizard.welcome.subtitle": "화면 영역을 캡처하면 바로\nGoogle Drive 공유 링크가 생성됩니다.",
-  "wizard.welcome.btn": "시작하기",
+  "wizard.welcome.subtitle": "화면을 캡처하면 바로\n어디에나 붙여 넣을 수 있는 링크가 생성됩니다.",
+  "wizard.welcome.no_account": "계정 없이 시작하기",
+  "wizard.welcome.no_account_hint": "링크는 6시간 동안 유효하며, 캡처는 하루 최대 5개입니다.",
+  "wizard.welcome.drive": "내 Google Drive 사용",
 
   "wizard.connect.title": "Google Drive 연결",
   "wizard.connect.body": "Snap2Link가 스크린샷을 저장하려면\nGoogle Drive 접근 권한이 필요합니다.\n\n“Snap2Link” 폴더가 자동으로 생성됩니다.",
@@ -19,6 +21,9 @@
   "settings.saved": "자동으로 저장됨",
   "settings.active_host": "사용 중인 호스팅",
   "settings.host.drive": "Google Drive",
+  "settings.host.snap2link": "Snap2Link",
+  "settings.host.no_account": "계정 없음",
+  "settings.host.not_connected": "연결되지 않음",
 
   "settings.nav.capture": "캡처",
   "settings.nav.hosting": "호스팅",
@@ -61,7 +66,16 @@
   "settings.memory.desc": "“묻기”를 사용하면 마지막 선택이 미리 선택됩니다. 확인 없이는 아무것도 공유되지 않습니다.",
   "settings.memory.reset": "초기화",
 
-  "settings.hosting.desc": "캡처는 사용자의 Google Drive로 전송됩니다.",
+  "settings.hosting.desc": "선택한 호스팅의 옵션만 표시됩니다.",
+  "settings.hosting.choose": "캡처를 호스팅할 위치",
+  "settings.hosting.snap2link_card": "계정이 필요 없습니다. 임시 링크입니다.",
+  "settings.hosting.drive_card": "Google 계정을 사용합니다. 캡처는 Drive에 유지됩니다.",
+  "settings.hosting.plan": "내 요금제",
+  "settings.hosting.plan_hint": "하루 캡처 5개, 개당 최대 5MB. 계정과 더 많은 캡처가 곧 제공됩니다.",
+  "settings.hosting.link_life": "링크는 6시간 동안 유효합니다",
+  "settings.hosting.link_life_hint": "이 기간이 지나면 링크가 더 이상 작동하지 않고 캡처가 삭제됩니다.",
+  "settings.hosting.connect": "Google Drive 연결",
+  "settings.hosting.connect_hint": "계정을 연결하면 캡처를 Drive로 전송할 수 있습니다.",
   "settings.hosting.account": "Google 계정",
   "settings.hosting.account_hint": "캡처는 이 계정으로 전송됩니다.",
   "settings.hosting.disconnect": "로그아웃",
@@ -104,7 +118,7 @@
   "settings.delete_saved": "캡처는 {days}일 후 삭제됩니다",
 
   "about.version": "버전 {version}",
-  "about.description": "화면 영역을 캡처하면 바로 Google Drive 공유 링크가 생성됩니다.",
+  "about.description": "화면을 캡처하면 바로 어디에나 붙여 넣을 수 있는 링크가 생성됩니다.",
   "about.author": "제작자",
   "about.github": "GitHub",
   "about.license": "라이선스",
@@ -159,7 +173,7 @@
   "annotator.done": "완료",
   "annotator.loading": "캡처를 불러오는 중…",
 
-  "uploader.title": "Google Drive에 업로드 중",
+  "uploader.title": "캡처 업로드 중",
   "uploader.subtitle": "잠시만 기다려 주세요. 곧 링크가 클립보드에 복사됩니다.",
   "uploader.success.title": "링크 복사됨!",
   "uploader.success.subtitle": "스크린샷 링크가 클립보드에 있습니다.",
@@ -169,6 +183,11 @@
   "uploader.deleted.subtitle": "링크가 더 이상 작동하지 않습니다.",
   "uploader.delete_failed.title": "캡처를 삭제할 수 없습니다",
   "uploader.delete_failed.subtitle": "링크는 아직 작동합니다. 다시 시도하세요.",
+  "uploader.error.daily_limit": "일일 한도 도달: 계정 없이는 하루 5개까지 캡처할 수 있습니다.",
+  "uploader.error.service_busy": "지금은 Snap2Link 호스팅이 혼잡합니다. 나중에 다시 시도하세요.",
+  "uploader.error.too_large": "이 캡처는 Snap2Link 호스팅에 올리기에 너무 큽니다(최대 5MB).",
+  "uploader.error.unreachable": "Snap2Link 호스팅에 연결할 수 없습니다. 연결 상태를 확인하세요.",
+  "uploader.error.drive_not_connected": "Google Drive가 연결되어 있지 않습니다. 설정에서 연결하세요.",
 
   "oauth.success.title": "Google Drive가 연결되었습니다!",
   "oauth.success.body": "이 탭을 닫고\nSnap2Link로 돌아가셔도 됩니다.",

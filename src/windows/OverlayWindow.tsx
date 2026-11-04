@@ -51,6 +51,15 @@ interface CaptureRequest {
   last_after: LastAfter | null;
 }
 
+/** Upload failures Rust reports as codes, with what to show for each. */
+const UPLOAD_ERRORS: Record<string, string> = {
+  relay_daily_limit: "uploader.error.daily_limit",
+  relay_service_busy: "uploader.error.service_busy",
+  relay_too_large: "uploader.error.too_large",
+  relay_unreachable: "uploader.error.unreachable",
+  drive_not_connected: "uploader.error.drive_not_connected",
+};
+
 const ASK_EVERYTHING: CaptureRequest = {
   mode: "ask",
   after: "ask",
@@ -472,9 +481,10 @@ export function OverlayWindow() {
       dlog(`[overlay] upload FAILED: ${msg}`);
       void Promise.resolve(invoke("hide_toast")).catch(() => {});
       try {
+        const known = UPLOAD_ERRORS[msg];
         sendNotification({
           title: t("notify.error"),
-          body: msg.slice(0, 200),
+          body: known ? t(known) : msg.slice(0, 200),
         });
       } catch {
         /* ignored */
