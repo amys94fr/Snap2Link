@@ -95,6 +95,19 @@ The relay is MIT, like the rest of Snap2Link. For your own instance:
    pnpm exec wrangler deploy
    ```
 
+## Deployment of snap2link.app
+
+Workers Builds deploys `main`, with these settings:
+
+| Setting | Value |
+|---|---|
+| Root directory | `relay` |
+| Build command | `pnpm test` |
+| Deploy command | `pnpm exec wrangler deploy` |
+| Build watch paths | `relay/*` |
+
+The default build token can't write to D1, so a new migration has to be applied separately, before the code that needs it is deployed.
+
 ## Taking a capture down
 
 To also ban the guest that sent it, do this first, while the capture still exists:
