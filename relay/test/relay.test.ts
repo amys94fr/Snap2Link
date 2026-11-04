@@ -1,10 +1,14 @@
 import { env } from "cloudflare:workers";
 import { createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
 import {
-  ANONYMOUS_DAILY_LIMIT,
+  BLOCK_DAILY_LIMIT,
+  BLOCK_GUESTS_DAILY_LIMIT,
   GLOBAL_DAILY_LIMIT,
+  GLOBAL_GUESTS_DAILY_LIMIT,
+  GUEST_DAILY_LIMIT,
+  GUEST_LIFETIME_MS,
   LINK_LIFETIME_MS,
   MAX_CAPTURE_BYTES,
   MAX_STORED_BYTES,
@@ -12,6 +16,7 @@ import {
 import { purgeExpired, utcDay } from "../src/store";
 
 const BASE = "https://i.snap2link.app";
+const GUEST = "guest-token-used-by-most-tests";
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 function png(size = 64): Uint8Array<ArrayBuffer> {
@@ -29,12 +34,45 @@ async function call(path: string, init: RequestInit = {}): Promise<Response> {
   return response;
 }
 
-function upload(body: BodyInit = png(), ip = "203.0.113.7"): Promise<Response> {
+function upload(
+  body: BodyInit = png(),
+  ip = "203.0.113.7",
+  guest = GUEST,
+): Promise<Response> {
   return call("/v1/captures", {
     method: "POST",
     body,
-    headers: { "CF-Connecting-IP": ip },
+    headers: { "CF-Connecting-IP": ip, Authorization: `Bearer ${guest}` },
   });
+}
+
+async function sha256(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function addGuest(token: string, expiresAt = Date.now() + 60_000, banned = 0) {
+  await env.DB.prepare(
+    "INSERT INTO guests (token_hash, created_at, expires_at, banned) VALUES (?1, 0, ?2, ?3)",
+  )
+    .bind(await sha256(token), expiresAt, banned)
+    .run();
+}
+
+/** What Turnstile answers, for the next verifications. */
+function turnstileAnswers(answer: object | Error, status = 200) {
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async () => {
+    if (answer instanceof Error) throw answer;
+    return Response.json(answer, { status });
+  });
+}
+
+const PASSED = { success: true, hostname: "i.snap2link.app", action: "guest" };
+
+function askGuest(ip = "203.0.113.7", body: BodyInit = '{"turnstile":"solved"}') {
+  return call("/v1/guests", { method: "POST", body, headers: { "CF-Connecting-IP": ip } });
 }
 
 interface Created {
@@ -55,9 +93,15 @@ beforeEach(async () => {
   vi.useRealTimers();
   await env.DB.batch([
     env.DB.prepare("DELETE FROM captures"),
+    env.DB.prepare("DELETE FROM guests"),
     env.DB.prepare("DELETE FROM usage"),
     env.DB.prepare("UPDATE stats SET value = 0"),
   ]);
+  await addGuest(GUEST, Date.now() + GUEST_LIFETIME_MS);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("upload and read", () => {
@@ -204,60 +248,101 @@ describe("delete", () => {
 });
 
 describe("limits", () => {
-  it("stops an address at the daily limit, not another one", async () => {
-    for (let i = 0; i < ANONYMOUS_DAILY_LIMIT; i += 1) {
+  it("stops a guest at the daily limit, not another one", async () => {
+    for (let i = 0; i < GUEST_DAILY_LIMIT; i += 1) {
       expect((await upload()).status).toBe(201);
     }
     const refused = await upload();
     expect(refused.status).toBe(429);
     expect(await refused.json()).toEqual({ error: "daily_limit" });
 
-    expect((await upload(png(), "198.51.100.9")).status).toBe(201);
+    await addGuest("other");
+    expect((await upload(png(), "203.0.113.7", "other")).status).toBe(201);
   });
 
-  it("counts a whole IPv6 /64 as one address", async () => {
-    for (let i = 1; i <= ANONYMOUS_DAILY_LIMIT; i += 1) {
-      expect((await upload(png(), `2001:db8:1:2::${i}`)).status).toBe(201);
+  it("doesn't let a guest escape its limit by changing address", async () => {
+    for (let i = 0; i < GUEST_DAILY_LIMIT; i += 1) await upload();
+    expect((await upload(png(), "198.51.100.9")).status).toBe(429);
+  });
+
+  it("stops an address block, however many guests it has", async () => {
+    const guests = Math.ceil(BLOCK_DAILY_LIMIT / GUEST_DAILY_LIMIT) + 1;
+    let accepted = 0;
+    for (let g = 0; g < guests; g += 1) {
+      await addGuest(`guest-${g}`);
+      for (let i = 0; i < GUEST_DAILY_LIMIT; i += 1) {
+        const address = `2001:db8:1:2::${g + 1}:${i + 1}`;
+        const response = await upload(png(), address, `guest-${g}`);
+        if (response.status === 201) accepted += 1;
+      }
     }
-    expect((await upload(png(), "2001:db8:1:2:aaaa:bbbb:cccc:dddd")).status).toBe(429);
+    expect(accepted).toBe(BLOCK_DAILY_LIMIT);
 
-    expect((await upload(png(), "2001:db8:1:3::1")).status).toBe(201);
+    await addGuest("next-door");
+    expect((await upload(png(), "2001:db8:1:3::1", "next-door")).status).toBe(201);
   });
+
+  it("gives back the guest's place when its block refuses", async () => {
+    const day = utcDay(Date.now());
+    await upload();
+    const { results } = await env.DB.prepare("SELECT key FROM usage WHERE key LIKE 'ip:%'").all<{
+      key: string;
+    }>();
+    await env.DB.prepare("UPDATE usage SET count = ?1 WHERE key = ?2 AND day = ?3")
+      .bind(BLOCK_DAILY_LIMIT, results[0].key, day)
+      .run();
+
+    expect((await upload()).status).toBe(429);
+
+    const guest = await env.DB.prepare(
+      "SELECT count FROM usage WHERE key LIKE 'guest:%'",
+    ).first<{ count: number }>();
+    expect(guest?.count).toBe(1);
+  });
+
+  const blocksUsed = async () => {
+    const { results } = await env.DB.prepare(
+      "SELECT count FROM usage WHERE key LIKE 'ip:%'",
+    ).all<{ count: number }>();
+    return results.map((row) => row.count);
+  };
 
   it.each([
     ["uppercase", "2001:DB8:1:2::9"],
     ["leading zeros", "2001:0db8:0001:0002::9"],
     ["no compression", "2001:db8:1:2:0:0:0:9"],
+    ["another interface", "2001:db8:1:2:aaaa:bbbb:cccc:dddd"],
   ])("sees the same /64 written with %s", async (_, address) => {
-    for (let i = 1; i <= ANONYMOUS_DAILY_LIMIT; i += 1) {
-      await upload(png(), `2001:db8:1:2::${i}`);
-    }
-    expect((await upload(png(), address)).status).toBe(429);
+    await upload(png(), "2001:db8:1:2::1");
+    await upload(png(), address);
+    expect(await blocksUsed()).toEqual([2]);
   });
 
   it("finds the /64 when the compression reaches into it", async () => {
-    for (let i = 1; i <= ANONYMOUS_DAILY_LIMIT; i += 1) {
-      await upload(png(), `2001:db8:0:0:${i}::`);
-    }
-    expect((await upload(png(), "2001:db8::9")).status).toBe(429);
-    expect((await upload(png(), "2001:db8:0:1::9")).status).toBe(201);
+    await upload(png(), "2001:db8:0:0:1::");
+    await upload(png(), "2001:db8::9");
+    expect(await blocksUsed()).toEqual([2]);
+
+    await upload(png(), "2001:db8:0:1::9");
+    expect((await blocksUsed()).sort()).toEqual([1, 2]);
   });
 
   it("treats an IPv4 address in IPv6 form as the IPv4 address", async () => {
-    for (let i = 0; i < ANONYMOUS_DAILY_LIMIT; i += 1) await upload();
-    expect((await upload(png(), "::ffff:203.0.113.7")).status).toBe(429);
+    await upload();
+    await upload(png(), "::ffff:203.0.113.7");
+    expect(await blocksUsed()).toEqual([2]);
   });
 
   it("lets simultaneous uploads take only the places left", async () => {
     const results = await Promise.all(
-      Array.from({ length: ANONYMOUS_DAILY_LIMIT + 3 }, () => upload()),
+      Array.from({ length: GUEST_DAILY_LIMIT + 3 }, () => upload()),
     );
     const accepted = results.filter((r) => r.status === 201);
-    expect(accepted).toHaveLength(ANONYMOUS_DAILY_LIMIT);
+    expect(accepted).toHaveLength(GUEST_DAILY_LIMIT);
   });
 
   it("starts again the next UTC day", async () => {
-    for (let i = 0; i < ANONYMOUS_DAILY_LIMIT; i += 1) await upload();
+    for (let i = 0; i < GUEST_DAILY_LIMIT; i += 1) await upload();
     vi.useFakeTimers({ now: Date.now() + 24 * 60 * 60 * 1000 });
     expect((await upload()).status).toBe(201);
   });
@@ -271,10 +356,10 @@ describe("limits", () => {
     expect(refused.status).toBe(503);
     expect(await refused.json()).toEqual({ error: "service_busy" });
 
-    const owner = await env.DB.prepare("SELECT count FROM usage WHERE key != 'global'").first<{
-      count: number;
-    }>();
-    expect(owner?.count).toBe(0);
+    const owners = await env.DB.prepare(
+      "SELECT SUM(count) AS total FROM usage WHERE key != 'global'",
+    ).first<{ total: number }>();
+    expect(owners?.total).toBe(0);
   });
 
   it("refuses when storage is full and gives the places back", async () => {
@@ -298,6 +383,194 @@ describe("limits", () => {
   });
 });
 
+describe("guests", () => {
+  it("turns a passed challenge into a token that can upload", async () => {
+    const siteverify = turnstileAnswers(PASSED);
+
+    const response = await askGuest();
+    expect(response.status).toBe(201);
+    const { guest_token, expires_at } = await response.json<{
+      guest_token: string;
+      expires_at: string;
+    }>();
+
+    const [url, init] = siteverify.mock.calls[0];
+    expect(url).toContain("/turnstile/v0/siteverify");
+    expect(JSON.parse(init?.body as string)).toEqual({
+      secret: "test-secret",
+      response: "solved",
+    });
+    expect(new Date(expires_at).getTime()).toBeGreaterThan(Date.now());
+    expect((await upload(png(), "203.0.113.7", guest_token)).status).toBe(201);
+  });
+
+  it("never stores the token itself", async () => {
+    turnstileAnswers(PASSED);
+    const { guest_token } = await (await askGuest()).json<{ guest_token: string }>();
+    const stored = await env.DB.prepare("SELECT token_hash FROM guests WHERE token_hash = ?1")
+      .bind(guest_token)
+      .first();
+    expect(stored).toBeNull();
+  });
+
+  it.each([
+    ["a refused token", { success: false, "error-codes": ["invalid-input-response"] }],
+    ["a token already used", { success: false, "error-codes": ["timeout-or-duplicate"] }],
+    ["another site", { ...PASSED, hostname: "evil.example" }],
+    ["another purpose", { ...PASSED, action: "login" }],
+  ])("refuses %s", async (_, answer) => {
+    turnstileAnswers(answer);
+    const response = await askGuest();
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ error: "verification_failed" });
+
+    const guests = await env.DB.prepare("SELECT COUNT(*) AS total FROM guests").first<{
+      total: number;
+    }>();
+    expect(guests?.total).toBe(1);
+  });
+
+  it("doesn't count failed attempts against the address", async () => {
+    turnstileAnswers({ success: false });
+    for (let i = 0; i <= BLOCK_GUESTS_DAILY_LIMIT; i += 1) await askGuest();
+    vi.restoreAllMocks();
+    turnstileAnswers(PASSED);
+    expect((await askGuest()).status).toBe(201);
+  });
+
+  it.each([
+    ["is unreachable", new Error("network"), 200],
+    ["answers an error", {}, 500],
+    ["fails on its side", { success: false, "error-codes": ["internal-error"] }, 200],
+  ])("says so when Turnstile %s", async (_, answer, status) => {
+    turnstileAnswers(answer, status);
+    const response = await askGuest();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "verification_unavailable" });
+  });
+
+  it.each([
+    ["no body", ""],
+    ["invalid JSON", "{"],
+    ["null", "null"],
+    ["no token", "{}"],
+    ["a token of the wrong type", '{"turnstile":1}'],
+    ["an empty token", '{"turnstile":""}'],
+    ["an oversized body", JSON.stringify({ turnstile: "a".repeat(5000) })],
+  ])("refuses %s without asking Turnstile", async (_, body) => {
+    const siteverify = turnstileAnswers(PASSED);
+    expect((await askGuest("203.0.113.7", body)).status).toBe(400);
+    expect(siteverify).not.toHaveBeenCalled();
+  });
+
+  it("limits the guests an address can create", async () => {
+    turnstileAnswers(PASSED);
+    for (let i = 1; i <= BLOCK_GUESTS_DAILY_LIMIT; i += 1) {
+      expect((await askGuest(`2001:db8:1:2::${i}`)).status).toBe(201);
+    }
+    const refused = await askGuest("2001:db8:1:2::ffff");
+    expect(refused.status).toBe(429);
+    expect(await refused.json()).toEqual({ error: "daily_limit" });
+
+    expect((await askGuest("2001:db8:1:3::1")).status).toBe(201);
+  });
+
+  it("stops at the global limit of guests, without using the address's quota", async () => {
+    turnstileAnswers(PASSED);
+    await env.DB.prepare("INSERT INTO usage (key, day, count) VALUES ('global-guests', ?1, ?2)")
+      .bind(utcDay(Date.now()), GLOBAL_GUESTS_DAILY_LIMIT)
+      .run();
+
+    const refused = await askGuest();
+    expect(refused.status).toBe(503);
+    expect(await refused.json()).toEqual({ error: "service_busy" });
+
+    const address = await env.DB.prepare(
+      "SELECT SUM(count) AS total FROM usage WHERE key != 'global-guests'",
+    ).first<{ total: number }>();
+    expect(address?.total).toBe(0);
+  });
+
+  it.each([
+    ["no token", {}],
+    ["a wrong scheme", { Authorization: `Basic ${GUEST}` }],
+    ["an unknown token", { Authorization: "Bearer nobody" }],
+  ])("refuses an upload with %s", async (_, headers) => {
+    const response = await call("/v1/captures", { method: "POST", body: png(), headers });
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ error: "guest_required" });
+  });
+
+  it("asks an expired guest to get a new token", async () => {
+    await addGuest("old", Date.now() - 1);
+    const response = await upload(png(), "203.0.113.7", "old");
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ error: "guest_required" });
+  });
+
+  it("refuses a banned guest and stores nothing", async () => {
+    await addGuest("banned", Date.now() + 60_000, 1);
+    const response = await upload(png(), "203.0.113.7", "banned");
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ error: "guest_banned" });
+    expect(await storedBytes()).toBe(0);
+  });
+
+  it("can ban the guest behind a capture", async () => {
+    const { id } = await (await upload()).json<Created>();
+
+    await env.DB.prepare(
+      "UPDATE guests SET banned = 1 WHERE token_hash = (SELECT guest_hash FROM captures WHERE id = ?1)",
+    )
+      .bind(id)
+      .run();
+
+    expect((await upload()).status).toBe(403);
+  });
+
+  it("forgets expired guests, not the others", async () => {
+    await addGuest("old", Date.now() - 1);
+    await purgeExpired(storage, Date.now());
+    const { results } = await env.DB.prepare("SELECT token_hash FROM guests").all<{
+      token_hash: string;
+    }>();
+    expect(results).toEqual([{ token_hash: await sha256(GUEST) }]);
+  });
+
+  it("serves the challenge page with its key and strict headers", async () => {
+    const response = await call("/guest");
+    expect(response.headers.get("Content-Type")).toContain("text/html");
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+
+    const page = await response.text();
+    expect(page).toContain(env.TURNSTILE_SITEKEY);
+    expect(page).not.toContain("test-secret");
+
+    const policy = response.headers.get("Content-Security-Policy");
+    const nonce = /nonce="([0-9a-f]+)"/.exec(page)?.[1];
+    expect(policy).toContain(`'nonce-${nonce}'`);
+    expect(policy).toContain("frame-ancestors 'none'");
+  });
+
+  it("uses a new nonce each time", async () => {
+    const nonce = async () =>
+      /nonce="([0-9a-f]+)"/.exec(await (await call("/guest")).text())?.[1];
+    expect(await nonce()).not.toBe(await nonce());
+  });
+
+  it("keeps the result in the fragment, away from the server", async () => {
+    const page = await (await call("/guest")).text();
+    expect(page).toContain('"/guest/done#"');
+    expect(page).not.toContain('"/guest/done?"');
+  });
+
+  it("ends in a plain page when no app stops the navigation", async () => {
+    const response = await call("/guest/done");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+});
+
 describe("routing", () => {
   it("shows where to report a capture", async () => {
     const response = await call("/");
@@ -310,6 +583,8 @@ describe("routing", () => {
 
   it("refuses the wrong methods and unknown paths", async () => {
     expect((await call("/v1/captures")).status).toBe(405);
+    expect((await call("/v1/guests")).status).toBe(405);
+    expect((await call("/guest", { method: "POST" })).status).toBe(405);
     expect((await call(`/${"a".repeat(22)}.png`, { method: "POST" })).status).toBe(405);
     expect((await call("/../etc/passwd")).status).toBe(404);
     expect((await call("/short.png")).status).toBe(404);

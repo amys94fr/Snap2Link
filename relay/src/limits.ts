@@ -18,8 +18,23 @@ export const LINK_LIFETIME_MS = 6 * 60 * 60 * 1000;
 /** Largest accepted capture. */
 export const MAX_CAPTURE_BYTES = 5_000_000;
 
-/** Captures one address can send per UTC day without an account. */
-export const ANONYMOUS_DAILY_LIMIT = 5;
+/** Captures one guest can send per UTC day. */
+export const GUEST_DAILY_LIMIT = 5;
+
+/**
+ * Captures one address block can send per UTC day, whatever its guests. Above
+ * a guest's limit, so that an office behind one address keeps working.
+ */
+export const BLOCK_DAILY_LIMIT = 30;
+
+/** Guests one address block can create per UTC day. */
+export const BLOCK_GUESTS_DAILY_LIMIT = 10;
+
+/** Guests the whole service creates per UTC day. */
+export const GLOBAL_GUESTS_DAILY_LIMIT = 5_000;
+
+/** A guest has to pass the challenge again after this delay. */
+export const GUEST_LIFETIME_MS = 90 * 24 * 60 * 60 * 1000;
 
 /** Captures the whole service accepts per UTC day. */
 export const GLOBAL_DAILY_LIMIT = 3_000;
