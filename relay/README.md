@@ -41,7 +41,7 @@ All of them are in [`src/limits.ts`](src/limits.ts), which also explains how the
 
 ## Privacy
 
-Addresses are never stored. Quotas use a hash of the address that changes every UTC day. Images are removed at expiry, and a link stops working at that moment even if the cleanup job hasn't run.
+Addresses are never stored. Quotas use a hash of the address that changes every UTC day, and IPv6 addresses count per /64. Images are removed at expiry, and a link stops working at that moment even if the cleanup job hasn't run.
 
 ## Run it yourself
 
