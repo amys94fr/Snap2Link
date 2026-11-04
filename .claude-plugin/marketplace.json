@@ -1,0 +1,17 @@
+{
+  "name": "snap2link",
+  "owner": {
+    "name": "amys94fr",
+    "url": "https://github.com/amys94fr"
+  },
+  "metadata": {
+    "description": "Snap2Link plugins for AI coding tools."
+  },
+  "plugins": [
+    {
+      "name": "snap2link",
+      "source": "./integrations/claude-code",
+      "description": "Read Snap2Link screenshot links in Claude Code, including over SSH where image paste does not work."
+    }
+  ]
+}
