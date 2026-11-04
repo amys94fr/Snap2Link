@@ -36,20 +36,31 @@ setup below, every release is just:
 ```bash
 # 1. Bump version in package.json + src-tauri/Cargo.toml + src-tauri/tauri.conf.json
 # 2. Add a [X.Y.Z] section to CHANGELOG.md
-git add -A && git commit -m "Release vX.Y.Z"
+# 3. Merge that through a pull request: main is protected
+git switch main && git pull
 git tag vX.Y.Z
-git push origin main --tags
+git push origin vX.Y.Z
 ```
 
 The workflow then:
 
 1. Runs frontend + backend tests (release fails if anything is red).
 2. Restores `credentials.json` from a secret.
-3. Builds a signed Tauri bundle (Windows NSIS).
+3. Builds signed Tauri bundles for Windows, macOS and Linux.
 4. Generates `latest.json` from the freshly-signed `.exe`.
 5. Generates a release body from the matching `CHANGELOG.md` section.
-6. Creates the GitHub release with installer + `.sig` + `latest.json`.
-7. (Optional) submits a `wingetcreate update` PR to `microsoft/winget-pkgs`.
+6. Creates a **draft** GitHub release with the installers, `.sig` files and
+   `latest.json`.
+
+Nothing reaches users yet: drafts are private, and the updater reads
+`releases/latest`, which ignores them. Download the installers from the draft
+and test them. Then:
+
+- **It works:** publish the draft. Users get the update, and
+  [`winget.yml`](../.github/workflows/winget.yml) submits a `wingetcreate update`
+  PR to `microsoft/winget-pkgs` if `SUBMIT_WINGET` is set.
+- **It doesn't:** delete the draft, fix through a pull request, and release the
+  next patch version. The tag stays public, so don't reuse it.
 
 ### One-time secret setup
 
@@ -66,11 +77,11 @@ And one repo variable at <https://github.com/amys94fr/Snap2Link/settings/variabl
 
 | Variable | Value | Required |
 |---|---|---|
-| `SUBMIT_WINGET` | `true` to auto-submit a winget update PR after every release. | optional |
+| `SUBMIT_WINGET` | `true` to auto-submit a winget update PR when a release is published. | optional |
 
 ### Failure modes
 
-- The `submit-winget` job will fail (and the rest of the release will succeed)
+- The `Winget` workflow will fail (and the release itself is not affected)
   on the very first run because `wingetcreate update` requires the package to
   already exist in `microsoft/winget-pkgs`. Once the initial v1.0.0 PR is merged,
   this stops being an issue.
