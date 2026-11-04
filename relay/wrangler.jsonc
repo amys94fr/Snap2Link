@@ -1,0 +1,26 @@
+// Forks: change `routes`, `vars` and `database_id`, then follow the README.
+// `workers_dev` stays off so that the rate limiting rule can't be bypassed.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "snap2link-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": false,
+  "routes": [{ "pattern": "i.snap2link.app", "custom_domain": true }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "snap2link-relay",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "snap2link-relay" }],
+  "vars": {
+    "PUBLIC_URL": "https://i.snap2link.app",
+    "ABUSE_CONTACT": "abuse@snap2link.app"
+  },
+  // Links are refused the moment they expire: this only frees the space.
+  "triggers": { "crons": ["*/30 * * * *"] },
+  "observability": { "enabled": true }
+}
