@@ -1,0 +1,29 @@
+{
+  "name": "snap2link-relay",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Temporary image hosting for Snap2Link, on Cloudflare Workers and D1.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "migrate:local": "wrangler d1 migrations apply snap2link-relay --local"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.5.1",
+    "@cloudflare/workers-types": "^5.20261104.1",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.157.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
+  }
+}
