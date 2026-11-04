@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "snap2link": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/snap2link-mcp.mjs"]
+    }
+  }
+}

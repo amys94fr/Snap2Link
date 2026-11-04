@@ -121,6 +121,16 @@ pnpm tauri dev         # hot-reload dev build
 pnpm tauri build       # produces a signed installer in src-tauri/target/release/bundle/
 ```
 
+### Claude Code plugin
+
+To let Claude Code read your links directly, even over SSH, type this at its prompt:
+
+```text
+/plugin install snap2link --marketplace amys94fr/Snap2Link
+```
+
+See [integrations/claude-code](integrations/claude-code) for details.
+
 ## 💡 Use Cases
 
 - **AI prompts** — paste the link directly into Claude Code, Cursor, ChatGPT, or Aider when you need visual context

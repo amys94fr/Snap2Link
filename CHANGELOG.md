@@ -4,6 +4,12 @@ All notable changes to Snap2Link are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Claude Code plugin.** An MCP server, a skill and a mod let Claude Code read Snap2Link links directly, including over SSH where image paste doesn't work. See `integrations/claude-code`.
+
 ## [1.5.0] – 2026-10-11
 
 Security hardening release from a full audit of the app and its release pipeline. No known exploit existed (no script-injection point was found), but the app gave its windows far more power than they needed, so a single future bug or compromised dependency could have exposed local files. Updating is recommended.
