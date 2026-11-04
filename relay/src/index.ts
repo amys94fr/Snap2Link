@@ -60,10 +60,27 @@ function error(status: number, code: string): Response {
   return Response.json({ error: code }, { status });
 }
 
+/**
+ * What a quota counts. One IPv6 connection owns a whole /64, billions of
+ * addresses, so counting each of them would leave the limit without effect.
+ */
+function quotaBlock(address: string): string {
+  if (!address.includes(":")) return address;
+  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(address);
+  if (mapped) return mapped[1];
+
+  const [head, tail] = address.toLowerCase().split("::");
+  const left = head ? head.split(":") : [];
+  const right = tail ? tail.split(":") : [];
+  const zeros = Array<string>(Math.max(0, 8 - left.length - right.length)).fill("0");
+  const prefix = [...left, ...zeros, ...right].slice(0, 4);
+  return `${prefix.map((group) => group.replace(/^0+(?=.)/, "")).join(":")}::/64`;
+}
+
 /** Addresses are never stored: only a hash that changes every day. */
 function ownerKey(request: Request, salt: string, now: number): Promise<string> {
-  const address = request.headers.get("CF-Connecting-IP") ?? "unknown";
-  return sha256(`${salt}:${utcDay(now)}:${address}`).then((hash) => `ip:${hash}`);
+  const block = quotaBlock(request.headers.get("CF-Connecting-IP") ?? "unknown");
+  return sha256(`${salt}:${utcDay(now)}:${block}`).then((hash) => `ip:${hash}`);
 }
 
 async function handleUpload(request: Request, env: Env): Promise<Response> {

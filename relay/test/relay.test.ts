@@ -215,6 +215,39 @@ describe("limits", () => {
     expect((await upload(png(), "198.51.100.9")).status).toBe(201);
   });
 
+  it("counts a whole IPv6 /64 as one address", async () => {
+    for (let i = 1; i <= ANONYMOUS_DAILY_LIMIT; i += 1) {
+      expect((await upload(png(), `2001:db8:1:2::${i}`)).status).toBe(201);
+    }
+    expect((await upload(png(), "2001:db8:1:2:aaaa:bbbb:cccc:dddd")).status).toBe(429);
+
+    expect((await upload(png(), "2001:db8:1:3::1")).status).toBe(201);
+  });
+
+  it.each([
+    ["uppercase", "2001:DB8:1:2::9"],
+    ["leading zeros", "2001:0db8:0001:0002::9"],
+    ["no compression", "2001:db8:1:2:0:0:0:9"],
+  ])("sees the same /64 written with %s", async (_, address) => {
+    for (let i = 1; i <= ANONYMOUS_DAILY_LIMIT; i += 1) {
+      await upload(png(), `2001:db8:1:2::${i}`);
+    }
+    expect((await upload(png(), address)).status).toBe(429);
+  });
+
+  it("finds the /64 when the compression reaches into it", async () => {
+    for (let i = 1; i <= ANONYMOUS_DAILY_LIMIT; i += 1) {
+      await upload(png(), `2001:db8:0:0:${i}::`);
+    }
+    expect((await upload(png(), "2001:db8::9")).status).toBe(429);
+    expect((await upload(png(), "2001:db8:0:1::9")).status).toBe(201);
+  });
+
+  it("treats an IPv4 address in IPv6 form as the IPv4 address", async () => {
+    for (let i = 0; i < ANONYMOUS_DAILY_LIMIT; i += 1) await upload();
+    expect((await upload(png(), "::ffff:203.0.113.7")).status).toBe(429);
+  });
+
   it("lets simultaneous uploads take only the places left", async () => {
     const results = await Promise.all(
       Array.from({ length: ANONYMOUS_DAILY_LIMIT + 3 }, () => upload()),
