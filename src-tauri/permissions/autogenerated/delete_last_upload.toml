@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-delete-last-upload"
+description = "Enables the delete_last_upload command without any pre-configured scope."
+commands.allow = ["delete_last_upload"]
+
+[[permission]]
+identifier = "deny-delete-last-upload"
+description = "Denies the delete_last_upload command without any pre-configured scope."
+commands.deny = ["delete_last_upload"]

@@ -1,9 +1,9 @@
+import { version } from "../package.json";
+
 export const APP_NAME = "Snap2Link";
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = version;
 export const APP_AUTHOR = "Steven Abittan";
 export const APP_GITHUB = "https://github.com/amys94fr";
-export const APP_DESCRIPTION =
-  "Capture a screen region and instantly get a Google Drive share link.";
 export const APP_LICENSE = "MIT License";
 export const APP_LICENSE_TEXT = `MIT License
 

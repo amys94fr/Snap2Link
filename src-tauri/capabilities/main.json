@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
   "description": "Settings, setup wizard, updater UI and About page.",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:window:default",
     "core:webview:default",
@@ -17,7 +19,14 @@
     "notification:default",
     {
       "identifier": "opener:allow-open-url",
-      "allow": [{ "url": "https://github.com/amys94fr*" }]
+      "allow": [
+        {
+          "url": "https://github.com/amys94fr*"
+        },
+        {
+          "url": "https://drive.google.com/*"
+        }
+      ]
     },
     "allow-get-config",
     "allow-save-config",
@@ -25,8 +34,12 @@
     "allow-authenticate",
     "allow-get-account-email",
     "allow-disconnect",
-    "allow-update-hotkey",
     "allow-check-for-update",
-    "allow-install-update"
+    "allow-install-update",
+    "allow-save-profiles",
+    "allow-reset-last-choice",
+    "allow-save-notify-link",
+    "allow-get-language",
+    "allow-set-language"
   ]
 }

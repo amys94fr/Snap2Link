@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-hide-toast"
+description = "Enables the hide_toast command without any pre-configured scope."
+commands.allow = ["hide_toast"]
+
+[[permission]]
+identifier = "deny-hide-toast"
+description = "Denies the hide_toast command without any pre-configured scope."
+commands.deny = ["hide_toast"]

@@ -2,14 +2,15 @@ import { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { useLanguage } from "./i18n";
 import { useAppStore, type AppPage } from "./store/appStore";
 import { SetupWizard } from "./windows/SetupWizard";
 import { SettingsWindow } from "./windows/SettingsWindow";
-import { AboutWindow } from "./windows/AboutWindow";
 import { OverlayWindow } from "./windows/OverlayWindow";
 import { AnnotatorWindow } from "./windows/AnnotatorWindow";
+import { ToastWindow } from "./windows/ToastWindow";
 
-type WindowKind = "main" | "overlay" | "annotator";
+type WindowKind = "main" | "overlay" | "annotator" | "toast";
 
 function getWindowKind(): WindowKind {
   if (typeof window === "undefined") return "main";
@@ -17,19 +18,21 @@ function getWindowKind(): WindowKind {
   const kind = params.get("window");
   if (kind === "overlay") return "overlay";
   if (kind === "annotator") return "annotator";
+  if (kind === "toast") return "toast";
   return "main";
 }
 
 export default function App() {
+  useLanguage();
   const kind = getWindowKind();
   if (kind === "overlay") return <OverlayWindow />;
   if (kind === "annotator") return <AnnotatorWindow />;
+  if (kind === "toast") return <ToastWindow />;
   return <MainApp />;
 }
 
 function MainApp() {
   const {
-    page,
     setPage,
     isAuthenticated,
     setAuthenticated,
@@ -63,16 +66,6 @@ function MainApp() {
     };
   }, [setAuthenticated, setPage, requestAutoCheckUpdates]);
 
-  const closeWindow = async () => {
-    try {
-      await getCurrentWebviewWindow().hide();
-    } catch {
-      // ignored in test env
-    }
-    setPage("settings");
-    consumeAutoCheckUpdates();
-  };
-
   if (!isAuthenticated) {
     return (
       <SetupWizard
@@ -84,15 +77,11 @@ function MainApp() {
     );
   }
 
-  if (page === "about") {
-    return <AboutWindow onClose={closeWindow} />;
-  }
-
   return (
     <SettingsWindow
-      onClose={closeWindow}
-      onAbout={() => setPage("about")}
       autoCheckUpdates={autoCheckUpdates}
+      onUpdatesChecked={consumeAutoCheckUpdates}
+      onSignedOut={() => setAuthenticated(false)}
     />
   );
 }

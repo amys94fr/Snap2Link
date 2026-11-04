@@ -10,8 +10,8 @@ export default {
           800: "#334155",
         },
         brand: {
-          DEFAULT: "#3B82F6",
-          dark: "#2563EB",
+          DEFAULT: "#2563EB",
+          dark: "#1D4ED8",
         },
         success: "#22C55E",
         danger: "#EF4444",

@@ -100,9 +100,18 @@ export function SetupWizard({ onComplete }: Props) {
 
       {step === "success" && (
         <>
-          <span className="text-6xl mb-4" aria-hidden="true">
-            ✅
-          </span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-16 mb-4 text-green-300"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
           <h2 className="text-2xl font-bold text-success mb-2">
             {t("wizard.success.connected")}
           </h2>

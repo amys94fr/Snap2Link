@@ -1,11 +1,34 @@
-//! Global keyboard shortcut registration.
+//! Global keyboard shortcuts: one per capture profile.
 
 use std::sync::Mutex;
 
+use serde::Serialize;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
-static CURRENT: Mutex<Option<Shortcut>> = Mutex::new(None);
+use crate::commands::config::{
+    load_config, AfterCapture, CaptureMode, CaptureProfile, LastAfter, LastMode,
+};
+
+/// Read when a key is pressed, so changing a profile's behaviour doesn't need
+/// the shortcut to be registered again.
+static BINDINGS: Mutex<Vec<Binding>> = Mutex::new(Vec::new());
+
+#[derive(Clone, Copy)]
+struct Binding {
+    shortcut: Shortcut,
+    mode: CaptureMode,
+    after: AfterCapture,
+}
+
+/// Sent to the overlay, which runs the capture.
+#[derive(Clone, Debug, Serialize)]
+struct CaptureRequest {
+    mode: CaptureMode,
+    after: AfterCapture,
+    last_mode: Option<LastMode>,
+    last_after: Option<LastAfter>,
+}
 
 pub fn parse_hotkey(hotkey: &str) -> Result<Shortcut, String> {
     hotkey
@@ -13,37 +36,106 @@ pub fn parse_hotkey(hotkey: &str) -> Result<Shortcut, String> {
         .map_err(|e| format!("invalid hotkey '{hotkey}': {e}"))
 }
 
-/// Registers the new shortcut first and only then drops the previous one,
-/// so an invalid or already-taken combination never leaves the user
-/// without a working hotkey.
-pub fn register(app: &AppHandle, hotkey: &str) -> Result<(), String> {
-    let new = parse_hotkey(hotkey)?;
-    let mgr = app.global_shortcut();
-    let mut current = CURRENT.lock().map_err(|_| "hotkey state poisoned".to_string())?;
-    if *current == Some(new) && mgr.is_registered(new) {
-        return Ok(());
+/// Starts a capture. The tray uses `Ask` for both steps: a click on the icon
+/// must never share something without confirmation.
+pub fn trigger(app: &AppHandle, mode: CaptureMode, after: AfterCapture) {
+    let last = load_config().last_choice;
+    let _ = app.emit(
+        "trigger-screenshot",
+        CaptureRequest {
+            mode,
+            after,
+            last_mode: last.mode,
+            last_after: last.after,
+        },
+    );
+}
+
+fn on_pressed(app: &AppHandle, pressed: &Shortcut) {
+    let binding = BINDINGS
+        .lock()
+        .ok()
+        .and_then(|b| b.iter().find(|b| b.shortcut == *pressed).copied());
+    if let Some(binding) = binding {
+        eprintln!("[snap2link] hotkey pressed");
+        trigger(app, binding.mode, binding.after);
+    }
+}
+
+/// Makes the registered shortcuts match `profiles`.
+///
+/// New shortcuts are registered before the old ones go. If one that
+/// `may_fail` doesn't excuse is refused, everything is rolled back, so a taken
+/// combination never leaves the user without a working shortcut. An excused
+/// failure is logged and the other shortcuts still work.
+pub fn sync(
+    app: &AppHandle,
+    profiles: &[CaptureProfile],
+    may_fail: impl Fn(&Shortcut) -> bool,
+) -> Result<(), String> {
+    let mut wanted = Vec::with_capacity(profiles.len());
+    for profile in profiles {
+        match parse_hotkey(&profile.hotkey) {
+            Ok(shortcut) => wanted.push(Binding {
+                shortcut,
+                mode: profile.mode,
+                after: profile.after,
+            }),
+            // `save_profiles` validates first: only a hand-edited file gets here.
+            Err(e) => eprintln!("[snap2link] {e}"),
+        }
     }
 
-    let app_for_handler = app.clone();
-    mgr.on_shortcut(new, move |_app, _shortcut, event| {
-        if event.state == ShortcutState::Pressed {
-            eprintln!("[snap2link] hotkey pressed");
-            let _ = app_for_handler.emit("trigger-screenshot", ());
-        }
-    })
-    .map_err(|e| format!("on_shortcut('{hotkey}'): {e}"))?;
+    // Not held while registering: a key press needs this lock on another
+    // thread, and the plugin may wait for the event loop.
+    let previous: Vec<Shortcut> = BINDINGS
+        .lock()
+        .map_err(|_| "hotkey state poisoned".to_string())?
+        .iter()
+        .map(|b| b.shortcut)
+        .collect();
 
-    if let Some(old) = current.replace(new) {
-        if old != new {
+    let mgr = app.global_shortcut();
+    let mut added = Vec::new();
+    let mut failed = Vec::new();
+    for binding in &wanted {
+        let shortcut = binding.shortcut;
+        if previous.contains(&shortcut) && mgr.is_registered(shortcut) {
+            continue;
+        }
+        let handle = app.clone();
+        let registered = mgr.on_shortcut(shortcut, move |_app, pressed, event| {
+            if event.state == ShortcutState::Pressed {
+                on_pressed(&handle, pressed);
+            }
+        });
+        match registered {
+            Ok(()) => added.push(shortcut),
+            Err(e) if may_fail(&shortcut) => {
+                eprintln!("[snap2link] shortcut refused: {e}");
+                failed.push(shortcut);
+            }
+            Err(e) => {
+                eprintln!("[snap2link] shortcut refused: {e}");
+                for shortcut in added {
+                    let _ = mgr.unregister(shortcut);
+                }
+                return Err("hotkey_unavailable".to_string());
+            }
+        }
+    }
+
+    for old in previous {
+        if !wanted.iter().any(|b| b.shortcut == old) {
             let _ = mgr.unregister(old);
         }
     }
-    Ok(())
-}
 
-#[tauri::command]
-pub fn update_hotkey(app_handle: AppHandle, hotkey: String) -> Result<(), String> {
-    register(&app_handle, &hotkey)
+    wanted.retain(|b| !failed.contains(&b.shortcut));
+    *BINDINGS
+        .lock()
+        .map_err(|_| "hotkey state poisoned".to_string())? = wanted;
+    Ok(())
 }
 
 #[cfg(test)]

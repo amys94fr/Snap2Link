@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Claude Code plugin.** An MCP server, a skill and a mod let Claude Code read Snap2Link links directly, including over SSH where image paste doesn't work. See `integrations/claude-code`.
+- **Up to 3 capture shortcuts.** Each one sets what to capture (ask, region, full screen, active window) and what follows (ask, share directly, annotate), so a link can be one key press away. Your existing shortcut is kept and behaves as before.
+- **Full screen and active window without the overlay.** Full screen takes the screen under the mouse. If no window can be detected, Snap2Link opens the window picker.
+- **Last choice.** On "Ask", Snap2Link reopens the last mode and preselects the last action, which Enter confirms. Nothing is shared without confirmation, and the choice can be reset in Settings.
+- **"Link copied" message with a Delete button.** It sits in a corner of the screen without taking focus, and removes the capture from Drive right away. It can be turned off in Settings.
+- **20 languages,** including right-to-left layouts for Arabic, Hebrew and Persian. Snap2Link follows the system language by default, and the language can be changed in Settings.
+
+### Changed
+
+- **New settings window,** organized by category: Capture, Hosting, General and About. It is larger and resizable, and each option explains what it does.
+- Uploads no longer cover the screen: the overlay closes as soon as the upload starts.
+- Blue buttons use a darker shade so that their text stays readable.
+
+### Fixed
+
+- Closing the settings window with its close button destroyed it, and it could not be reopened until the app restarted. The same applied to the annotator.
+- The About page always showed version 1.0.0.
 
 ## [1.5.0] – 2026-10-11
 

@@ -3,6 +3,7 @@
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 use std::fs;
+use std::sync::Mutex;
 use tauri::AppHandle;
 
 use crate::commands::auth::get_valid_token;
@@ -18,6 +19,10 @@ pub fn is_valid_drive_id(id: &str) -> bool {
 }
 
 pub const FOLDER_NAME: &str = "Snap2Link";
+
+/// Drive id of the latest upload. The toast's Delete button can only reach
+/// this file, so that window never gets to name an arbitrary Drive file.
+static LAST_UPLOAD: Mutex<Option<String>> = Mutex::new(None);
 
 /// Public direct-download share link for a Drive file ID.
 /// Uses the canonical `drive.google.com/uc` form (no `/u/0/`) so a viewer
@@ -198,7 +203,45 @@ pub async fn upload_screenshot(
 
     let _ = fs::remove_file(&image_path);
 
+    if let Ok(mut last) = LAST_UPLOAD.lock() {
+        *last = Some(file_id.clone());
+    }
+
     Ok(share_link_for(&file_id))
+}
+
+/// Deletes the capture that was just shared: its link stops working at once.
+#[tauri::command]
+pub async fn delete_last_upload(app: AppHandle) -> Result<(), String> {
+    let file_id = LAST_UPLOAD
+        .lock()
+        .map_err(|_| "upload state poisoned".to_string())?
+        .take()
+        .ok_or_else(|| "nothing to delete".to_string())?;
+
+    let failure = match get_valid_token(&app).await {
+        Ok(token) => {
+            let resp = reqwest::Client::new()
+                .delete(format!(
+                    "https://www.googleapis.com/drive/v3/files/{file_id}"
+                ))
+                .bearer_auth(&token)
+                .send()
+                .await;
+            match resp {
+                Ok(r) if r.status().is_success() => return Ok(()),
+                Ok(r) => format!("Drive delete failed ({})", r.status()),
+                Err(e) => format!("delete network error: {e}"),
+            }
+        }
+        Err(e) => e,
+    };
+
+    // Keep the id so the user can retry from the same toast.
+    if let Ok(mut last) = LAST_UPLOAD.lock() {
+        last.get_or_insert(file_id);
+    }
+    Err(failure)
 }
 
 fn truncate(s: &str, max: usize) -> String {

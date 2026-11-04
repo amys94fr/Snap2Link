@@ -1,196 +1,153 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import {
-  isEnabled as autostartIsEnabled,
-  enable as autostartEnable,
-  disable as autostartDisable,
-} from "@tauri-apps/plugin-autostart";
-import { t } from "@/i18n";
-import { HotkeyRecorder } from "@/components/HotkeyRecorder";
-import { RetentionControl } from "@/components/RetentionControl";
-import { UpdateChecker } from "@/components/UpdateChecker";
 import clsx from "clsx";
-
-interface Config {
-  hotkey: string;
-  retention_days: number;
-  auto_delete: boolean;
-}
+import { t } from "@/i18n";
+import type { AppConfig } from "@/lib/config";
+import { useAppStore, type SettingsCategory } from "@/store/appStore";
+import logoUrl from "@/assets/logo.png";
+import { AboutWindow } from "./AboutWindow";
+import { CapturePage } from "./settings/CapturePage";
+import { GeneralPage } from "./settings/GeneralPage";
+import { HostingPage } from "./settings/HostingPage";
+import {
+  CameraIcon,
+  CheckIcon,
+  CloudIcon,
+  InfoIcon,
+  SlidersIcon,
+} from "./settings/ui";
 
 interface Props {
-  onClose: () => void;
-  onAbout: () => void;
-  /** When true, the UpdateChecker auto-runs a check as soon as Settings opens.
-   *  Used when navigating from the tray "Check for Updates" entry. */
+  /** Runs an update check as soon as the General page opens (tray entry). */
   autoCheckUpdates?: boolean;
+  onUpdatesChecked?: () => void;
+  onSignedOut?: () => void;
 }
 
-const DRIVE_FOLDER_NAME = "Snap2Link";
+const CATEGORIES: ReadonlyArray<{
+  id: SettingsCategory;
+  icon: ReactNode;
+  descKey: string;
+}> = [
+  { id: "capture", icon: <CameraIcon />, descKey: "settings.capture.desc" },
+  { id: "hosting", icon: <CloudIcon />, descKey: "settings.hosting.desc" },
+  { id: "general", icon: <SlidersIcon />, descKey: "settings.general.desc" },
+  { id: "about", icon: <InfoIcon />, descKey: "settings.about.desc" },
+];
 
-const DEFAULT_CONFIG: Config = {
-  hotkey: "Ctrl+PrintScreen",
-  retention_days: 30,
-  auto_delete: true,
-};
-
-export function SettingsWindow({ onClose, onAbout, autoCheckUpdates }: Props) {
-  const [email, setEmail] = useState<string>("—");
-  const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
-  const [startupEnabled, setStartupEnabled] = useState(false);
-  const [accHint, setAccHint] = useState<{
-    kind: "info" | "success" | "error";
-    text: string;
-  } | null>(null);
-  const [switching, setSwitching] = useState(false);
+export function SettingsWindow({
+  autoCheckUpdates,
+  onUpdatesChecked,
+  onSignedOut,
+}: Props) {
+  const { category, setCategory } = useAppStore();
+  const [config, setConfig] = useState<AppConfig | null>(null);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     void invoke<string | null>("get_account_email").then((e) =>
-      setEmail(e ?? "—"),
+      setEmail(e ?? ""),
     );
-    void invoke<Config>("get_config").then(setConfig);
-    void autostartIsEnabled().then(setStartupEnabled);
+    void invoke<AppConfig>("get_config").then(setConfig);
   }, []);
 
-  const persistConfig = async (next: Config) => {
-    setConfig(next);
-    // Tauri converts args from camelCase (JS) to snake_case (Rust).
-    await invoke("save_config", {
-      hotkey: next.hotkey,
-      retentionDays: next.retention_days,
-      autoDelete: next.auto_delete,
-    });
-  };
-
-  const handleSwitchAccount = async () => {
-    setSwitching(true);
-    setAccHint({ kind: "info", text: t("settings.switch_account.loading") });
-    try {
-      await invoke("disconnect");
-      const mail = await invoke<string>("authenticate");
-      setEmail(mail);
-      setAccHint({
-        kind: "success",
-        text: t("settings.switch_account.success", { email: mail }),
-      });
-      window.setTimeout(() => setAccHint(null), 4000);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setAccHint({
-        kind: "error",
-        text: t("settings.switch_account.error", { msg: msg.slice(0, 70) }),
-      });
-    } finally {
-      setSwitching(false);
-    }
-  };
-
-  const handleHotkeyChange = async (hotkey: string) => {
-    // Register first: if the combination is invalid or taken, the error
-    // surfaces before the broken value is written to config.json.
-    await invoke("update_hotkey", { hotkey });
-    await persistConfig({ ...config, hotkey });
-  };
-
-  const handleRetentionToggle = async (auto_delete: boolean) => {
-    await persistConfig({ ...config, auto_delete });
-  };
-
-  const handleRetentionSave = async (retention_days: number) => {
-    await persistConfig({ ...config, retention_days });
-  };
-
-  const handleStartupToggle = async () => {
-    if (startupEnabled) {
-      await autostartDisable();
-      setStartupEnabled(false);
-    } else {
-      await autostartEnable();
-      setStartupEnabled(true);
-    }
-  };
+  const current = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
 
   return (
-    <div className="bg-slate-950 text-slate-100 h-screen overflow-y-auto px-7 py-6">
-      <h1 className="text-xl font-bold mb-3">{t("settings.heading")}</h1>
-      <hr className="border-slate-800 mb-4" />
+    <div className="flex h-screen bg-slate-950 text-slate-100 text-sm">
+      <nav
+        aria-label={t("settings.categories")}
+        className="w-56 shrink-0 flex flex-col gap-1 px-3 py-5 border-e border-slate-800"
+      >
+        <div className="flex items-center gap-2.5 px-2.5 pb-4">
+          <img
+            src={logoUrl}
+            alt=""
+            aria-hidden="true"
+            className="size-8 select-none"
+            draggable={false}
+          />
+          <span className="text-base font-bold">{t("settings.heading")}</span>
+        </div>
 
-      <p className="text-xs text-slate-400">{t("settings.google_account")}</p>
-      <div className="flex items-center justify-between mt-1 mb-1">
-        <span className="text-sm font-medium truncate pr-3">{email}</span>
+        {CATEGORIES.map((item) => {
+          const active = item.id === current.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-current={active ? "page" : undefined}
+              onClick={() => setCategory(item.id)}
+              className={clsx(
+                "min-h-11 flex items-center gap-2.5 px-3 rounded-lg font-semibold text-start cursor-pointer",
+                active
+                  ? "bg-brand text-white"
+                  : "text-slate-200 hover:bg-slate-900",
+              )}
+            >
+              {item.icon}
+              {t(`settings.nav.${item.id}`)}
+            </button>
+          );
+        })}
+
         <button
           type="button"
-          onClick={handleSwitchAccount}
-          disabled={switching}
-          className="btn text-xs bg-slate-800 hover:bg-brand text-white px-3 py-1.5 rounded-lg whitespace-nowrap"
+          onClick={() => setCategory("hosting")}
+          className="mt-auto flex flex-col gap-0.5 px-3 py-2.5 text-start bg-slate-900 border border-slate-800 rounded-lg cursor-pointer"
         >
-          {t("settings.switch_account")}
+          <span className="text-xs text-slate-300">
+            {t("settings.active_host")}
+          </span>
+          <span className="font-semibold">{t("settings.host.drive")}</span>
+          <span dir="ltr" className="text-xs text-slate-300 truncate text-start">
+            {email}
+          </span>
         </button>
-      </div>
-      {accHint && (
-        <p
-          className={clsx(
-            "text-xs mb-2",
-            accHint.kind === "success"
-              ? "text-success"
-              : accHint.kind === "error"
-                ? "text-danger"
-                : "text-slate-400",
-          )}
-        >
-          {accHint.text}
-        </p>
-      )}
+      </nav>
 
-      <p className="text-xs text-slate-400 mt-3">{t("settings.drive_folder")}</p>
-      <p className="text-sm font-medium mb-4">{DRIVE_FOLDER_NAME}</p>
+      <main className="flex-1 min-w-0 overflow-y-auto p-7 flex flex-col gap-6">
+        <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
+          <div className="flex-[1_1_320px] min-w-0">
+            <h1 className="text-[22px] font-bold">
+              {t(`settings.nav.${current.id}`)}
+            </h1>
+            <p className="mt-1 text-slate-300">{t(current.descKey)}</p>
+          </div>
+          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-green-300">
+            <CheckIcon />
+            {t("settings.saved")}
+          </p>
+        </header>
 
-      <p className="text-xs text-slate-400">{t("settings.shortcut")}</p>
-      <HotkeyRecorder current={config.hotkey} onChange={handleHotkeyChange} />
-
-      <hr className="border-slate-800 my-3" />
-
-      <RetentionControl
-        days={config.retention_days}
-        enabled={config.auto_delete}
-        onToggle={handleRetentionToggle}
-        onSave={handleRetentionSave}
-      />
-
-      <hr className="border-slate-800 my-3" />
-
-      <label className="flex items-center justify-between cursor-pointer">
-        <span className="text-sm font-medium">{t("settings.startup")}</span>
-        <input
-          type="checkbox"
-          aria-label={t("settings.startup")}
-          checked={startupEnabled}
-          onChange={handleStartupToggle}
-          className="w-10 h-5 accent-brand cursor-pointer"
-        />
-      </label>
-
-      <hr className="border-slate-800 my-4" />
-
-      <UpdateChecker autoStart={autoCheckUpdates} />
-
-      <hr className="border-slate-800 my-4" />
-
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onAbout}
-          className="btn bg-slate-800 hover:bg-slate-900 text-white text-sm px-4 py-2 rounded-lg"
-        >
-          {t("settings.about_btn")}
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn bg-brand hover:bg-brand-dark text-white text-sm px-4 py-2 rounded-lg"
-        >
-          {t("settings.close")}
-        </button>
-      </div>
+        {config === null ? (
+          <div aria-busy="true" className="h-40 rounded-[10px] bg-slate-900" />
+        ) : (
+          <>
+            {current.id === "capture" && (
+              <CapturePage config={config} onConfig={setConfig} />
+            )}
+            {current.id === "hosting" && (
+              <HostingPage
+                config={config}
+                onConfig={setConfig}
+                email={email}
+                onEmail={setEmail}
+                onSignedOut={() => onSignedOut?.()}
+              />
+            )}
+            {current.id === "general" && (
+              <GeneralPage
+                config={config}
+                onConfig={setConfig}
+                autoCheckUpdates={autoCheckUpdates}
+                onUpdatesChecked={onUpdatesChecked}
+              />
+            )}
+            {current.id === "about" && <AboutWindow />}
+          </>
+        )}
+      </main>
     </div>
   );
 }

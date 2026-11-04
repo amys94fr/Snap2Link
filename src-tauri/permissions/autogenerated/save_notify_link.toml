@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-save-notify-link"
+description = "Enables the save_notify_link command without any pre-configured scope."
+commands.allow = ["save_notify_link"]
+
+[[permission]]
+identifier = "deny-save-notify-link"
+description = "Denies the save_notify_link command without any pre-configured scope."
+commands.deny = ["save_notify_link"]

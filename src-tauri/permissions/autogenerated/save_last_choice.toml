@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-save-last-choice"
+description = "Enables the save_last_choice command without any pre-configured scope."
+commands.allow = ["save_last_choice"]
+
+[[permission]]
+identifier = "deny-save-last-choice"
+description = "Denies the save_last_choice command without any pre-configured scope."
+commands.deny = ["save_last_choice"]

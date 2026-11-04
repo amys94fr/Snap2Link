@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-capture-at-cursor"
+description = "Enables the capture_at_cursor command without any pre-configured scope."
+commands.allow = ["capture_at_cursor"]
+
+[[permission]]
+identifier = "deny-capture-at-cursor"
+description = "Denies the capture_at_cursor command without any pre-configured scope."
+commands.deny = ["capture_at_cursor"]

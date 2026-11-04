@@ -16,7 +16,17 @@ const COMMANDS: &[&str] = &[
     "write_annotated_image",
     "check_for_update",
     "install_update",
-    "update_hotkey",
+    "capture_at_cursor",
+    "capture_active_window",
+    "delete_last_upload",
+    "save_profiles",
+    "save_last_choice",
+    "reset_last_choice",
+    "save_notify_link",
+    "get_language",
+    "set_language",
+    "show_toast",
+    "hide_toast",
     "debug_log",
 ];
 

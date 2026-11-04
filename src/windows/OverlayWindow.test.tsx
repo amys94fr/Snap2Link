@@ -1,10 +1,39 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { invoke } from "@tauri-apps/api/core";
+import { emit, listen } from "@tauri-apps/api/event";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { sendNotification } from "@tauri-apps/plugin-notification";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { OverlayWindow } from "./OverlayWindow";
+
+type Handler = (e: { payload: unknown }) => void;
+
+/** Renders the overlay and returns a function that fires a capture request,
+ *  as Rust does when a shortcut is pressed. */
+async function renderWithTrigger() {
+  const handlers: Record<string, Handler> = {};
+  vi.mocked(listen).mockImplementation((async (name: string, cb: Handler) => {
+    handlers[name] = cb;
+    return () => {};
+  }) as never);
+  render(<OverlayWindow />);
+  await waitFor(() => expect(handlers["trigger-screenshot"]).toBeDefined());
+  return async (request: Record<string, unknown>) => {
+    await act(async () => {
+      handlers["trigger-screenshot"]({
+        payload: { last_mode: null, last_after: null, ...request },
+      });
+    });
+  };
+}
+
+function dragRegion() {
+  const surface = screen.getByTestId("overlay-surface");
+  fireEvent.mouseDown(surface, { clientX: 100, clientY: 100 });
+  fireEvent.mouseMove(surface, { clientX: 300, clientY: 250 });
+  fireEvent.mouseUp(surface, { clientX: 300, clientY: 250 });
+}
 
 describe("<OverlayWindow />", () => {
   it("renders the hint message", () => {
@@ -73,8 +102,30 @@ describe("<OverlayWindow />", () => {
         imagePath: "C:/temp/cap.png",
       });
     });
-    expect(writeText).toHaveBeenCalledWith("https://drive/file/abc");
-    await waitFor(() => expect(sendNotification).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith("https://drive/file/abc");
+    });
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("show_toast", { state: "copied" });
+    });
+  });
+
+  it("falls back on a notification if the toast window fails", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") return "https://drive/x";
+      if (cmd === "show_toast") throw new Error("no toast");
+      return undefined;
+    });
+    render(<OverlayWindow />);
+    dragRegion();
+    fireEvent.click(await screen.findByTestId("prompt-save"));
+
+    await waitFor(() => {
+      expect(sendNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringMatching(/link copied/i) }),
+      );
+    });
   });
 
   it("clicking Edit hands off to the annotator (no upload from overlay)", async () => {
@@ -154,29 +205,28 @@ describe("<OverlayWindow />", () => {
     });
   });
 
-  it("shows the uploading→success toast when Save is picked", async () => {
+  it("reports the upload in the toast window, with the overlay gone", async () => {
     vi.mocked(invoke).mockImplementation(async (cmd: string) => {
       if (cmd === "capture_region") return "C:/temp/cap.png";
       if (cmd === "upload_screenshot") return "https://drive/x";
       return undefined;
     });
+    const hide = vi.fn();
+    vi.mocked(getCurrentWebviewWindow).mockReturnValue({
+      hide,
+      show: vi.fn(),
+      setFocus: vi.fn(),
+      close: vi.fn(),
+    } as never);
 
     render(<OverlayWindow />);
-    const surface = screen.getByTestId("overlay-surface");
-    fireEvent.mouseDown(surface, { clientX: 100, clientY: 100 });
-    fireEvent.mouseMove(surface, { clientX: 300, clientY: 300 });
-    fireEvent.mouseUp(surface, { clientX: 300, clientY: 300 });
+    dragRegion();
     fireEvent.click(await screen.findByTestId("prompt-save"));
 
     await waitFor(() => {
-      expect(screen.getByText(/uploading to google drive/i)).toBeInTheDocument();
+      expect(invoke).toHaveBeenCalledWith("show_toast", { state: "uploading" });
     });
-    await waitFor(
-      () => {
-        expect(screen.getByText(/link copied/i)).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
+    expect(hide).toHaveBeenCalled();
   });
 
   it("Save flow notifies on upload error", async () => {
@@ -198,7 +248,182 @@ describe("<OverlayWindow />", () => {
         expect.objectContaining({ body: expect.stringContaining("nope") }),
       );
     });
-    expect(screen.queryByText(/link copied/i)).not.toBeInTheDocument();
+    expect(invoke).not.toHaveBeenCalledWith("show_toast", { state: "copied" });
+    expect(invoke).toHaveBeenCalledWith("hide_toast");
+  });
+
+  // ────────────────────────────────────────────────────────────────────
+  // Shortcuts set in advance
+  // ────────────────────────────────────────────────────────────────────
+
+  it("full screen + share: link copied without ever opening the overlay", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_at_cursor") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") return "https://drive/x";
+      return undefined;
+    });
+    const show = vi.fn();
+    vi.mocked(getCurrentWebviewWindow).mockReturnValue({
+      hide: vi.fn(),
+      show,
+      setFocus: vi.fn(),
+      close: vi.fn(),
+    } as never);
+
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "full_screen", after: "share" });
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("https://drive/x"));
+    expect(show).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("overlay-prompt")).not.toBeInTheDocument();
+  });
+
+  it("waits for a visible toast to leave before a direct capture", async () => {
+    const order: string[] = [];
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      order.push(cmd);
+      if (cmd === "hide_toast") return true;
+      if (cmd === "capture_at_cursor") return "C:/temp/cap.png";
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "full_screen", after: "ask" });
+
+    await screen.findByTestId("prompt-edit");
+    expect(order.indexOf("hide_toast")).toBeLessThan(
+      order.indexOf("capture_at_cursor"),
+    );
+  });
+
+  it("active window + ask: captures it and shows the prompt", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_active_window") return "C:/temp/cap.png";
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "active_window", after: "ask" });
+
+    expect(await screen.findByTestId("prompt-edit")).toBeInTheDocument();
+    expect(invoke).not.toHaveBeenCalledWith("upload_screenshot", expect.anything());
+  });
+
+  it("falls back on the window picker when nothing is in front", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_active_window") throw "no_active_window";
+      if (cmd === "list_windows") return [];
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "active_window", after: "share" });
+
+    expect(await screen.findByTestId("overlay-window-picker")).toBeInTheDocument();
+    expect(sendNotification).not.toHaveBeenCalled();
+  });
+
+  it("region + annotate: goes to the annotator, no prompt", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "region", after: "annotate" });
+    dragRegion();
+
+    await waitFor(() => {
+      expect(emit).toHaveBeenCalledWith("annotator-load", {
+        path: "C:/temp/cap.png",
+      });
+    });
+    expect(screen.queryByTestId("overlay-prompt")).not.toBeInTheDocument();
+    expect(invoke).not.toHaveBeenCalledWith("upload_screenshot", expect.anything());
+  });
+
+  // ────────────────────────────────────────────────────────────────────
+  // Last choice
+  // ────────────────────────────────────────────────────────────────────
+
+  it("reopens on the last mode when the shortcut is on Ask", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "list_windows") return [];
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "ask", after: "ask", last_mode: "fullScreen" });
+
+    expect(await screen.findByTestId("mode-tab-fullScreen")).toHaveAttribute(
+      "data-active",
+      "true",
+    );
+  });
+
+  it("a mode set on the shortcut wins over the last choice", async () => {
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "region", after: "ask", last_mode: "window" });
+
+    expect(await screen.findByTestId("mode-tab-region")).toHaveAttribute(
+      "data-active",
+      "true",
+    );
+  });
+
+  it("preselects the last action but only Enter confirms it", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") return "https://drive/x";
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "region", after: "ask", last_after: "save" });
+    dragRegion();
+
+    const save = await screen.findByTestId("prompt-save");
+    expect(save).toHaveAttribute("data-preferred", "true");
+    expect(invoke).not.toHaveBeenCalledWith("upload_screenshot", expect.anything());
+
+    fireEvent.keyDown(document, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("upload_screenshot", {
+        imagePath: "C:/temp/cap.png",
+      });
+    });
+  });
+
+  it("remembers only the steps left on Ask, after the capture went through", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") return "https://drive/x";
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "region", after: "ask" });
+    dragRegion();
+    fireEvent.click(await screen.findByTestId("prompt-save"));
+
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("save_last_choice", {
+        mode: null,
+        after: "save",
+      });
+    });
+  });
+
+  it("remembers nothing when the upload fails or the prompt is cancelled", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") throw new Error("nope");
+      return undefined;
+    });
+    const trigger = await renderWithTrigger();
+    await trigger({ mode: "ask", after: "ask" });
+    dragRegion();
+    fireEvent.click(await screen.findByTestId("prompt-save"));
+
+    await waitFor(() => expect(sendNotification).toHaveBeenCalled());
+    expect(invoke).not.toHaveBeenCalledWith(
+      "save_last_choice",
+      expect.anything(),
+    );
   });
 
   // ────────────────────────────────────────────────────────────────────
