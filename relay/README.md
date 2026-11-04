@@ -2,13 +2,37 @@
 
 Temporary image hosting for Snap2Link, so that a capture can become a link without a Google account. It runs on Cloudflare Workers, with images in R2 and quotas in D1.
 
-The app holds no secret: it calls a public URL. Quotas are enforced here, because forks can change the app.
+The app ships no secret: anything it contained could be extracted. Each install gets a guest token instead, after passing Cloudflare Turnstile once. Quotas are enforced here, because forks can change the app.
 
 ## API
 
+### `GET /guest`
+
+The page the app opens in its own window. It runs Turnstile, then goes to `/guest/done?turnstile=<token>` or `/guest/done?error=<code>`. The app catches that navigation and keeps the token, so the page has no access to the app.
+
+### `POST /v1/guests`
+
+The body is `{"turnstile": "<token>"}`. A Turnstile token works once, for 5 minutes.
+
+```json
+{
+  "guest_token": "…",
+  "expires_at": "2027-02-02T18:00:00.000Z"
+}
+```
+
+| Status | `error` | Meaning |
+|---|---|---|
+| 201 | | Created |
+| 400 | `bad_request` | No token in the body |
+| 403 | `verification_failed` | Turnstile refused the token |
+| 429 | `daily_limit` | This address created its 10 guests of the day |
+| 503 | `service_busy` | The global limit of guests is reached |
+| 503 | `verification_unavailable` | Turnstile didn't answer, try again later |
+
 ### `POST /v1/captures`
 
-The body is the PNG itself.
+Needs `Authorization: Bearer <guest_token>`. The body is the PNG itself.
 
 ```json
 {
@@ -22,9 +46,11 @@ The body is the PNG itself.
 | Status | `error` | Meaning |
 |---|---|---|
 | 201 | | Stored |
+| 401 | `guest_required` | No guest token, or an unknown or expired one: get a new one |
+| 403 | `guest_banned` | This guest is banned |
 | 413 | `too_large` | Over 5 MB |
 | 415 | `not_png` | Not a PNG |
-| 429 | `daily_limit` | This address used its 5 captures of the day |
+| 429 | `daily_limit` | This guest used its 5 captures of the day, or this address its 30 |
 | 503 | `service_busy` | A global limit is reached, try again later |
 
 ### `GET /{id}.png`
@@ -41,13 +67,13 @@ All of them are in [`src/limits.ts`](src/limits.ts), which also explains how the
 
 ## Privacy
 
-Addresses are never stored. Quotas use a hash of the address that changes every UTC day, and IPv6 addresses count per /64. Images are removed at expiry, and a link stops working at that moment even if the cleanup job hasn't run.
+Addresses are never stored. Quotas use a hash of the address that changes every UTC day, and IPv6 addresses count per /64. A guest is a random token, kept as a hash with its dates: nothing about the device is collected. A capture keeps the hash of its guest until it expires, so that abuse can be traced to a guest and to nothing else. Images are removed at expiry, and a link stops working at that moment even if the cleanup job hasn't run.
 
 ## Run it yourself
 
 The relay is MIT, like the rest of Snap2Link. For your own instance:
 
-1. In `wrangler.jsonc`, change `routes`, `PUBLIC_URL`, `ABUSE_CONTACT`, and the bucket and database names.
+1. Create a Turnstile widget for your hostname, in Managed mode. In `wrangler.jsonc`, change `routes`, `PUBLIC_URL`, `ABUSE_CONTACT`, `TURNSTILE_SITEKEY`, and the bucket and database names.
 2. Create the storage, and copy the printed id into `database_id`:
 
    ```bash
@@ -56,10 +82,11 @@ The relay is MIT, like the rest of Snap2Link. For your own instance:
    pnpm exec wrangler d1 migrations apply snap2link-relay --remote
    ```
 
-3. Set the salt to a long random value:
+3. Set the salt to a long random value, and the secret key of the widget:
 
    ```bash
    pnpm exec wrangler secret put IP_SALT
+   pnpm exec wrangler secret put TURNSTILE_SECRET
    ```
 
 4. Deploy, then add a rate limiting rule on the hostname in the Cloudflare dashboard. A rule stops a single source before it reaches the Worker. Workers quotas are per account, so a flood here can affect your other Workers.
@@ -69,6 +96,14 @@ The relay is MIT, like the rest of Snap2Link. For your own instance:
    ```
 
 ## Taking a capture down
+
+To also ban the guest that sent it, do this first, while the capture still exists:
+
+```bash
+pnpm exec wrangler d1 execute snap2link-relay --remote --command "UPDATE guests SET banned = 1 WHERE token_hash = (SELECT guest_hash FROM captures WHERE id = '<id>')"
+```
+
+Then remove the capture:
 
 ```bash
 pnpm exec wrangler r2 object delete snap2link-relay/<id> --remote
@@ -86,3 +121,5 @@ pnpm typecheck
 ```
 
 Tests run in the Workers runtime against local D1 and R2.
+
+Turnstile's test keys show the widget, but the relay refuses their answer: it carries neither your hostname nor the `guest` action. Tests stub Siteverify instead.

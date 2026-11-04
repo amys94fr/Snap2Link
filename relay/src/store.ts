@@ -1,5 +1,8 @@
 import {
+  BLOCK_GUESTS_DAILY_LIMIT,
   GLOBAL_DAILY_LIMIT,
+  GLOBAL_GUESTS_DAILY_LIMIT,
+  GUEST_LIFETIME_MS,
   LINK_LIFETIME_MS,
   MAX_STORED_BYTES,
   PURGE_BATCH,
@@ -18,6 +21,7 @@ export interface Storage {
 }
 
 const GLOBAL_KEY = "global";
+const GLOBAL_GUESTS_KEY = "global-guests";
 const BYTES_KEY = "stored_bytes";
 
 export function utcDay(now: number): string {
@@ -51,6 +55,30 @@ function returnQuota(db: D1Database, key: string, day: string) {
     .bind(key, day);
 }
 
+export interface Quota {
+  key: string;
+  limit: number;
+}
+
+/** Takes every quota, or none: returns the one that refused. */
+async function takeQuotas(
+  db: D1Database,
+  quotas: Quota[],
+  day: string,
+): Promise<Quota | null> {
+  const taken: Quota[] = [];
+  for (const quota of quotas) {
+    if (!(await takeQuota(db, quota.key, day, quota.limit))) {
+      if (taken.length > 0) {
+        await db.batch(taken.map(({ key }) => returnQuota(db, key, day)));
+      }
+      return quota;
+    }
+    taken.push(quota);
+  }
+  return null;
+}
+
 async function reserveBytes(db: D1Database, size: number): Promise<boolean> {
   const row = await db
     .prepare(
@@ -74,9 +102,10 @@ export type Refusal = "daily_limit" | "service_busy";
 export interface NewCapture {
   id: string;
   deleteHash: string;
+  guestHash: string;
   bytes: Uint8Array;
-  ownerKey: string;
-  ownerLimit: number;
+  /** What the sender may use, checked in this order. */
+  quotas: Quota[];
   now: number;
 }
 
@@ -85,19 +114,18 @@ export async function createCapture(
   { db, images }: Storage,
   capture: NewCapture,
 ): Promise<{ expiresAt: number } | { refused: Refusal }> {
-  const { id, deleteHash, bytes, ownerKey, ownerLimit, now } = capture;
+  const { id, deleteHash, guestHash, bytes, now } = capture;
   const day = utcDay(now);
   const size = bytes.byteLength;
+  const quotas = [...capture.quotas, { key: GLOBAL_KEY, limit: GLOBAL_DAILY_LIMIT }];
+  const giveBack = () => quotas.map(({ key }) => returnQuota(db, key, day));
 
-  if (!(await takeQuota(db, ownerKey, day, ownerLimit))) {
-    return { refused: "daily_limit" };
-  }
-  if (!(await takeQuota(db, GLOBAL_KEY, day, GLOBAL_DAILY_LIMIT))) {
-    await returnQuota(db, ownerKey, day).run();
-    return { refused: "service_busy" };
+  const refused = await takeQuotas(db, quotas, day);
+  if (refused) {
+    return { refused: refused.key === GLOBAL_KEY ? "service_busy" : "daily_limit" };
   }
   if (!(await reserveBytes(db, size))) {
-    await db.batch([returnQuota(db, ownerKey, day), returnQuota(db, GLOBAL_KEY, day)]);
+    await db.batch(giveBack());
     return { refused: "service_busy" };
   }
 
@@ -106,21 +134,60 @@ export async function createCapture(
     await images.put(id, bytes, { httpMetadata: { contentType: "image/png" } });
     await db
       .prepare(
-        `INSERT INTO captures (id, delete_hash, size, created_at, expires_at)
-         VALUES (?1, ?2, ?3, ?4, ?5)`,
+        `INSERT INTO captures (id, delete_hash, guest_hash, size, created_at, expires_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
       )
-      .bind(id, deleteHash, size, now, expiresAt)
+      .bind(id, deleteHash, guestHash, size, now, expiresAt)
       .run();
   } catch (err) {
     await images.delete(id);
-    await db.batch([
-      releaseBytes(db, size),
-      returnQuota(db, ownerKey, day),
-      returnQuota(db, GLOBAL_KEY, day),
-    ]);
+    await db.batch([releaseBytes(db, size), ...giveBack()]);
     throw err;
   }
   return { expiresAt };
+}
+
+/** Records a guest, or says which limit refused it. */
+export async function createGuest(
+  db: D1Database,
+  tokenHash: string,
+  blockKey: string,
+  now: number,
+): Promise<{ expiresAt: number } | { refused: Refusal }> {
+  const refused = await takeQuotas(
+    db,
+    [
+      { key: `new-${blockKey}`, limit: BLOCK_GUESTS_DAILY_LIMIT },
+      { key: GLOBAL_GUESTS_KEY, limit: GLOBAL_GUESTS_DAILY_LIMIT },
+    ],
+    utcDay(now),
+  );
+  if (refused) {
+    return { refused: refused.key === GLOBAL_GUESTS_KEY ? "service_busy" : "daily_limit" };
+  }
+
+  const expiresAt = now + GUEST_LIFETIME_MS;
+  await db
+    .prepare("INSERT INTO guests (token_hash, created_at, expires_at) VALUES (?1, ?2, ?3)")
+    .bind(tokenHash, now, expiresAt)
+    .run();
+  return { expiresAt };
+}
+
+export type GuestStatus = "valid" | "banned" | "unknown";
+
+/** An expired guest is unknown: the app answers by getting a new one. */
+export async function guestStatus(
+  db: D1Database,
+  tokenHash: string,
+  now: number,
+): Promise<GuestStatus> {
+  const guest = await db
+    .prepare("SELECT banned FROM guests WHERE token_hash = ?1 AND expires_at > ?2")
+    .bind(tokenHash, now)
+    .first<{ banned: number }>();
+  if (!guest) return "unknown";
+  return guest.banned ? "banned" : "valid";
 }
 
 /** Size of a live capture, or null when it doesn't exist or has expired. */
@@ -156,7 +223,7 @@ export async function deleteCapture(
   return true;
 }
 
-/** Cron job: frees what expired, and forgets the counters of past days. */
+/** Cron job: frees what expired, and forgets past counters and old guests. */
 export async function purgeExpired(
   { db, images }: Storage,
   now: number,
@@ -166,7 +233,10 @@ export async function purgeExpired(
     .bind(now, PURGE_BATCH)
     .all<{ id: string; size: number }>();
 
-  const statements = [db.prepare("DELETE FROM usage WHERE day < ?1").bind(utcDay(now))];
+  const statements = [
+    db.prepare("DELETE FROM usage WHERE day < ?1").bind(utcDay(now)),
+    db.prepare("DELETE FROM guests WHERE expires_at <= ?1").bind(now),
+  ];
   if (results.length > 0) {
     const ids = results.map((capture) => capture.id);
     await images.delete(ids);

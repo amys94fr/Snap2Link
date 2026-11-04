@@ -18,7 +18,8 @@
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "snap2link-relay" }],
   "vars": {
     "PUBLIC_URL": "https://i.snap2link.app",
-    "ABUSE_CONTACT": "abuse@snap2link.app"
+    "ABUSE_CONTACT": "abuse@snap2link.app",
+    "TURNSTILE_SITEKEY": "0x4AAAAAAFz4ZLGx_T_OsfRo"
   },
   // Links are refused the moment they expire: this only frees the space.
   "triggers": { "crons": ["*/30 * * * *"] },
