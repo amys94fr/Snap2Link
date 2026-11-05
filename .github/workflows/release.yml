@@ -78,7 +78,7 @@ jobs:
             os: windows-latest
             target: x86_64-pc-windows-msvc
           - name: darwin-universal
-            os: macos-14
+            os: macos-15
             target: universal-apple-darwin
             rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
           - name: linux-x86_64
