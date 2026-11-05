@@ -1,6 +1,6 @@
 import type { Register } from 'claude-code'
 
-const SHARE_LINK = /https:\/\/drive\.google\.com\/uc\?id=[A-Za-z0-9_-]{1,128}&export=download|https:\/\/i\.snap2link\.app\/[0-9A-Za-z]{22}\.png/g
+const SHARE_LINK = /https:\/\/drive\.google\.com\/uc\?id=[A-Za-z0-9_-]{1,128}&export=download|https:\/\/i\.snap2link\.app\/[0-9A-Za-z]{22}(?:\.png)?(?![0-9A-Za-z])/g
 
 export const register: Register = (on) => {
   on('prompt.submit', ($, e, next) => {

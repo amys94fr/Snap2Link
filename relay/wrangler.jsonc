@@ -17,6 +17,8 @@
     }
   ],
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "snap2link-relay" }],
+  // Link previews. Free for 5,000 resizes a month, then refused and never billed.
+  "images": { "binding": "RESIZER" },
   "vars": {
     "PUBLIC_URL": "https://i.snap2link.app",
     "ABUSE_CONTACT": "abuse@snap2link.app",

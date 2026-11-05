@@ -39,7 +39,7 @@ Needs `Authorization: Bearer <guest_token>`, or `Bearer <session_token>` for an 
 ```json
 {
   "id": "4fGh2kLm9PqRs7TuVw1XyZ",
-  "url": "https://i.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ.png",
+  "url": "https://i.snap2link.app/4fGh2kLm9PqRs7TuVw1XyZ",
   "delete_token": "…",
   "expires_at": "2026-11-04T18:00:00.000Z"
 }
@@ -58,9 +58,15 @@ Needs `Authorization: Bearer <guest_token>`, or `Bearer <session_token>` for an 
 | 429 | `daily_limit` | This guest used its 5 captures of the day, this account its 20, or this address its 30 (100 through accounts) |
 | 503 | `service_busy` | A global limit is reached, try again later |
 
-### `GET /{id}.png`
+### `GET /{id}`
 
-Returns the image, or 404 once it is deleted or expired. `HEAD` works too.
+Returns the image, or 404 once it is deleted or expired. `HEAD` works too. `/{id}.png` returns the same image, and links made before 1.8.0 use it.
+
+WhatsApp, Facebook, X and LinkedIn get a small page with Open Graph tags instead, because they build their card from a page. They recognize themselves by their `User-Agent`, and everyone else gets the image.
+
+### `GET /{id}.jpg`
+
+The picture for that card. A capture up to 300 KB is served as is, and a larger one is reduced to 800 pixels on its longest side. Past Cloudflare's 5,000 free resizes of the month, larger captures answer 404 and their card has no picture: the link itself keeps working.
 
 ### `DELETE /v1/captures/{id}`
 

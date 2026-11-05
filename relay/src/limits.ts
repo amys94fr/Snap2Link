@@ -18,6 +18,15 @@ export const LINK_LIFETIME_MS = 6 * 60 * 60 * 1000;
 /** Largest accepted capture. */
 export const MAX_CAPTURE_BYTES = 5_000_000;
 
+/**
+ * Up to this size, a capture is its own preview and costs no resize. WhatsApp
+ * documents 600 KB as its ceiling, and some reports say 300 KB.
+ */
+export const MAX_PREVIEW_BYTES = 300_000;
+
+/** Longest side of a resized preview, in pixels. */
+export const PREVIEW_SIDE = 800;
+
 /** Captures one guest can send per UTC day. */
 export const GUEST_DAILY_LIMIT = 5;
 
