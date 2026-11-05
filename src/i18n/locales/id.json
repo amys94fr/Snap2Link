@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Tangkap layar Anda dan langsung dapatkan\ntautan yang bisa ditempel di mana saja.",
   "wizard.welcome.no_account": "Mulai tanpa akun",
-  "wizard.welcome.no_account_hint": "Tautan berlaku 6 jam, maksimal 5 tangkapan layar per hari.",
+  "wizard.welcome.no_account_hint": "Tautan berlaku 24 jam, maksimal 5 tangkapan layar per hari.",
   "wizard.welcome.drive": "Gunakan Google Drive saya",
 
   "wizard.connect.title": "Hubungkan Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Akun Google Anda. Tangkapan layar tetap di Drive Anda.",
   "settings.hosting.plan": "Paket Anda",
   "settings.hosting.plan_hint": "5 tangkapan layar per hari, masing-masing maksimal 5 MB.",
-  "settings.hosting.link_life": "Tautan berlaku 6 jam",
+  "settings.hosting.link_life": "Tautan berlaku 24 jam, hingga 48 jam dengan akun gratis",
   "settings.hosting.link_life_hint": "Setelah jangka waktu ini, tautan tidak berfungsi lagi dan tangkapan layar dihapus.",
   "settings.hosting.connect": "Hubungkan Google Drive",
   "settings.hosting.connect_hint": "Hubungkan akun Anda untuk mengirim tangkapan layar ke Drive Anda.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "Proses masuk dibatalkan. Anda bisa menutup tab ini dan mencoba lagi dari Snap2Link.",
 
   "account.free_title": "Akun gratis",
-  "account.free_hint": "20 tangkapan layar per hari dan 6 tautan sekaligus. Cukup dengan alamat email Anda.",
+  "account.free_hint": "20 tangkapan layar per hari dan 6 tautan sekaligus, hingga 48 jam. Cukup dengan alamat email Anda.",
   "account.email_label": "Alamat email",
   "account.send_code": "Dapatkan kode",
   "account.sending": "Mengirim…",

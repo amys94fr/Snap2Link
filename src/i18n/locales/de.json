@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Nehmen Sie Ihren Bildschirm auf und erhalten Sie\nsofort einen Link, den Sie überall einfügen können.",
   "wizard.welcome.no_account": "Ohne Konto starten",
-  "wizard.welcome.no_account_hint": "Links gelten 6 Stunden, bis zu 5 Screenshots pro Tag.",
+  "wizard.welcome.no_account_hint": "Links gelten 24 Stunden, bis zu 5 Screenshots pro Tag.",
   "wizard.welcome.drive": "Mein Google Drive verwenden",
 
   "wizard.connect.title": "Google Drive verbinden",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Ihr Google-Konto. Screenshots bleiben in Ihrem Drive.",
   "settings.hosting.plan": "Ihr Tarif",
   "settings.hosting.plan_hint": "5 Screenshots pro Tag, jeweils bis zu 5 MB.",
-  "settings.hosting.link_life": "Links gelten 6 Stunden",
+  "settings.hosting.link_life": "Links gelten 24 Stunden, mit kostenlosem Konto bis zu 48",
   "settings.hosting.link_life_hint": "Nach dieser Frist funktioniert der Link nicht mehr und der Screenshot wird gelöscht.",
   "settings.hosting.connect": "Google Drive verbinden",
   "settings.hosting.connect_hint": "Verbinden Sie Ihr Konto, um Screenshots an Ihr Drive zu senden.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "Die Anmeldung wurde abgebrochen. Sie können diesen Tab schließen und es in Snap2Link erneut versuchen.",
 
   "account.free_title": "Kostenloses Konto",
-  "account.free_hint": "20 Screenshots pro Tag und 6 Links gleichzeitig. Sie brauchen nur Ihre E-Mail-Adresse.",
+  "account.free_hint": "20 Screenshots pro Tag und 6 Links gleichzeitig, bis zu 48 Stunden lang. Sie brauchen nur Ihre E-Mail-Adresse.",
   "account.email_label": "E-Mail-Adresse",
   "account.send_code": "Code anfordern",
   "account.sending": "Wird gesendet…",

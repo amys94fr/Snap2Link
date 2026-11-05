@@ -12,8 +12,8 @@
  *     this one: add a limit before upgrading.
  */
 
-/** Links die after this delay, whatever happens to the cleanup job. */
-export const LINK_LIFETIME_MS = 6 * 60 * 60 * 1000;
+/** Guest links die after this delay, whatever happens to the cleanup job. */
+export const GUEST_LINK_LIFETIME_MS = 24 * 60 * 60 * 1000;
 
 /** Largest accepted capture. */
 export const MAX_CAPTURE_BYTES = 5_000_000;
@@ -75,11 +75,11 @@ export const MAX_STORED_BYTES = 2_000_000_000;
 
 /**
  * What each plan may do. `slots` is how many of an account's links work at
- * once: a new capture ends the oldest. Stored bytes stay bounded by
- * MAX_STORED_BYTES, whatever the number of accounts.
+ * once: a new capture ends the oldest, even before `linkLifetimeMs`. Stored
+ * bytes stay bounded by MAX_STORED_BYTES, whatever the number of accounts.
  */
 export const PLANS = {
-  free: { slots: 6, dailyCaptures: 20 },
+  free: { slots: 6, dailyCaptures: 20, linkLifetimeMs: 48 * 60 * 60 * 1000 },
 } as const;
 
 export type Plan = keyof typeof PLANS;

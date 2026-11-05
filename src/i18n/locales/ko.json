@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "화면을 캡처하면 바로\n어디에나 붙여 넣을 수 있는 링크가 생성됩니다.",
   "wizard.welcome.no_account": "계정 없이 시작하기",
-  "wizard.welcome.no_account_hint": "링크는 6시간 동안 유효하며, 캡처는 하루 최대 5개입니다.",
+  "wizard.welcome.no_account_hint": "링크는 24시간 동안 유효하며, 캡처는 하루 최대 5개입니다.",
   "wizard.welcome.drive": "내 Google Drive 사용",
 
   "wizard.connect.title": "Google Drive 연결",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Google 계정을 사용합니다. 캡처는 Drive에 유지됩니다.",
   "settings.hosting.plan": "내 요금제",
   "settings.hosting.plan_hint": "하루 캡처 5개, 개당 최대 5MB.",
-  "settings.hosting.link_life": "링크는 6시간 동안 유효합니다",
+  "settings.hosting.link_life": "링크는 24시간 동안 유효하며, 무료 계정은 최대 48시간입니다",
   "settings.hosting.link_life_hint": "이 기간이 지나면 링크가 더 이상 작동하지 않고 캡처가 삭제됩니다.",
   "settings.hosting.connect": "Google Drive 연결",
   "settings.hosting.connect_hint": "계정을 연결하면 캡처를 Drive로 전송할 수 있습니다.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "로그인이 취소되었습니다. 이 탭을 닫고 Snap2Link에서 다시 시도하세요.",
 
   "account.free_title": "무료 계정",
-  "account.free_hint": "하루 캡처 20개, 동시에 링크 6개. 이메일 주소만 있으면 됩니다.",
+  "account.free_hint": "하루 캡처 20개, 동시에 링크 6개, 최대 48시간. 이메일 주소만 있으면 됩니다.",
   "account.email_label": "이메일 주소",
   "account.send_code": "코드 받기",
   "account.sending": "보내는 중…",

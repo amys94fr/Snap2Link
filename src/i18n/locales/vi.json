@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Chụp màn hình và nhận ngay\nliên kết để dán ở bất cứ đâu.",
   "wizard.welcome.no_account": "Bắt đầu không cần tài khoản",
-  "wizard.welcome.no_account_hint": "Liên kết có hiệu lực trong 6 giờ, tối đa 5 ảnh chụp mỗi ngày.",
+  "wizard.welcome.no_account_hint": "Liên kết có hiệu lực trong 24 giờ, tối đa 5 ảnh chụp mỗi ngày.",
   "wizard.welcome.drive": "Dùng Google Drive của tôi",
 
   "wizard.connect.title": "Kết nối Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Tài khoản Google của bạn. Ảnh chụp được giữ trong Drive của bạn.",
   "settings.hosting.plan": "Gói của bạn",
   "settings.hosting.plan_hint": "5 ảnh chụp mỗi ngày, tối đa 5 MB mỗi ảnh.",
-  "settings.hosting.link_life": "Liên kết có hiệu lực trong 6 giờ",
+  "settings.hosting.link_life": "Liên kết có hiệu lực trong 24 giờ, tối đa 48 giờ với tài khoản miễn phí",
   "settings.hosting.link_life_hint": "Sau thời gian này, liên kết ngừng hoạt động và ảnh chụp bị xóa.",
   "settings.hosting.connect": "Kết nối Google Drive",
   "settings.hosting.connect_hint": "Kết nối tài khoản của bạn để gửi ảnh chụp đến Drive.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "Đăng nhập đã bị hủy. Bạn có thể đóng tab này và thử lại từ Snap2Link.",
 
   "account.free_title": "Tài khoản miễn phí",
-  "account.free_hint": "20 ảnh chụp mỗi ngày và 6 liên kết cùng lúc. Chỉ cần địa chỉ email của bạn.",
+  "account.free_hint": "20 ảnh chụp mỗi ngày và 6 liên kết cùng lúc, tối đa 48 giờ. Chỉ cần địa chỉ email của bạn.",
   "account.email_label": "Địa chỉ email",
   "account.send_code": "Nhận mã",
   "account.sending": "Đang gửi…",

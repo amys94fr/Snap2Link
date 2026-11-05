@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "अपनी स्क्रीन कैप्चर करें और तुरंत\nऐसा लिंक पाएँ जिसे कहीं भी पेस्ट किया जा सके।",
   "wizard.welcome.no_account": "बिना खाते के शुरू करें",
-  "wizard.welcome.no_account_hint": "लिंक 6 घंटे तक काम करते हैं, हर दिन 5 कैप्चर तक।",
+  "wizard.welcome.no_account_hint": "लिंक 24 घंटे तक काम करते हैं, हर दिन 5 कैप्चर तक।",
   "wizard.welcome.drive": "मेरा Google Drive इस्तेमाल करें",
 
   "wizard.connect.title": "Google Drive कनेक्ट करें",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "आपका Google खाता। कैप्चर आपके Drive में ही रहते हैं।",
   "settings.hosting.plan": "आपका प्लान",
   "settings.hosting.plan_hint": "हर दिन 5 कैप्चर, हर कैप्चर 5 MB तक।",
-  "settings.hosting.link_life": "लिंक 6 घंटे तक काम करते हैं",
+  "settings.hosting.link_life": "लिंक 24 घंटे तक काम करते हैं, मुफ़्त खाते से 48 घंटे तक",
   "settings.hosting.link_life_hint": "इस अवधि के बाद, लिंक काम करना बंद कर देता है और कैप्चर मिटा दिया जाता है।",
   "settings.hosting.connect": "Google Drive कनेक्ट करें",
   "settings.hosting.connect_hint": "कैप्चर अपने Drive पर भेजने के लिए अपना खाता कनेक्ट करें।",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "साइन-इन रद्द कर दिया गया। आप यह टैब बंद करके Snap2Link से फिर से कोशिश कर सकते हैं।",
 
   "account.free_title": "मुफ़्त खाता",
-  "account.free_hint": "हर दिन 20 कैप्चर और एक साथ 6 लिंक। बस आपका ईमेल पता चाहिए।",
+  "account.free_hint": "हर दिन 20 कैप्चर और एक साथ 6 लिंक, 48 घंटे तक। बस आपका ईमेल पता चाहिए।",
   "account.email_label": "ईमेल पता",
   "account.send_code": "कोड पाएँ",
   "account.sending": "भेजा जा रहा है…",

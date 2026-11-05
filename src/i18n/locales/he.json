@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "מצלמים את המסך ומקבלים מיד\nקישור שאפשר להדביק בכל מקום.",
   "wizard.welcome.no_account": "התחלה בלי חשבון",
-  "wizard.welcome.no_account_hint": "הקישורים עובדים במשך 6 שעות, עד 5 צילומים ביום.",
+  "wizard.welcome.no_account_hint": "הקישורים עובדים במשך 24 שעות, עד 5 צילומים ביום.",
   "wizard.welcome.drive": "שימוש ב-Google Drive שלי",
 
   "wizard.connect.title": "חיבור Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "חשבון Google שלך. הצילומים נשארים ב-Drive.",
   "settings.hosting.plan": "התוכנית שלך",
   "settings.hosting.plan_hint": "5 צילומים ביום, עד 5 מגה-בייט לכל צילום.",
-  "settings.hosting.link_life": "הקישורים עובדים במשך 6 שעות",
+  "settings.hosting.link_life": "הקישורים עובדים במשך 24 שעות, ועד 48 שעות עם חשבון חינמי",
   "settings.hosting.link_life_hint": "בתום פרק הזמן הזה, הקישור יפסיק לעבוד והצילום יימחק.",
   "settings.hosting.connect": "חיבור Google Drive",
   "settings.hosting.connect_hint": "כדי לשלוח צילומים ל-Drive, צריך לחבר את החשבון.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "הכניסה בוטלה. אפשר לסגור את הכרטיסייה הזו ולנסות שוב מ-Snap2Link.",
 
   "account.free_title": "חשבון חינמי",
-  "account.free_hint": "20 צילומים ביום ו-6 קישורים בו-זמנית. צריך רק כתובת אימייל.",
+  "account.free_hint": "20 צילומים ביום ו-6 קישורים בו-זמנית, עד 48 שעות. צריך רק כתובת אימייל.",
   "account.email_label": "כתובת אימייל",
   "account.send_code": "קבלת קוד",
   "account.sending": "שולח…",

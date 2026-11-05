@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Зробіть знімок екрана й одразу отримайте\nпосилання, яке можна вставити будь-де.",
   "wizard.welcome.no_account": "Почати без облікового запису",
-  "wizard.welcome.no_account_hint": "Посилання працюють 6 годин, до 5 знімків на день.",
+  "wizard.welcome.no_account_hint": "Посилання працюють 24 години, до 5 знімків на день.",
   "wizard.welcome.drive": "Використати мій Google Drive",
 
   "wizard.connect.title": "Підключіть Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Ваш обліковий запис Google. Знімки залишаються на вашому Drive.",
   "settings.hosting.plan": "Ваш тариф",
   "settings.hosting.plan_hint": "5 знімків на день, до 5 МБ кожен.",
-  "settings.hosting.link_life": "Посилання працюють 6 годин",
+  "settings.hosting.link_life": "Посилання працюють 24 години, до 48 з безкоштовним обліковим записом",
   "settings.hosting.link_life_hint": "Після цього терміну посилання перестає працювати, а знімок видаляється.",
   "settings.hosting.connect": "Підключити Google Drive",
   "settings.hosting.connect_hint": "Підключіть обліковий запис, щоб надсилати знімки на ваш Drive.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "Вхід скасовано. Закрийте цю вкладку й повторіть спробу в Snap2Link.",
 
   "account.free_title": "Безкоштовний обліковий запис",
-  "account.free_hint": "20 знімків на день і 6 посилань одночасно. Потрібна лише електронна адреса.",
+  "account.free_hint": "20 знімків на день і 6 посилань одночасно, до 48 годин. Потрібна лише електронна адреса.",
   "account.email_label": "Електронна адреса",
   "account.send_code": "Отримати код",
   "account.sending": "Надсилання…",

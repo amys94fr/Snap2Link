@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Links on `i.snap2link.app` are shorter: they no longer end in `.png`. Older links keep working. Update the Claude Code plugin to 0.2.0, as earlier versions refuse the new links.
+- Links on `i.snap2link.app` last longer: 24 hours without an account instead of 6, and up to 48 hours with a free account. Links already created keep their 6 hours.
 
 ### Added
 

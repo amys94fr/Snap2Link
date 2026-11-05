@@ -7,6 +7,7 @@ import {
   BLOCK_DAILY_CODES,
   EMAIL_DAILY_CODES,
   GLOBAL_DAILY_CODES,
+  GUEST_LINK_LIFETIME_MS,
   LOGIN_CODE_ATTEMPTS,
   LOGIN_CODE_LIFETIME_MS,
   PLANS,
@@ -373,6 +374,15 @@ describe("using a code", () => {
 });
 
 describe("an account's captures", () => {
+  it("keeps a link longer than a guest's", async () => {
+    const { session_token } = await signIn();
+    const { expires_at } = await (await upload(session_token)).json<{ expires_at: string }>();
+    const lifetime = new Date(expires_at).getTime() - Date.now();
+    expect(lifetime).toBeGreaterThan(FREE.linkLifetimeMs - 60_000);
+    expect(lifetime).toBeLessThanOrEqual(FREE.linkLifetimeMs);
+    expect(FREE.linkLifetimeMs).toBeGreaterThan(GUEST_LINK_LIFETIME_MS);
+  });
+
   it("are not limited like a guest's", async () => {
     const { session_token } = await signIn();
 

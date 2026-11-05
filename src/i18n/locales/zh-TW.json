@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "擷取螢幕畫面，\n立即取得可貼到任何地方的連結。",
   "wizard.welcome.no_account": "不需帳號，直接開始",
-  "wizard.welcome.no_account_hint": "連結有效期限為 6 小時，每天最多 5 張截圖。",
+  "wizard.welcome.no_account_hint": "連結有效期限為 24 小時，每天最多 5 張截圖。",
   "wizard.welcome.drive": "使用我的 Google Drive",
 
   "wizard.connect.title": "連接 Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "使用您的 Google 帳號，截圖會保留在您的 Drive。",
   "settings.hosting.plan": "您的方案",
   "settings.hosting.plan_hint": "每天 5 張截圖，每張最大 5 MB。",
-  "settings.hosting.link_life": "連結有效期限為 6 小時",
+  "settings.hosting.link_life": "連結有效期限為 24 小時，免費帳號最長 48 小時",
   "settings.hosting.link_life_hint": "超過此期限後，連結會失效，截圖也會被清除。",
   "settings.hosting.connect": "連接 Google Drive",
   "settings.hosting.connect_hint": "連接您的帳號，即可將截圖上傳到您的 Drive。",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "登入已取消。您可以關閉此分頁，然後從 Snap2Link 再試一次。",
 
   "account.free_title": "免費帳號",
-  "account.free_hint": "每天 20 張截圖，同時保留 6 個連結。只需要您的電子郵件地址。",
+  "account.free_hint": "每天 20 張截圖，同時保留 6 個連結，最長 48 小時。只需要您的電子郵件地址。",
   "account.email_label": "電子郵件地址",
   "account.send_code": "取得驗證碼",
   "account.sending": "傳送中…",
