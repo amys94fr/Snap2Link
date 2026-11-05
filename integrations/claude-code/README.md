@@ -16,7 +16,7 @@ It needs Node.js 20 or newer on the machine where Claude Code runs. Snap2Link it
 
 - **MCP server**: the `read_capture` tool downloads the capture and shows it to Claude.
 - **Skill**: tells Claude when to use the tool and what to do when a link no longer works.
-- **Mod**: spots a Snap2Link link in your prompt, shows a notification and tells Claude to read it. It needs a recent Claude Code, and the rest works without it.
+- **Mod**: spots a Snap2Link link in your prompt, shows a notification and tells Claude to read it. It hooks `prompt.submit` only: it reads the text you send, adds that note when it finds a link and changes nothing else. It needs a recent Claude Code, and the rest works without it.
 
 ## Security
 
@@ -47,4 +47,4 @@ pnpm build
 claude plugin test .
 ```
 
-`server/snap2link-mcp.mjs` is the bundle the plugin ships, so users don't have to install dependencies. Run `pnpm build` after changing the server: CI fails if the bundle doesn't match the source.
+`server/snap2link-mcp.mjs` is the file the plugin ships. It has no dependencies and isn't minified, so you can read what runs. Run `pnpm build` after changing the server: CI fails if the bundle doesn't match the source.
