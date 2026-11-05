@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The Linux AppImage failed to start on systems older than Ubuntu 24.04, such as Ubuntu 22.04. It is now built on Ubuntu 22.04.
+
 ## [1.6.0] – 2026-11-05
 
 ### Added
@@ -28,7 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Closing the settings window with its close button destroyed it, and it could not be reopened until the app restarted. The same applied to the annotator.
 - The About page always showed version 1.0.0.
-- The Linux AppImage failed to start on systems older than Ubuntu 24.04, such as Ubuntu 22.04. It is now built on Ubuntu 22.04.
 
 ## [1.5.0] – 2026-10-11
 
