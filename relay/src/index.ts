@@ -25,7 +25,6 @@ export interface Env {
   TURNSTILE_SECRET: string;
 }
 
-const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const ID_LENGTH = 22;
 
@@ -61,10 +60,6 @@ async function sha256(text: string): Promise<string> {
   return [...new Uint8Array(digest)]
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
-}
-
-function isPng(bytes: Uint8Array): boolean {
-  return PNG_SIGNATURE.every((value, index) => bytes[index] === value);
 }
 
 function error(status: number, code: string): Response {
@@ -108,12 +103,12 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
   if (status === "unknown") return error(401, "guest_required");
   if (status === "banned") return error(403, "guest_banned");
 
-  const declared = Number(request.headers.get("Content-Length") ?? 0);
-  if (declared > MAX_CAPTURE_BYTES) return error(413, "too_large");
-
-  const bytes = new Uint8Array(await request.arrayBuffer());
-  if (bytes.byteLength > MAX_CAPTURE_BYTES) return error(413, "too_large");
-  if (!isPng(bytes)) return error(415, "not_png");
+  // The size has to be known up front: the body goes straight to R2.
+  const size = Number(request.headers.get("Content-Length"));
+  if (!request.body || !Number.isSafeInteger(size) || size <= 0) {
+    return error(411, "length_required");
+  }
+  if (size > MAX_CAPTURE_BYTES) return error(413, "too_large");
 
   const id = randomId();
   const deleteToken = randomToken();
@@ -121,7 +116,8 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     id,
     deleteHash: await sha256(deleteToken),
     guestHash,
-    bytes,
+    body: request.body,
+    size,
     quotas: [
       { key: `guest:${guestHash}`, limit: GUEST_DAILY_LIMIT },
       { key: await ownerKey(request, env.IP_SALT, now), limit: BLOCK_DAILY_LIMIT },
@@ -130,7 +126,8 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
   });
 
   if ("refused" in result) {
-    return error(result.refused === "daily_limit" ? 429 : 503, result.refused);
+    const status = { daily_limit: 429, service_busy: 503, not_png: 415 }[result.refused];
+    return error(status, result.refused);
   }
   return Response.json(
     {
