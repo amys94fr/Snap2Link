@@ -133,7 +133,7 @@ jobs:
       matrix:
         include:
           - name: macOS
-            os: macos-14
+            os: macos-15
           # Same runner as the Linux build in release.yml.
           - name: Linux
             os: ubuntu-22.04
