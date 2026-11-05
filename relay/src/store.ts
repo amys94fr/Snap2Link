@@ -6,6 +6,7 @@ import {
   LINK_LIFETIME_MS,
   MAX_STORED_BYTES,
   PURGE_BATCH,
+  SESSION_LIFETIME_MS,
 } from "./limits";
 
 /**
@@ -50,7 +51,7 @@ async function takeQuota(
   return row !== null;
 }
 
-function returnQuota(db: D1Database, key: string, day: string) {
+export function returnQuota(db: D1Database, key: string, day: string) {
   return db
     .prepare("UPDATE usage SET count = count - 1 WHERE key = ?1 AND day = ?2")
     .bind(key, day);
@@ -62,7 +63,7 @@ export interface Quota {
 }
 
 /** Takes every quota, or none: returns the one that refused. */
-async function takeQuotas(
+export async function takeQuotas(
   db: D1Database,
   quotas: Quota[],
   day: string,
@@ -92,7 +93,7 @@ async function reserveBytes(db: D1Database, size: number): Promise<boolean> {
   return row !== null;
 }
 
-function releaseBytes(db: D1Database, size: number): D1PreparedStatement {
+export function releaseBytes(db: D1Database, size: number): D1PreparedStatement {
   return db
     .prepare("UPDATE stats SET value = MAX(value - ?1, 0) WHERE key = ?2")
     .bind(size, BYTES_KEY);
@@ -111,7 +112,8 @@ async function storedPng(images: R2Bucket, id: string): Promise<boolean> {
 export interface NewCapture {
   id: string;
   deleteHash: string;
-  guestHash: string;
+  /** Who sent it: a guest, or an account with its number of slots. */
+  sender: { guestHash: string } | { accountId: string; slots: number };
   /** Never read in JS: copying 5 MB through it costs most of a request's 10 ms of CPU. */
   body: ReadableStream;
   /** What the sender declared. The stream fails if it carries anything else. */
@@ -130,7 +132,7 @@ export async function createCapture(
   { db, images }: Storage,
   capture: NewCapture,
 ): Promise<{ expiresAt: number } | { refused: Refusal | "not_png" }> {
-  const { id, deleteHash, guestHash, body, size, now } = capture;
+  const { id, deleteHash, sender, body, size, now } = capture;
   const day = utcDay(now);
   const quotas = [...capture.quotas, { key: GLOBAL_KEY, limit: GLOBAL_DAILY_LIMIT }];
   const giveBack = () => quotas.map(({ key }) => returnQuota(db, key, day));
@@ -154,19 +156,45 @@ export async function createCapture(
       await db.batch([releaseBytes(db, size)]);
       return { refused: "not_png" };
     }
-    await db
+    const accountId = "accountId" in sender ? sender.accountId : null;
+    const guestHash = "guestHash" in sender ? sender.guestHash : null;
+    const insert = db
       .prepare(
-        `INSERT INTO captures (id, delete_hash, guest_hash, size, created_at, expires_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
+        `INSERT INTO captures (id, delete_hash, guest_hash, account_id, size, created_at, expires_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
       )
-      .bind(id, deleteHash, guestHash, size, now, expiresAt)
-      .run();
+      .bind(id, deleteHash, guestHash, accountId, size, now, expiresAt);
+    await db.batch(
+      "slots" in sender ? [insert, endOldestLinks(db, sender.accountId, sender.slots, now)] : [insert],
+    );
   } catch (err) {
     await images.delete(id);
     await db.batch([releaseBytes(db, size), ...giveBack()]);
     throw err;
   }
   return { expiresAt };
+}
+
+/**
+ * Ends every link of an account past its newest `slots`. Only the date changes:
+ * an upload has little CPU left, and the cleanup job frees the image and its
+ * bytes. Sorted by rowid, since two captures can share a millisecond.
+ */
+function endOldestLinks(
+  db: D1Database,
+  accountId: string,
+  slots: number,
+  now: number,
+): D1PreparedStatement {
+  return db
+    .prepare(
+      `UPDATE captures SET expires_at = ?3
+       WHERE account_id = ?1 AND expires_at > ?3 AND id NOT IN (
+         SELECT id FROM captures WHERE account_id = ?1 AND expires_at > ?3
+         ORDER BY rowid DESC LIMIT ?2
+       )`,
+    )
+    .bind(accountId, slots, now);
 }
 
 /** Records a guest, or says which limit refused it. */
@@ -245,7 +273,7 @@ export async function deleteCapture(
   return true;
 }
 
-/** Cron job: frees what expired, and forgets past counters and old guests. */
+/** Cron job: frees what expired, and forgets past counters, old guests and old accounts. */
 export async function purgeExpired(
   { db, images }: Storage,
   now: number,
@@ -258,6 +286,16 @@ export async function purgeExpired(
   const statements = [
     db.prepare("DELETE FROM usage WHERE day < ?1").bind(utcDay(now)),
     db.prepare("DELETE FROM guests WHERE expires_at <= ?1").bind(now),
+    db.prepare("DELETE FROM login_codes WHERE expires_at <= ?1").bind(now),
+    db.prepare("DELETE FROM sessions WHERE expires_at <= ?1").bind(now),
+    // A banned address stays known, or it could come back. A paid plan outlives its sessions.
+    db
+      .prepare(
+        `DELETE FROM accounts
+         WHERE plan = 'free' AND banned = 0 AND created_at <= ?1
+           AND NOT EXISTS (SELECT 1 FROM sessions WHERE sessions.account_id = accounts.id)`,
+      )
+      .bind(now - SESSION_LIFETIME_MS),
   ];
   if (results.length > 0) {
     const ids = results.map((capture) => capture.id);
