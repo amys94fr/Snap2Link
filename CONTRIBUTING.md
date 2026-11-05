@@ -124,8 +124,7 @@ scripts/
 
 .github/workflows/
   test.yml                   Tests on every push/PR, Rust on Windows, macOS and Linux
-  release.yml                Build + sign + draft release on every v* tag
-  winget.yml                 Winget update when a release is published
+  release.yml                Build + sign + publish on every v* tag, then winget
 ```
 
 ## Tests
@@ -194,7 +193,7 @@ CI ([`test.yml`](.github/workflows/test.yml)) will run automatically. Wait for i
 
 ## Release process
 
-Releases are cut by the maintainer and fully automated through GitHub Actions. The workflow is documented in [**docs/RELEASE.md**](docs/RELEASE.md). In short: bump the version in `package.json`, `Cargo.toml`, and `tauri.conf.json`, add a `CHANGELOG.md` entry, push a `vX.Y.Z` tag. That builds signed installers into a draft release, which reaches users once it is tested and published (winget follows).
+Releases are cut by the maintainer and fully automated through GitHub Actions. The workflow is documented in [**docs/RELEASE.md**](docs/RELEASE.md). In short: bump the version in `package.json`, `Cargo.toml`, and `tauri.conf.json`, add a `CHANGELOG.md` entry, push a `vX.Y.Z` tag. That builds signed installers and publishes the release, so users get it straight away (winget follows).
 
 ## Questions?
 
