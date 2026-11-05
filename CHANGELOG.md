@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Linux installs never received updates: the update check failed because the update manifest had no Linux entry. The AppImage, `.deb` and `.rpm` now each get the update in their own format.
+
 ## [1.6.0] – 2026-11-05
 
 ### Added
