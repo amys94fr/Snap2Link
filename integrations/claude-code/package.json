@@ -1,21 +1,18 @@
 {
   "name": "snap2link-claude-code",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Snap2Link plugin for Claude Code: MCP server, skill and mod.",
   "license": "MIT",
   "packageManager": "pnpm@10.15.1",
   "scripts": {
-    "build": "esbuild server/src/index.ts --bundle --platform=node --format=esm --target=node20 --minify --legal-comments=none --banner:js=\"import{createRequire}from'node:module';const require=createRequire(import.meta.url);\" --outfile=server/snap2link-mcp.mjs",
+    "build": "esbuild server/src/index.ts --bundle --platform=node --format=esm --target=node20 --legal-comments=none --outfile=server/snap2link-mcp.mjs",
     "test": "vitest run server",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.2",
-    "zod": "^4.6.7"
-  },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@types/node": "^26.6.6",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2",

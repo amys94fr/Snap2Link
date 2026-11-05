@@ -1,6 +1,6 @@
 {
   "name": "snap2link",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Read Snap2Link screenshot links in Claude Code, including over SSH where image paste does not work.",
   "author": { "name": "amys94fr", "url": "https://github.com/amys94fr" },
   "homepage": "https://snap2link.app",
