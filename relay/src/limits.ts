@@ -70,8 +70,8 @@ export const GUEST_LIFETIME_MS = 90 * 24 * 60 * 60 * 1000;
 /** Captures the whole service accepts per UTC day. */
 export const GLOBAL_DAILY_LIMIT = 3_000;
 
-/** Bytes kept at once. Leaves most of the free 10 GB to the rest of the account. */
-export const MAX_STORED_BYTES = 2_000_000_000;
+/** Bytes kept at once. Stays under the 10 GB of R2's free tier, past which it bills. */
+export const MAX_STORED_BYTES = 8_000_000_000;
 
 /**
  * What each plan may do. `slots` is how many of an account's links work at
