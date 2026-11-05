@@ -232,5 +232,11 @@
   "uploader.limit.title": "Osiągnięto dzienny limit",
   "uploader.limit.subtitle": "Darmowe konto daje 20 zrzutów dziennie.",
   "uploader.limit.action": "Załóż konto",
-  "uploader.error.account_daily_limit": "Twoje konto osiągnęło dzienny limit. Odnawia się o północy UTC."
+  "uploader.error.account_daily_limit": "Twoje konto osiągnęło dzienny limit. Odnawia się o północy UTC.",
+  "account.google": "Kontynuuj z Google",
+  "account.google_waiting": "Dokończ logowanie w przeglądarce.",
+  "account.or_email": "Lub otrzymaj kod e-mailem",
+  "account.error.google": "Logowanie przez Google nie zostało ukończone. Spróbuj ponownie.",
+  "oauth.signed_in.title": "Zalogowano!",
+  "oauth.not_signed_in.title": "Nie zalogowano"
 }

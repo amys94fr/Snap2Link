@@ -232,5 +232,11 @@
   "uploader.limit.title": "הגעת למגבלה היומית",
   "uploader.limit.subtitle": "חשבון חינמי נותן 20 צילומים ביום.",
   "uploader.limit.action": "הרשמה",
-  "uploader.error.account_daily_limit": "החשבון שלך הגיע למגבלה היומית. היא מתאפסת בחצות UTC."
+  "uploader.error.account_daily_limit": "החשבון שלך הגיע למגבלה היומית. היא מתאפסת בחצות UTC.",
+  "account.google": "המשך עם Google",
+  "account.google_waiting": "יש לסיים את הכניסה בדפדפן.",
+  "account.or_email": "או קבלת קוד באימייל",
+  "account.error.google": "הכניסה עם Google לא הושלמה. אפשר לנסות שוב.",
+  "oauth.signed_in.title": "נכנסת בהצלחה!",
+  "oauth.not_signed_in.title": "הכניסה לא הושלמה"
 }

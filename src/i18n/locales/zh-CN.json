@@ -232,5 +232,11 @@
   "uploader.limit.title": "已达每日上限",
   "uploader.limit.subtitle": "免费账号每天可用 20 张截图。",
   "uploader.limit.action": "注册",
-  "uploader.error.account_daily_limit": "你的账号已达每日上限，将在 UTC 午夜重置。"
+  "uploader.error.account_daily_limit": "你的账号已达每日上限，将在 UTC 午夜重置。",
+  "account.google": "使用 Google 继续",
+  "account.google_waiting": "请在浏览器中完成登录。",
+  "account.or_email": "或通过邮箱获取验证码",
+  "account.error.google": "Google 登录未完成，请重试。",
+  "oauth.signed_in.title": "已登录！",
+  "oauth.not_signed_in.title": "未登录"
 }

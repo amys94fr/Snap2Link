@@ -232,5 +232,11 @@
   "uploader.limit.title": "Daily limit reached",
   "uploader.limit.subtitle": "A free account gives you 20 captures a day.",
   "uploader.limit.action": "Sign up",
-  "uploader.error.account_daily_limit": "Daily limit reached for your account. It resets at midnight UTC."
+  "uploader.error.account_daily_limit": "Daily limit reached for your account. It resets at midnight UTC.",
+  "account.google": "Continue with Google",
+  "account.google_waiting": "Finish signing in in your browser.",
+  "account.or_email": "Or get a code by email",
+  "account.error.google": "Google sign-in didn't finish. Try again.",
+  "oauth.signed_in.title": "You're signed in!",
+  "oauth.not_signed_in.title": "You're not signed in"
 }

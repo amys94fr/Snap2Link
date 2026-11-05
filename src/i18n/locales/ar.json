@@ -232,5 +232,11 @@
   "uploader.limit.title": "تم بلوغ الحد اليومي",
   "uploader.limit.subtitle": "يمنحك الحساب المجاني 20 لقطة في اليوم.",
   "uploader.limit.action": "إنشاء حساب",
-  "uploader.error.account_daily_limit": "بلغ حسابك الحد اليومي. يُعاد ضبطه عند منتصف الليل بالتوقيت العالمي."
+  "uploader.error.account_daily_limit": "بلغ حسابك الحد اليومي. يُعاد ضبطه عند منتصف الليل بالتوقيت العالمي.",
+  "account.google": "المتابعة باستخدام Google",
+  "account.google_waiting": "أكمل تسجيل الدخول في متصفحك.",
+  "account.or_email": "أو احصل على رمز عبر البريد الإلكتروني",
+  "account.error.google": "لم يكتمل تسجيل الدخول عبر Google. حاول مرة أخرى.",
+  "oauth.signed_in.title": "تم تسجيل الدخول!",
+  "oauth.not_signed_in.title": "لم يتم تسجيل الدخول"
 }

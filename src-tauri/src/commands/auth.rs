@@ -14,6 +14,9 @@ pub const SCOPES: &[&str] = &[
     "openid",
 ];
 
+/// What signing in to a Snap2Link account needs: an address, no access to Drive.
+const IDENTITY_SCOPES: &str = "openid email";
+
 pub const TOKEN_REFRESH_THRESHOLD_S: i64 = 60;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -148,7 +151,28 @@ pub fn parse_callback(is_get: bool, request_url: &str, expected_state: &str) -> 
     }
 }
 
-fn wait_for_code(server: tiny_http::Server, state: &str) -> Result<String, String> {
+/// What the browser tab says at the end: the flows differ for the user.
+#[derive(Clone, Copy)]
+struct ResultTitles {
+    success: &'static str,
+    failure: &'static str,
+}
+
+const DRIVE_TITLES: ResultTitles = ResultTitles {
+    success: "oauth.success.title",
+    failure: "oauth.failure.title",
+};
+
+const SIGN_IN_TITLES: ResultTitles = ResultTitles {
+    success: "oauth.signed_in.title",
+    failure: "oauth.not_signed_in.title",
+};
+
+fn wait_for_code(
+    server: tiny_http::Server,
+    state: &str,
+    titles: ResultTitles,
+) -> Result<String, String> {
     use tiny_http::{Header, Method, Response};
 
     let html = |body: String| {
@@ -171,22 +195,26 @@ fn wait_for_code(server: tiny_http::Server, state: &str) -> Result<String, Strin
                 let _ = request.respond(Response::empty(404));
             }
             Callback::Denied(err) => {
-                let _ = request.respond(html(failure_html()));
+                let _ = request.respond(html(failure_html(titles.failure)));
                 return Err(format!("Google sign-in was not completed ({err})."));
             }
             Callback::Code(code) => {
-                let _ = request.respond(html(success_html()));
+                let _ = request.respond(html(success_html(titles.success)));
                 return Ok(code);
             }
         }
     }
 }
 
-#[tauri::command]
-pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
+/// Runs the browser flow and returns Google's token answer. `extra` goes at
+/// the end of the authorization URL.
+async fn authorize(
+    creds: &ClientSecret,
+    scope: &str,
+    extra: &str,
+    titles: ResultTitles,
+) -> Result<serde_json::Value, String> {
     use std::net::TcpListener;
-
-    let creds = read_credentials(&app_handle)?;
 
     // Keep this listener for the callback server: releasing and re-binding
     // the port would let another local process grab it in between.
@@ -195,22 +223,21 @@ pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
     let server = tiny_http::Server::from_listener(listener, None).map_err(|e| e.to_string())?;
 
     let redirect_uri = format!("http://127.0.0.1:{port}");
-    let scope = SCOPES.join(" ");
     let state = random_urlsafe(32)?;
     let code_verifier = random_urlsafe(64)?;
 
     let auth_url = format!(
-        "{base}?client_id={cid}&redirect_uri={redir}&response_type=code&scope={scope}&access_type=offline&prompt=select_account&state={state}&code_challenge={challenge}&code_challenge_method=S256",
+        "{base}?client_id={cid}&redirect_uri={redir}&response_type=code&scope={scope}&prompt=select_account&state={state}&code_challenge={challenge}&code_challenge_method=S256{extra}",
         base = creds.installed.auth_uri,
         cid = urlencoding::encode(&creds.installed.client_id),
         redir = urlencoding::encode(&redirect_uri),
-        scope = urlencoding::encode(&scope),
+        scope = urlencoding::encode(scope),
         challenge = pkce_challenge(&code_verifier),
     );
 
     open::that(&auth_url).map_err(|e| format!("Could not open browser: {e}"))?;
 
-    let code = tokio::task::spawn_blocking(move || wait_for_code(server, &state))
+    let code = tokio::task::spawn_blocking(move || wait_for_code(server, &state, titles))
         .await
         .map_err(|e| e.to_string())??;
 
@@ -223,7 +250,7 @@ pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
         ("grant_type", "authorization_code"),
         ("code_verifier", code_verifier.as_str()),
     ];
-    let resp: serde_json::Value = client
+    client
         .post(&creds.installed.token_uri)
         .form(&params)
         .send()
@@ -231,7 +258,24 @@ pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
         .map_err(|e| e.to_string())?
         .json()
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())
+}
+
+/// A Google ID token proving the address of whoever signs in. It goes to the
+/// relay and isn't kept: this flow gives no lasting access to the account.
+pub async fn identity_token(app: &AppHandle) -> Result<String, String> {
+    let creds = read_credentials(app)?;
+    let resp = authorize(&creds, IDENTITY_SCOPES, "", SIGN_IN_TITLES).await?;
+    resp["id_token"]
+        .as_str()
+        .map(str::to_string)
+        .ok_or_else(|| "No id_token in response".to_string())
+}
+
+#[tauri::command]
+pub async fn authenticate(app_handle: AppHandle) -> Result<String, String> {
+    let creds = read_credentials(&app_handle)?;
+    let resp = authorize(&creds, &SCOPES.join(" "), "&access_type=offline", DRIVE_TITLES).await?;
 
     let access_token = resp["access_token"]
         .as_str()
@@ -364,17 +408,17 @@ fn result_page(color: &str, title_key: &str, body_key: &str, script: &str) -> St
         .replace("{script}", script)
 }
 
-fn success_html() -> String {
+fn success_html(title_key: &str) -> String {
     result_page(
         "#22c55e",
-        "oauth.success.title",
+        title_key,
         "oauth.success.body",
         "<script>setTimeout(()=>window.close(),3000)</script>",
     )
 }
 
-fn failure_html() -> String {
-    result_page("#f87171", "oauth.failure.title", "oauth.failure.body", "")
+fn failure_html(title_key: &str) -> String {
+    result_page("#f87171", title_key, "oauth.failure.body", "")
 }
 
 #[cfg(test)]

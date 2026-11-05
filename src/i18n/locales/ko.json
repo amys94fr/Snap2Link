@@ -232,5 +232,11 @@
   "uploader.limit.title": "일일 한도 도달",
   "uploader.limit.subtitle": "무료 계정은 하루 20개까지 캡처할 수 있습니다.",
   "uploader.limit.action": "가입하기",
-  "uploader.error.account_daily_limit": "계정의 일일 한도에 도달했습니다. UTC 자정에 초기화됩니다."
+  "uploader.error.account_daily_limit": "계정의 일일 한도에 도달했습니다. UTC 자정에 초기화됩니다.",
+  "account.google": "Google로 계속하기",
+  "account.google_waiting": "브라우저에서 로그인을 완료하세요.",
+  "account.or_email": "또는 이메일로 코드 받기",
+  "account.error.google": "Google 로그인이 완료되지 않았습니다. 다시 시도하세요.",
+  "oauth.signed_in.title": "로그인되었습니다!",
+  "oauth.not_signed_in.title": "로그인되지 않았습니다"
 }

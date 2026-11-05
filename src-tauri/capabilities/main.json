@@ -45,6 +45,7 @@
     "allow-set-hosting",
     "allow-request-login-code",
     "allow-verify-login-code",
+    "allow-sign-in-with-google",
     "allow-get-account",
     "allow-get-snap2link-email",
     "allow-sign-out",

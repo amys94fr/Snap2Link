@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Links on `i.snap2link.app` show a preview of the capture in WhatsApp, Facebook, X and LinkedIn.
+- Sign in to a Snap2Link account with Google. It only asks for your address and gives no access to your Drive. The same address gets the same account, with Google or with a code.
 
 ## [1.7.0] – 2026-11-05
 

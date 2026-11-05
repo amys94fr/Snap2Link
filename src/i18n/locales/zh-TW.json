@@ -232,5 +232,11 @@
   "uploader.limit.title": "已達每日上限",
   "uploader.limit.subtitle": "免費帳號每天可用 20 張截圖。",
   "uploader.limit.action": "註冊",
-  "uploader.error.account_daily_limit": "您的帳號已達每日上限，將在 UTC 午夜重設。"
+  "uploader.error.account_daily_limit": "您的帳號已達每日上限，將在 UTC 午夜重設。",
+  "account.google": "使用 Google 繼續",
+  "account.google_waiting": "請在瀏覽器中完成登入。",
+  "account.or_email": "或透過電子郵件取得驗證碼",
+  "account.error.google": "Google 登入未完成，請再試一次。",
+  "oauth.signed_in.title": "已登入！",
+  "oauth.not_signed_in.title": "未登入"
 }

@@ -29,6 +29,7 @@ const COMMANDS: &[&str] = &[
     "set_hosting",
     "request_login_code",
     "verify_login_code",
+    "sign_in_with_google",
     "get_account",
     "get_snap2link_email",
     "sign_out",

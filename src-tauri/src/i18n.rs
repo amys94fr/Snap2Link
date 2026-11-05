@@ -129,6 +129,8 @@ mod tests {
             "oauth.success.title",
             "oauth.success.body",
             "oauth.failure.title",
+            "oauth.signed_in.title",
+            "oauth.not_signed_in.title",
             "oauth.failure.body",
         ];
         for (code, _) in LOCALES {

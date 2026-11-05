@@ -232,5 +232,11 @@
   "uploader.limit.title": "Batas harian tercapai",
   "uploader.limit.subtitle": "Akun gratis memberi Anda 20 tangkapan layar per hari.",
   "uploader.limit.action": "Daftar",
-  "uploader.error.account_daily_limit": "Akun Anda mencapai batas harian. Batas diatur ulang pada tengah malam UTC."
+  "uploader.error.account_daily_limit": "Akun Anda mencapai batas harian. Batas diatur ulang pada tengah malam UTC.",
+  "account.google": "Lanjutkan dengan Google",
+  "account.google_waiting": "Selesaikan proses masuk di browser Anda.",
+  "account.or_email": "Atau dapatkan kode lewat email",
+  "account.error.google": "Masuk dengan Google tidak selesai. Coba lagi.",
+  "oauth.signed_in.title": "Anda sudah masuk!",
+  "oauth.not_signed_in.title": "Anda belum masuk"
 }

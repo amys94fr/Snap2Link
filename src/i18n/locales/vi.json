@@ -232,5 +232,11 @@
   "uploader.limit.title": "Đã đạt giới hạn hằng ngày",
   "uploader.limit.subtitle": "Tài khoản miễn phí cho bạn 20 ảnh chụp mỗi ngày.",
   "uploader.limit.action": "Đăng ký",
-  "uploader.error.account_daily_limit": "Tài khoản của bạn đã đạt giới hạn hằng ngày. Giới hạn đặt lại lúc nửa đêm UTC."
+  "uploader.error.account_daily_limit": "Tài khoản của bạn đã đạt giới hạn hằng ngày. Giới hạn đặt lại lúc nửa đêm UTC.",
+  "account.google": "Tiếp tục với Google",
+  "account.google_waiting": "Hoàn tất đăng nhập trong trình duyệt của bạn.",
+  "account.or_email": "Hoặc nhận mã qua email",
+  "account.error.google": "Đăng nhập bằng Google chưa hoàn tất. Hãy thử lại.",
+  "oauth.signed_in.title": "Bạn đã đăng nhập!",
+  "oauth.not_signed_in.title": "Bạn chưa đăng nhập"
 }

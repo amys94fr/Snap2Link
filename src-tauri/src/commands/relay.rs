@@ -64,6 +64,7 @@ fn error_code(body: &str, status: reqwest::StatusCode) -> String {
         Ok("account_banned") => "relay_account_banned".to_string(),
         Ok("invalid_email") => "relay_invalid_email".to_string(),
         Ok("invalid_code") => "relay_invalid_code".to_string(),
+        Ok("google_refused") => "relay_google_refused".to_string(),
         Ok("mail_unavailable") => "relay_mail_unavailable".to_string(),
         _ => format!("Snap2Link hosting answered {status}"),
     }
@@ -133,6 +134,22 @@ pub async fn verify_code(
         .post(endpoint(base, "/v1/login/verify"))
         .bearer_auth(guest)
         .json(&serde_json::json!({ "email": email, "code": code }))
+        .send()
+        .await;
+    let body = body_of(response).await?;
+    serde_json::from_str(&body).map_err(|e| format!("invalid relay response: {e}"))
+}
+
+/// Turns a Google ID token into a session, creating the account the first time.
+pub async fn sign_in_with_google(
+    base: &str,
+    guest: &str,
+    id_token: &str,
+) -> Result<NewSession, String> {
+    let response = reqwest::Client::new()
+        .post(endpoint(base, "/v1/login/google"))
+        .bearer_auth(guest)
+        .json(&serde_json::json!({ "id_token": id_token }))
         .send()
         .await;
     let body = body_of(response).await?;
@@ -322,6 +339,37 @@ mod tests {
                 email: "someone@example.com".to_string(),
             }
         );
+    }
+
+    #[tokio::test]
+    async fn sign_in_with_google_sends_the_token_and_returns_the_session() {
+        let mut server = mockito::Server::new_async().await;
+        server
+            .mock("POST", "/v1/login/google")
+            .match_header("authorization", "Bearer guest")
+            .match_body(mockito::Matcher::Json(serde_json::json!({ "id_token": "a.b.c" })))
+            .with_status(200)
+            .with_body(r#"{"session_token":"s_x","expires_at":"x","email":"a@b.co","plan":"free"}"#)
+            .create_async()
+            .await;
+
+        let session = sign_in_with_google(&server.url(), "guest", "a.b.c").await.unwrap();
+        assert_eq!(session.session_token, "s_x");
+        assert_eq!(session.email, "a@b.co");
+    }
+
+    #[tokio::test]
+    async fn a_refused_google_token_has_its_own_code() {
+        let mut server = mockito::Server::new_async().await;
+        server
+            .mock("POST", "/v1/login/google")
+            .with_status(403)
+            .with_body(r#"{"error":"google_refused"}"#)
+            .create_async()
+            .await;
+
+        let error = sign_in_with_google(&server.url(), "guest", "a.b.c").await;
+        assert_eq!(error.unwrap_err(), "relay_google_refused");
     }
 
     #[tokio::test]
