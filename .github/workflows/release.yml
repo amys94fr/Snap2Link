@@ -1,8 +1,8 @@
 name: Release
 
-# A v* tag builds and signs for every platform, then creates a DRAFT release.
-# Nothing reaches users until the draft is published by hand: the updater reads
-# releases/latest, which ignores drafts, and winget.yml waits for publication.
+# A v* tag builds and signs for every platform, then publishes the release:
+# users get the update as soon as this workflow ends. To retry a failed job,
+# re-run it from the Actions tab.
 
 on:
   push:
@@ -26,6 +26,8 @@ env:
   # from the type2-runtime `continuous` tag.
   APPIMAGE_RUNTIME_URL: https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64
   APPIMAGE_RUNTIME_SHA256: 2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d
+  WINGETCREATE_URL: https://github.com/microsoft/winget-create/releases/download/v1.12.13.0/wingetcreate.exe
+  WINGETCREATE_SHA256: 24042bd37915805615e6cf969ac57c6439124c3fe85823327f5f3fb24bd9ffea
 
 jobs:
   # Validates the tag once. Every later job reads it from this job's
@@ -280,7 +282,7 @@ jobs:
             src-tauri/target/universal-apple-darwin/release/bundle/macos/*
 
   release:
-    name: Create draft GitHub release
+    name: Publish GitHub release
     needs: [resolve, build]
     runs-on: ubuntu-24.04
     environment: release
@@ -334,6 +336,8 @@ jobs:
           cp scripts/release-out/latest.json release-files/
           ls -lh release-files/
 
+      # A draft first: the updater reads releases/latest, so a release must not
+      # be public before latest.json is attached to it.
       - name: Create GitHub release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
@@ -343,3 +347,48 @@ jobs:
           draft: true
           fail_on_unmatched_files: true
           files: release-files/*
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release edit "$TAG" --draft=false --latest
+
+  # In this workflow, because a release published with GITHUB_TOKEN doesn't start
+  # other workflows.
+  submit-winget:
+    name: Submit winget update PR
+    needs: [resolve, release]
+    runs-on: windows-latest
+    environment: release
+    if: ${{ vars.SUBMIT_WINGET == 'true' }}
+    env:
+      TAG: ${{ needs.resolve.outputs.tag }}
+      VERSION: ${{ needs.resolve.outputs.version }}
+    steps:
+      - name: Install wingetcreate (pinned, checksum-verified)
+        shell: pwsh
+        run: |
+          # wingetcreate 1.12.x prints both the version line and the
+          # full help, then exits 1, so neither `version` nor `--version`
+          # can be used as a self-test. The checksum is the real gate.
+          Invoke-WebRequest -Uri $env:WINGETCREATE_URL -OutFile wingetcreate.exe
+          $hash = (Get-FileHash wingetcreate.exe -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $env:WINGETCREATE_SHA256) {
+            throw "wingetcreate.exe checksum mismatch: $hash"
+          }
+
+      - name: Submit update to microsoft/winget-pkgs
+        shell: pwsh
+        env:
+          WINGET_PAT: ${{ secrets.WINGET_PAT }}
+        run: |
+          if (-not $env:WINGET_PAT) {
+            throw "Missing secret WINGET_PAT."
+          }
+          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:TAG/Snap2Link_$($env:VERSION)_x64-setup.exe"
+          .\wingetcreate.exe update amys94fr.Snap2Link `
+            --version "$env:VERSION" `
+            --urls "$url" `
+            --submit `
+            --token "$env:WINGET_PAT"
