@@ -26,6 +26,17 @@ It needs Node.js 20 or newer on the machine where Claude Code runs. Snap2Link it
 
 Snap2Link links are public: anyone who has one can see the image.
 
+## Privacy Policy
+
+The plugin has no account, no analytics and no server of its own. It runs on your machine.
+
+- **What it collects:** nothing. It only reads the link you give it.
+- **Where it connects:** to `i.snap2link.app` or to Google Drive, to download the capture. That host sees your IP address, as with any download.
+- **What Claude receives:** the capture, which then goes to Anthropic like anything else in your conversation.
+- **What stays on your machine:** a capture over 3.5 MB is saved in your temporary folder, readable only by you, so that Claude can open it. The plugin doesn't delete that file.
+
+The full policy for Snap2Link is at <https://snap2link.app/privacy>. For questions, write to contact@snap2link.app.
+
 ## Development
 
 ```bash
