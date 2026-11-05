@@ -19,6 +19,10 @@ const BASE = "https://i.snap2link.app";
 const GUEST = "guest-token-used-by-most-tests";
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
+const stored = async () => (await env.IMAGES.list()).objects.length;
+
+const notAnImage = (text: string) => new TextEncoder().encode(text) as Uint8Array<ArrayBuffer>;
+
 function png(size = 64): Uint8Array<ArrayBuffer> {
   const bytes = new Uint8Array(size);
   bytes.set(SIGNATURE);
@@ -35,14 +39,18 @@ async function call(path: string, init: RequestInit = {}): Promise<Response> {
 }
 
 function upload(
-  body: BodyInit = png(),
+  body: Uint8Array<ArrayBuffer> = png(),
   ip = "203.0.113.7",
   guest = GUEST,
 ): Promise<Response> {
   return call("/v1/captures", {
     method: "POST",
     body,
-    headers: { "CF-Connecting-IP": ip, Authorization: `Bearer ${guest}` },
+    headers: {
+      "CF-Connecting-IP": ip,
+      Authorization: `Bearer ${guest}`,
+      "Content-Length": String(body.byteLength),
+    },
   });
 }
 
@@ -153,9 +161,46 @@ describe("upload and read", () => {
   });
 
   it("refuses what isn't a PNG", async () => {
-    const response = await upload(new TextEncoder().encode("<script>alert(1)</script>"));
+    const before = await stored();
+    const response = await upload(notAnImage("<script>alert(1)</script>"));
     expect(response.status).toBe(415);
     expect(await response.json()).toEqual({ error: "not_png" });
+    expect(await storedBytes()).toBe(0);
+    expect(await stored()).toBe(before);
+  });
+
+  it("counts what isn't a PNG, since it reached storage", async () => {
+    const junk = notAnImage("not an image");
+    for (let i = 0; i < GUEST_DAILY_LIMIT; i += 1) {
+      expect((await upload(junk)).status).toBe(415);
+    }
+    expect((await upload()).status).toBe(429);
+  });
+
+  it("needs to know the size before reading the body", async () => {
+    const response = await call("/v1/captures", {
+      method: "POST",
+      body: png(),
+      headers: { Authorization: `Bearer ${GUEST}` },
+    });
+    expect(response.status).toBe(411);
+    expect(await response.json()).toEqual({ error: "length_required" });
+  });
+
+  it("gives everything back when the body isn't the declared size", async () => {
+    const before = await stored();
+    await expect(
+      call("/v1/captures", {
+        method: "POST",
+        body: png(100),
+        headers: { Authorization: `Bearer ${GUEST}`, "Content-Length": "200" },
+      }),
+    ).rejects.toThrow();
+
+    expect(await storedBytes()).toBe(0);
+    expect(await stored()).toBe(before);
+    const { results } = await env.DB.prepare("SELECT count FROM usage").all<{ count: number }>();
+    expect(results.every(({ count }) => count === 0)).toBe(true);
   });
 
   it("refuses a capture that is too large", async () => {

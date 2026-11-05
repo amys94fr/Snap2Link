@@ -23,6 +23,7 @@ export interface Storage {
 const GLOBAL_KEY = "global";
 const GLOBAL_GUESTS_KEY = "global-guests";
 const BYTES_KEY = "stored_bytes";
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 export function utcDay(now: number): string {
   return new Date(now).toISOString().slice(0, 10);
@@ -99,24 +100,38 @@ function releaseBytes(db: D1Database, size: number): D1PreparedStatement {
 
 export type Refusal = "daily_limit" | "service_busy";
 
+/** Reads only the start of what R2 stored. */
+async function storedPng(images: R2Bucket, id: string): Promise<boolean> {
+  const start = await images.get(id, { range: { length: PNG_SIGNATURE.length } });
+  if (!start) return false;
+  const bytes = new Uint8Array(await start.arrayBuffer());
+  return PNG_SIGNATURE.every((value, index) => bytes[index] === value);
+}
+
 export interface NewCapture {
   id: string;
   deleteHash: string;
   guestHash: string;
-  bytes: Uint8Array;
+  /** Never read in JS: copying 5 MB through it costs most of a request's 10 ms of CPU. */
+  body: ReadableStream;
+  /** What the sender declared. The stream fails if it carries anything else. */
+  size: number;
   /** What the sender may use, checked in this order. */
   quotas: Quota[];
   now: number;
 }
 
-/** Stores a capture, or says which limit refused it. */
+/**
+ * Stores a capture, or says what refused it. A file that isn't a PNG keeps its
+ * place in the quotas: it was written to R2 before anyone could tell, and those
+ * writes have to stay limited.
+ */
 export async function createCapture(
   { db, images }: Storage,
   capture: NewCapture,
-): Promise<{ expiresAt: number } | { refused: Refusal }> {
-  const { id, deleteHash, guestHash, bytes, now } = capture;
+): Promise<{ expiresAt: number } | { refused: Refusal | "not_png" }> {
+  const { id, deleteHash, guestHash, body, size, now } = capture;
   const day = utcDay(now);
-  const size = bytes.byteLength;
   const quotas = [...capture.quotas, { key: GLOBAL_KEY, limit: GLOBAL_DAILY_LIMIT }];
   const giveBack = () => quotas.map(({ key }) => returnQuota(db, key, day));
 
@@ -131,7 +146,14 @@ export async function createCapture(
 
   const expiresAt = now + LINK_LIFETIME_MS;
   try {
-    await images.put(id, bytes, { httpMetadata: { contentType: "image/png" } });
+    await images.put(id, body.pipeThrough(new FixedLengthStream(size)), {
+      httpMetadata: { contentType: "image/png" },
+    });
+    if (!(await storedPng(images, id))) {
+      await images.delete(id);
+      await db.batch([releaseBytes(db, size)]);
+      return { refused: "not_png" };
+    }
     await db
       .prepare(
         `INSERT INTO captures (id, delete_hash, guest_hash, size, created_at, expires_at)

@@ -48,6 +48,7 @@ Needs `Authorization: Bearer <guest_token>`. The body is the PNG itself.
 | 201 | | Stored |
 | 401 | `guest_required` | No guest token, or an unknown or expired one: get a new one |
 | 403 | `guest_banned` | This guest is banned |
+| 411 | `length_required` | No `Content-Length` |
 | 413 | `too_large` | Over 5 MB |
 | 415 | `not_png` | Not a PNG |
 | 429 | `daily_limit` | This guest used its 5 captures of the day, or this address its 30 |
