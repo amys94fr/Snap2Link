@@ -12,6 +12,7 @@ declare global {
       TURNSTILE_SECRET: string;
       RESEND_API_KEY: string;
       MAIL_FROM: string;
+      GOOGLE_CLIENT_ID: string;
       TEST_MIGRATIONS: D1Migration[];
     }
   }
