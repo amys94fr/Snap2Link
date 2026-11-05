@@ -7,6 +7,7 @@ import {
   deleteAccount,
   openSession,
   sessionAccount,
+  takeGoogleAttempt,
   useLoginCode,
   type Account,
 } from "./accounts";
@@ -17,6 +18,7 @@ import {
   MAX_CAPTURE_BYTES,
   PLANS,
 } from "./limits";
+import { verifiedGoogleEmail } from "./google";
 import { sendLoginCode } from "./mail";
 import {
   createCapture,
@@ -47,6 +49,8 @@ export interface Env {
   MAIL_FROM: string;
   /** Sends the login codes. */
   RESEND_API_KEY: string;
+  /** Google ID tokens must be made for this client: the app's. */
+  GOOGLE_CLIENT_ID: string;
 }
 
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -61,6 +65,8 @@ const TURNSTILE_ACTION = "guest";
 /** Turnstile tokens are 2,048 characters at most. */
 const MAX_GUEST_REQUEST_BYTES = 4_096;
 const MAX_LOGIN_REQUEST_BYTES = 1_024;
+/** A Google ID token is about 1,200 characters. */
+const MAX_GOOGLE_REQUEST_BYTES = 4_096;
 const MAX_EMAIL_LENGTH = 254;
 
 /** Tells a session from a guest token before asking the database. */
@@ -290,9 +296,12 @@ async function handleGuest(request: Request, env: Env): Promise<Response> {
 }
 
 /** A JSON object from a small request body, or null. */
-async function loginBody(request: Request): Promise<Record<string, unknown> | null> {
+async function loginBody(
+  request: Request,
+  maxBytes = MAX_LOGIN_REQUEST_BYTES,
+): Promise<Record<string, unknown> | null> {
   const body = await request.text();
-  if (body.length > MAX_LOGIN_REQUEST_BYTES) return null;
+  if (body.length > maxBytes) return null;
   try {
     const value: unknown = JSON.parse(body);
     return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
@@ -360,6 +369,11 @@ async function handleLoginVerify(request: Request, env: Env): Promise<Response> 
     return error(400, "invalid_code");
   }
 
+  return signIn(id, email, env, now);
+}
+
+/** Opens a session for an address that was just proved. */
+async function signIn(id: string, email: string, env: Env, now: number): Promise<Response> {
   const sessionToken = `${SESSION_PREFIX}${randomToken()}`;
   const session = await openSession(env.DB, id, email, await sha256(sessionToken), now);
   if (!session) return error(403, "account_banned");
@@ -369,6 +383,30 @@ async function handleLoginVerify(request: Request, env: Env): Promise<Response> 
     email: session.account.email,
     plan: session.account.plan,
   });
+}
+
+/**
+ * Signs in with a Google ID token. An account is its address, so the same
+ * person gets the same account with Google and with a code. A guest token is
+ * required here too: Turnstile stands in front of every sign-in.
+ */
+async function handleLoginGoogle(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const guest = await requireGuest(request, env, now);
+  if (guest instanceof Response) return guest;
+
+  const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
+  if (typeof body?.id_token !== "string") return error(400, "bad_request");
+
+  const block = await ownerKey(request, env.IP_SALT, now);
+  if (!(await takeGoogleAttempt(env.DB, block, now))) return error(429, "daily_limit");
+
+  const result = await verifiedGoogleEmail(body.id_token, env.GOOGLE_CLIENT_ID, now);
+  if (result === "unavailable") return error(503, "service_busy");
+  const email = result === "refused" ? null : normalizedEmail(result.email);
+  if (!email) return error(403, "google_refused");
+
+  return signIn(await accountId(email, env), email, env, now);
 }
 
 async function handleMe(request: Request, env: Env): Promise<Response> {
@@ -533,6 +571,10 @@ export default {
 
     if (pathname === "/v1/login/verify") {
       return method === "POST" ? handleLoginVerify(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/login/google") {
+      return method === "POST" ? handleLoginGoogle(request, env) : error(405, "method_not_allowed");
     }
 
     if (pathname === "/v1/logout") {

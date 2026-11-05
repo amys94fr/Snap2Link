@@ -1,5 +1,6 @@
 import {
   BLOCK_DAILY_CODES,
+  BLOCK_DAILY_GOOGLE,
   EMAIL_DAILY_CODES,
   GLOBAL_DAILY_CODES,
   LOGIN_CODE_ATTEMPTS,
@@ -60,6 +61,16 @@ export async function createLoginCode(
     .bind(accountId, codeHash, expiresAt)
     .run();
   return { expiresAt };
+}
+
+/** False when this address block used its Google sign-ins of the day. */
+export async function takeGoogleAttempt(
+  db: D1Database,
+  blockKey: string,
+  now: number,
+): Promise<boolean> {
+  const quota = { key: `google-${blockKey}`, limit: BLOCK_DAILY_GOOGLE };
+  return (await takeQuotas(db, [quota], utcDay(now))) === null;
 }
 
 /** Forgets a code that never reached its address, and what it counted. */

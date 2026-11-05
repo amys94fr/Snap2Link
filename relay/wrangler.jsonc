@@ -21,6 +21,8 @@
     "PUBLIC_URL": "https://i.snap2link.app",
     "ABUSE_CONTACT": "abuse@snap2link.app",
     "MAIL_FROM": "Snap2Link <noreply@snap2link.app>",
+    // Public by nature: it is in every sign-in URL. The client secret is not here.
+    "GOOGLE_CLIENT_ID": "565416375675-jfhsjr9c3j5fanto9htmdin7hibea83u.apps.googleusercontent.com",
     "TURNSTILE_SITEKEY": "0x4AAAAAAF0C_X7NcOtuLv5w"
   },
   // Links are refused the moment they expire: this only frees the space.

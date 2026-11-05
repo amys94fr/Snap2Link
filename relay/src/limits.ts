@@ -77,5 +77,8 @@ export const BLOCK_DAILY_CODES = 10;
  */
 export const GLOBAL_DAILY_CODES = 80;
 
+/** Google sign-ins one address block can try per UTC day. */
+export const BLOCK_DAILY_GOOGLE = 20;
+
 /** Objects freed per cleanup run: one bulk delete takes up to 1,000 keys. */
 export const PURGE_BATCH = 1_000;

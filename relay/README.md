@@ -4,7 +4,7 @@ Temporary image hosting for Snap2Link, so that a capture can become a link witho
 
 The app ships no secret: anything it contained could be extracted. Each install gets a guest token instead, after passing Cloudflare Turnstile once. Quotas are enforced here, because forks can change the app.
 
-A free account raises the limits: it takes an email address and a 6-digit code, with no password. An account has a number of slots, the links that work at once: a new capture ends the oldest one.
+A free account raises the limits: it takes an email address and a 6-digit code, or a Google sign-in, with no password. An account has a number of slots, the links that work at once: a new capture ends the oldest one.
 
 ## API
 
@@ -102,6 +102,20 @@ Needs the guest token too. The body is `{"email": "…", "code": "123456"}`. Thi
 | 401 | `guest_required` | No valid guest token |
 | 403 | `account_banned` | This account is banned |
 
+### `POST /v1/login/google`
+
+Needs the guest token too. The body is `{"id_token": "…"}`, a Google ID token made for the app's client, less than 10 minutes old and with a verified address. It answers like `/v1/login/verify`, and an address gets the same account either way.
+
+| Status | `error` | Meaning |
+|---|---|---|
+| 200 | | Signed in |
+| 400 | `bad_request` | The body isn't valid |
+| 401 | `guest_required` | No valid guest token |
+| 403 | `google_refused` | The token isn't valid, or its address isn't verified |
+| 403 | `account_banned` | This account is banned |
+| 429 | `daily_limit` | This address tried 20 Google sign-ins today |
+| 503 | `service_busy` | Google's keys can't be reached, try again later |
+
 ### `GET /v1/me`
 
 Needs `Authorization: Bearer <session_token>`. Returns 401 `session_required` when the session is over.
@@ -148,7 +162,7 @@ The relay is MIT, like the rest of Snap2Link. For your own instance:
    pnpm exec wrangler d1 migrations apply snap2link-relay --remote
    ```
 
-3. Set the salt to a long random value, the secret key of the widget, and a [Resend](https://resend.com) API key for a domain of yours, with `MAIL_FROM` changed in `wrangler.jsonc`. Account ids derive from the salt: changing it later orphans every account.
+3. Set the salt to a long random value, the secret key of the widget, and a [Resend](https://resend.com) API key for a domain of yours, with `MAIL_FROM` changed in `wrangler.jsonc`. Google sign-in needs your own OAuth client in `GOOGLE_CLIENT_ID`. Account ids derive from the salt: changing it later orphans every account.
 
    ```bash
    pnpm exec wrangler secret put IP_SALT
