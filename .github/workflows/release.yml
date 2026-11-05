@@ -81,8 +81,12 @@ jobs:
             os: macos-15
             target: universal-apple-darwin
             rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+          # The oldest supported Ubuntu LTS: the AppImage bundles this system's
+          # libraries, so it needs at least this glibc on the user's machine.
+          # A newer runner drops older systems and fails the AppImage catalog
+          # test, which runs on 22.04.
           - name: linux-x86_64
-            os: ubuntu-24.04
+            os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
 
     steps:
@@ -92,7 +96,7 @@ jobs:
           persist-credentials: false
 
       - name: Linux system dependencies
-        if: matrix.platform.os == 'ubuntu-24.04'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -102,7 +106,7 @@ jobs:
             librsvg2-dev \
             libssl-dev \
             libsoup-3.0-dev \
-            libpipewire-0.3-dev \
+            libclang-dev \
             libxdo-dev \
             libgbm-dev \
             libegl-dev \
@@ -110,7 +114,10 @@ jobs:
             libxcb1-dev \
             libxcb-shm0-dev \
             libdrm-dev \
+            meson \
+            ninja-build \
             patchelf
+          bash scripts/install_pipewire.sh
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
@@ -208,7 +215,7 @@ jobs:
       # repack over the original artefact with a pinned, checksummed
       # appimagetool and runtime.
       - name: Fix AppImage .DirIcon symlink and permissions
-        if: matrix.platform.os == 'ubuntu-24.04'
+        if: runner.os == 'Linux'
         shell: bash
         env:
           TARGET: ${{ matrix.platform.target }}
@@ -251,6 +258,10 @@ jobs:
           fi
           rm -f "$APPDIR/.DirIcon"
           ln -s "$ICON" "$APPDIR/.DirIcon"
+          if [ ! -e "$APPDIR/.DirIcon" ]; then
+            echo "::error::.DirIcon -> $ICON does not resolve"
+            exit 1
+          fi
           echo "Fixed .DirIcon -> $ICON (relative)"
 
           # Normalise perms. `X` means "add x where someone already has x,

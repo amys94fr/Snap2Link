@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The Linux AppImage failed to start on systems older than Ubuntu 24.04, such as Ubuntu 22.04. It is now built on Ubuntu 22.04.
 - Linux installs never received updates: the update check failed because the update manifest had no Linux entry. The AppImage, `.deb` and `.rpm` now each get the update in their own format.
 
 ## [1.6.0] – 2026-11-05
