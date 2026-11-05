@@ -46,8 +46,10 @@ The workflow then:
 
 1. Runs frontend + backend tests (release fails if anything is red).
 2. Restores `credentials.json` from a secret.
-3. Builds signed Tauri bundles for Windows, macOS and Linux.
-4. Generates `latest.json` from the freshly-signed `.exe`.
+3. Builds signed Tauri bundles for Windows, macOS and Linux. The AppImage is
+   repaired after the build, so it is signed again right after.
+4. Generates `latest.json`, with one entry per install type. The release fails
+   if a platform is missing or a signature doesn't match its installer.
 5. Generates a release body from the matching `CHANGELOG.md` section.
 6. Attaches the installers, `.sig` files and `latest.json` to a GitHub release,
    then publishes it. The release stays a draft until everything is attached,
@@ -124,8 +126,9 @@ And one repo variable at <https://github.com/amys94fr/Snap2Link/settings/variabl
 
    The same script is used by CI; it ingests artefacts from
    `artefacts/bundle-<platform>/` (workflow artifacts downloaded on the
-   release-aggregator job) and emits a manifest covering every platform
-   that completed its build.
+   release-aggregator job). It stops if a platform is missing: for a release
+   built on one machine, pass `--allow-missing`, knowing that the platforms
+   left out won't be offered this update.
 
 5. Create the GitHub release with `gh`:
 

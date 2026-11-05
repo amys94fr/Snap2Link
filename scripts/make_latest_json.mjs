@@ -4,21 +4,26 @@
 //
 // Expected layout (relative to repo root):
 //   artefacts/
-//     bundle-windows-x86_64/Snap2Link_<v>_x64-setup.exe       + .sig
-//     bundle-darwin-aarch64/Snap2Link.app.tar.gz              + .sig
-//     bundle-darwin-x86_64/Snap2Link.app.tar.gz               + .sig
-//     bundle-linux-x86_64/snap2link_<v>_amd64.AppImage.tar.gz + .sig
+//     bundle-windows-x86_64/.../Snap2Link_<v>_x64-setup.exe + .sig
+//     bundle-darwin-universal/.../Snap2Link.app.tar.gz      + .sig
+//     bundle-linux-x86_64/.../Snap2Link_<v>_amd64.AppImage  + .sig
+//     bundle-linux-x86_64/.../Snap2Link_<v>_amd64.deb       + .sig
+//     bundle-linux-x86_64/.../Snap2Link-<v>-1.x86_64.rpm    + .sig
 //
 // Usage:
 //   node scripts/make_latest_json.mjs \
 //     --version 1.1.0 \
 //     --notes "Initial multi-platform release."
 //
+// Fails if a signature doesn't match its installer, or if a platform is
+// missing, unless --allow-missing is passed.
+//
 // Output: scripts/release-out/latest.json (committed by softprops/action-gh-release).
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { collectPlatforms } from "./updater_manifest.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -37,76 +42,16 @@ if (!fs.existsSync(artefactsRoot)) {
   throw new Error(`Artefacts folder not found: ${artefactsRoot}`);
 }
 
-const REPO_BASE = "https://github.com/amys94fr/Snap2Link/releases/download";
+const tauriConf = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, "src-tauri", "tauri.conf.json"), "utf8"),
+);
 
-// Map platform → { signature pattern, installer pattern }.
-// `find` returns the *first* file matching the pattern; missing platforms
-// are simply omitted from the manifest (so Mac users won't be offered a
-// Windows update etc.).
-// Each entry maps a workflow artefact directory to one or more updater
-// platform keys. A `darwin-universal` build serves both ARM and Intel Macs
-// (Tauri lipos a single .app.tar.gz containing both architectures), so we
-// expand it into both `darwin-aarch64` and `darwin-x86_64` so the in-app
-// updater knows where to download regardless of the user's CPU.
-const PLATFORMS = [
-  {
-    keys: ["windows-x86_64"],
-    artefactDir: "bundle-windows-x86_64",
-    sigPattern: /\.exe\.sig$/i,
-    installerPattern: /-setup\.exe$/i,
-  },
-  {
-    keys: ["darwin-aarch64", "darwin-x86_64"],
-    artefactDir: "bundle-darwin-universal",
-    sigPattern: /\.app\.tar\.gz\.sig$/i,
-    installerPattern: /\.app\.tar\.gz$/i,
-  },
-  {
-    keys: ["linux-x86_64"],
-    artefactDir: "bundle-linux-x86_64",
-    sigPattern: /\.AppImage\.tar\.gz\.sig$/i,
-    installerPattern: /\.AppImage\.tar\.gz$/i,
-  },
-];
-
-function findFile(dir, pattern) {
-  if (!fs.existsSync(dir)) return null;
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      const nested = findFile(full, pattern);
-      if (nested) return nested;
-    } else if (pattern.test(entry.name)) {
-      return full;
-    }
-  }
-  return null;
-}
-
-const platforms = {};
-const summary = [];
-
-for (const p of PLATFORMS) {
-  const dir = path.join(artefactsRoot, p.artefactDir);
-  const sigFile = findFile(dir, p.sigPattern);
-  const installerFile = findFile(dir, p.installerPattern);
-  if (!sigFile || !installerFile) {
-    summary.push(
-      `  ${p.keys.join("+")}: skipped (sig=${!!sigFile}, installer=${!!installerFile})`,
-    );
-    continue;
-  }
-  const signature = fs.readFileSync(sigFile, "utf8").trim();
-  const installerName = path.basename(installerFile);
-  const url = `${REPO_BASE}/v${version}/${installerName}`;
-  for (const key of p.keys) {
-    platforms[key] = { signature, url };
-  }
-  summary.push(
-    `  ${p.keys.join("+")}: ${installerName} (sig ${signature.length} chars)`,
-  );
-}
+const { platforms, summary } = collectPlatforms({
+  artefactsRoot,
+  version,
+  pubkey: tauriConf.plugins.updater.pubkey,
+  allowMissing: process.argv.includes("--allow-missing"),
+});
 
 if (Object.keys(platforms).length === 0) {
   throw new Error("No platform artefacts were found. Did the build matrix complete?");

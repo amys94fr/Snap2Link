@@ -261,10 +261,30 @@ jobs:
           echo "Perms after normalisation:"
           find "$APPDIR" -maxdepth 1 -printf '%M %f\n'
 
-          rm -f "$APPIMAGE_PATH"
+          rm -f "$APPIMAGE_PATH" "$APPIMAGE_PATH.sig"
           ARCH="$(uname -m)" "$APPIMAGETOOL" --runtime-file "$TOOLDIR/runtime" "$APPDIR" "$APPIMAGE_PATH"
           chmod +x "$APPIMAGE_PATH"
           ls -lh "$APPIMAGE_PATH"
+
+      # The repack changes the file, so the signature Tauri made during the
+      # build no longer matches it and the updater would reject the update.
+      # Separate from the repair so the key stays away from the tools it
+      # downloads.
+      - name: Sign the repaired AppImage
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TARGET: ${{ matrix.platform.target }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
+        run: |
+          set -euo pipefail
+          # Same clean-up as the build step above.
+          KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r\n\t "'"'"'' | sed 's/^\xEF\xBB\xBF//')
+          export TAURI_SIGNING_PRIVATE_KEY="$KEY"
+          APPIMAGE_PATH=$(find "$PWD/src-tauri/target/$TARGET/release/bundle/appimage" -maxdepth 1 -name '*.AppImage' | head -1)
+          pnpm tauri signer sign --app-version "$VERSION" "$APPIMAGE_PATH"
 
       - name: Upload bundle artefacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -329,9 +349,9 @@ jobs:
             -name "*.exe" -o -name "*.exe.sig" -o \
             -name "*.dmg" -o \
             -name "*.app.tar.gz" -o -name "*.app.tar.gz.sig" -o \
-            -name "*.AppImage" -o -name "*.AppImage.tar.gz" -o -name "*.AppImage.tar.gz.sig" -o \
-            -name "*.deb" -o \
-            -name "*.rpm" \
+            -name "*.AppImage" -o -name "*.AppImage.sig" -o \
+            -name "*.deb" -o -name "*.deb.sig" -o \
+            -name "*.rpm" -o -name "*.rpm.sig" \
           \) -exec cp {} release-files/ \;
           cp scripts/release-out/latest.json release-files/
           ls -lh release-files/
