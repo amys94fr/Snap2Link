@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Full screen and active window without the overlay.** Full screen takes the screen under the mouse. If no window can be detected, Snap2Link opens the window picker.
 - **Last choice.** On "Ask", Snap2Link reopens the last mode and preselects the last action, which Enter confirms. Nothing is shared without confirmation, and the choice can be reset in Settings.
 - **"Link copied" message with a Delete button.** It sits in a corner of the screen without taking focus, and removes the capture from Drive right away. It can be turned off in Settings.
+- **Hosting choice.** Settings can send captures to Google Drive or to Snap2Link hosting, which needs no account: links last 6 hours, up to 5 captures a day. The first capture shows a quick security check by Cloudflare Turnstile, usually without a click. Each host shows only its own options. New installs can start without an account, and existing installs stay on Google Drive.
 - **20 languages,** including right-to-left layouts for Arabic, Hebrew and Persian. Snap2Link follows the system language by default, and the language can be changed in Settings.
 
 ### Changed

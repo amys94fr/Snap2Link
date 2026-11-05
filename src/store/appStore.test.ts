@@ -5,15 +5,15 @@ describe("appStore", () => {
   beforeEach(() => {
     useAppStore.setState({
       page: "wizard",
-      isAuthenticated: false,
+      setupDone: false,
       autoCheckUpdates: false,
     });
   });
 
-  it("starts on the wizard page when not authenticated", () => {
-    const { page, isAuthenticated } = useAppStore.getState();
+  it("starts on the wizard page", () => {
+    const { page, setupDone } = useAppStore.getState();
     expect(page).toBe("wizard");
-    expect(isAuthenticated).toBe(false);
+    expect(setupDone).toBe(false);
   });
 
   it("setPage updates the current page", () => {
@@ -24,12 +24,12 @@ describe("appStore", () => {
     expect(useAppStore.getState().page).toBe("about");
   });
 
-  it("setAuthenticated toggles authentication state", () => {
-    useAppStore.getState().setAuthenticated(true);
-    expect(useAppStore.getState().isAuthenticated).toBe(true);
+  it("setSetupDone records the end of setup", () => {
+    useAppStore.getState().setSetupDone(true);
+    expect(useAppStore.getState().setupDone).toBe(true);
 
-    useAppStore.getState().setAuthenticated(false);
-    expect(useAppStore.getState().isAuthenticated).toBe(false);
+    useAppStore.getState().setSetupDone(false);
+    expect(useAppStore.getState().setupDone).toBe(false);
   });
 
   it("only accepts valid page values via TypeScript", () => {

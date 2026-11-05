@@ -8,7 +8,7 @@ import { ToastWindow } from "./ToastWindow";
 describe("<UploaderToast />", () => {
   it("shows a spinner and no Delete button while uploading", () => {
     render(<UploaderToast state="uploading" />);
-    expect(screen.getByText(/uploading to google drive/i)).toBeInTheDocument();
+    expect(screen.getByText(/uploading your capture/i)).toBeInTheDocument();
     expect(screen.getByTestId("uploader-spinner")).toBeInTheDocument();
     expect(screen.queryByTestId("toast-delete")).not.toBeInTheDocument();
   });

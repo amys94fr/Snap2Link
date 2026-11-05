@@ -69,7 +69,7 @@ describe("i18n.t", () => {
   });
 
   it("returns the translated string for a known key", () => {
-    expect(t("wizard.welcome.btn")).toBe(en["wizard.welcome.btn"]);
+    expect(t("wizard.welcome.drive")).toBe(en["wizard.welcome.drive"]);
   });
 
   it("preserves multiline strings (\\n)", () => {

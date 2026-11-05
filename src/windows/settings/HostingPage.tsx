@@ -4,37 +4,101 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
 import { t } from "@/i18n";
 import { RetentionControl } from "@/components/RetentionControl";
-import type { AppConfig } from "@/lib/config";
-import { BUTTON, BUTTON_DANGER, Card, Row, Section } from "./ui";
+import type { AppConfig, Hosting } from "@/lib/config";
+import {
+  BUTTON,
+  BUTTON_DANGER,
+  BUTTON_PRIMARY,
+  Card,
+  CheckIcon,
+  Row,
+  Section,
+} from "./ui";
 
 const DRIVE_FOLDER_NAME = "Snap2Link";
 
 interface Props {
   config: AppConfig;
   onConfig: (config: AppConfig) => void;
+  /** Empty when no Google account is connected. */
   email: string;
   onEmail: (email: string) => void;
-  onSignedOut: () => void;
 }
 
-export function HostingPage({
-  config,
-  onConfig,
-  email,
-  onEmail,
-  onSignedOut,
-}: Props) {
+function HostCard({
+  title,
+  description,
+  selected,
+  onSelect,
+}: {
+  title: string;
+  description: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onSelect}
+      className={clsx(
+        "min-h-[88px] flex gap-3 p-3.5 text-start rounded-[10px] border-2 cursor-pointer",
+        selected
+          ? "bg-blue-950 border-blue-300"
+          : "bg-slate-900 border-slate-800 hover:border-slate-500",
+      )}
+    >
+      <span className="flex-1 min-w-0">
+        <span className="block font-bold">{title}</span>
+        <span className="block mt-0.5 text-[13px] text-slate-300">
+          {description}
+        </span>
+      </span>
+      {selected && (
+        <span className="text-blue-300">
+          <CheckIcon />
+        </span>
+      )}
+    </button>
+  );
+}
+
+function Snap2LinkOptions() {
+  return (
+    <>
+      <Section title={t("settings.hosting.plan")}>
+        <Card>
+          <Row
+            label={t("settings.host.no_account")}
+            hint={t("settings.hosting.plan_hint")}
+          />
+        </Card>
+      </Section>
+      <Section title={t("settings.hosting.access")}>
+        <Card>
+          <Row
+            label={t("settings.hosting.link_life")}
+            hint={t("settings.hosting.link_life_hint")}
+          />
+          <Row label={t("settings.hosting.access_title")} />
+        </Card>
+      </Section>
+    </>
+  );
+}
+
+function DriveOptions({ config, onConfig, email, onEmail }: Props) {
   const [hint, setHint] = useState<{
     kind: "info" | "success" | "error";
     text: string;
   } | null>(null);
-  const [switching, setSwitching] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  const switchAccount = async () => {
-    setSwitching(true);
+  const signIn = async (replacing: boolean) => {
+    setBusy(true);
     setHint({ kind: "info", text: t("settings.switch_account.loading") });
     try {
-      await invoke("disconnect");
+      if (replacing) await invoke("disconnect");
       const mail = await invoke<string>("authenticate");
       onEmail(mail);
       setHint({
@@ -49,13 +113,13 @@ export function HostingPage({
         text: t("settings.switch_account.error", { msg: msg.slice(0, 70) }),
       });
     } finally {
-      setSwitching(false);
+      setBusy(false);
     }
   };
 
   const signOut = async () => {
     await invoke("disconnect");
-    onSignedOut();
+    onEmail("");
   };
 
   const saveRetention = async (retention_days: number, auto_delete: boolean) => {
@@ -77,29 +141,45 @@ export function HostingPage({
     <>
       <Section title={t("settings.hosting.account")}>
         <Card>
-          <Row
-            label={<span dir="ltr">{email}</span>}
-            hint={t("settings.hosting.account_hint")}
-          >
-            <div className="flex flex-wrap gap-2">
+          {email ? (
+            <Row
+              label={<span dir="ltr">{email}</span>}
+              hint={t("settings.hosting.account_hint")}
+            >
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void signIn(true)}
+                  disabled={busy}
+                  className={BUTTON}
+                >
+                  {t("settings.switch_account")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  disabled={busy}
+                  className={BUTTON_DANGER}
+                >
+                  {t("settings.hosting.disconnect")}
+                </button>
+              </div>
+            </Row>
+          ) : (
+            <Row
+              label={t("settings.host.not_connected")}
+              hint={t("settings.hosting.connect_hint")}
+            >
               <button
                 type="button"
-                onClick={() => void switchAccount()}
-                disabled={switching}
-                className={BUTTON}
+                onClick={() => void signIn(false)}
+                disabled={busy}
+                className={BUTTON_PRIMARY}
               >
-                {t("settings.switch_account")}
+                {t("settings.hosting.connect")}
               </button>
-              <button
-                type="button"
-                onClick={() => void signOut()}
-                disabled={switching}
-                className={BUTTON_DANGER}
-              >
-                {t("settings.hosting.disconnect")}
-              </button>
-            </div>
-          </Row>
+            </Row>
+          )}
         </Card>
         {hint && (
           <p
@@ -145,6 +225,46 @@ export function HostingPage({
           />
         </Card>
       </Section>
+    </>
+  );
+}
+
+export function HostingPage(props: Props) {
+  const { config, onConfig } = props;
+
+  const choose = async (hosting: Hosting) => {
+    onConfig({ ...config, hosting });
+    await invoke("set_hosting", { hosting });
+  };
+
+  return (
+    <>
+      <Section title={t("settings.hosting.choose")}>
+        <div
+          role="group"
+          aria-label={t("settings.hosting.choose")}
+          className="grid grid-cols-2 gap-2.5"
+        >
+          <HostCard
+            title={t("settings.host.snap2link")}
+            description={t("settings.hosting.snap2link_card")}
+            selected={config.hosting === "snap2link"}
+            onSelect={() => void choose("snap2link")}
+          />
+          <HostCard
+            title={t("settings.host.drive")}
+            description={t("settings.hosting.drive_card")}
+            selected={config.hosting === "drive"}
+            onSelect={() => void choose("drive")}
+          />
+        </div>
+      </Section>
+
+      {config.hosting === "drive" ? (
+        <DriveOptions {...props} />
+      ) : (
+        <Snap2LinkOptions />
+      )}
     </>
   );
 }

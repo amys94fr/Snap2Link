@@ -3,6 +3,8 @@
 export type ProfileMode = "ask" | "region" | "full_screen" | "active_window";
 export type ProfileAfter = "ask" | "share" | "annotate";
 
+export type Hosting = "snap2link" | "drive";
+
 export interface CaptureProfile {
   hotkey: string;
   mode: ProfileMode;
@@ -26,6 +28,7 @@ export interface AppConfig {
   last_choice: LastChoice;
   language: string;
   notify_link: boolean;
+  hosting: Hosting;
 }
 
 export const MAX_PROFILES = 3;

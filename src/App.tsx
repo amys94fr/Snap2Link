@@ -34,15 +34,15 @@ export default function App() {
 function MainApp() {
   const {
     setPage,
-    isAuthenticated,
-    setAuthenticated,
+    setupDone,
+    setSetupDone,
     autoCheckUpdates,
     requestAutoCheckUpdates,
     consumeAutoCheckUpdates,
   } = useAppStore();
 
   useEffect(() => {
-    void invoke<boolean>("is_authenticated").then(setAuthenticated);
+    void invoke<boolean>("is_first_run").then((first) => setSetupDone(!first));
 
     const unlistenPromise = listen<string>("navigate", async (e) => {
       const p = e.payload;
@@ -64,13 +64,13 @@ function MainApp() {
     return () => {
       void unlistenPromise.then((fn) => fn());
     };
-  }, [setAuthenticated, setPage, requestAutoCheckUpdates]);
+  }, [setSetupDone, setPage, requestAutoCheckUpdates]);
 
-  if (!isAuthenticated) {
+  if (!setupDone) {
     return (
       <SetupWizard
         onComplete={() => {
-          setAuthenticated(true);
+          setSetupDone(true);
           setPage("settings");
         }}
       />
@@ -81,7 +81,6 @@ function MainApp() {
     <SettingsWindow
       autoCheckUpdates={autoCheckUpdates}
       onUpdatesChecked={consumeAutoCheckUpdates}
-      onSignedOut={() => setAuthenticated(false)}
     />
   );
 }

@@ -15,6 +15,7 @@ const defaultConfig: AppConfig = {
   last_choice: {},
   language: "auto",
   notify_link: true,
+  hosting: "drive",
 };
 
 function mockInvoke(config: Partial<AppConfig> = {}, email = "user@example.com") {
@@ -241,15 +242,55 @@ describe("<SettingsWindow />", () => {
       expect(invoke).toHaveBeenCalledWith("authenticate");
     });
 
-    it("signs out and tells the app", async () => {
-      const onSignedOut = vi.fn();
+    it("stays in the settings after signing out, ready to reconnect", async () => {
       const user = userEvent.setup();
-      useAppStore.setState({ category: "hosting" });
-      render(<SettingsWindow onSignedOut={onSignedOut} />);
+      open("hosting");
       await user.click(await screen.findByRole("button", { name: /sign out/i }));
 
       expect(invoke).toHaveBeenCalledWith("disconnect");
-      await waitFor(() => expect(onSignedOut).toHaveBeenCalledTimes(1));
+      expect(
+        await screen.findByRole("button", { name: /connect google drive/i }),
+      ).toBeInTheDocument();
+      expect(screen.getAllByText(/not connected/i).length).toBeGreaterThan(0);
+    });
+
+    it("connects a Google account from the page", async () => {
+      vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+        if (cmd === "get_account_email") return null;
+        if (cmd === "get_config") return defaultConfig;
+        if (cmd === "authenticate") return "new@example.com";
+        return undefined;
+      });
+      const user = userEvent.setup();
+      open("hosting");
+      await user.click(
+        await screen.findByRole("button", { name: /connect google drive/i }),
+      );
+
+      expect(await screen.findByText(/signed in: new@example.com/i)).toBeInTheDocument();
+      expect(invoke).not.toHaveBeenCalledWith("disconnect");
+    });
+
+    it("only shows the options of the chosen host", async () => {
+      const user = userEvent.setup();
+      open("hosting");
+      expect(await screen.findByText(/drive folder: snap2link/i)).toBeInTheDocument();
+      expect(screen.queryByText(/links last 6 hours/i)).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: /^snap2link/i }));
+
+      expect(invoke).toHaveBeenCalledWith("set_hosting", { hosting: "snap2link" });
+      expect(await screen.findByText(/links last 6 hours/i)).toBeInTheDocument();
+      expect(screen.queryByText(/drive folder/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole("switch", { name: /automatic deletion/i })).not.toBeInTheDocument();
+    });
+
+    it("shows the active host in the menu, whatever the page", async () => {
+      mockInvoke({ hosting: "snap2link" });
+      open("capture");
+      const button = await screen.findByRole("button", { name: /active hosting/i });
+      expect(button).toHaveTextContent(/snap2link/i);
+      expect(button).toHaveTextContent(/no account/i);
     });
 
     it("toggles automatic deletion via save_config", async () => {

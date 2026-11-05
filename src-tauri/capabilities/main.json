@@ -40,6 +40,8 @@
     "allow-reset-last-choice",
     "allow-save-notify-link",
     "allow-get-language",
-    "allow-set-language"
+    "allow-set-language",
+    "allow-is-first-run",
+    "allow-set-hosting"
   ]
 }
