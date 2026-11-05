@@ -1,7 +1,14 @@
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
-import { MAX_DRIVE_BYTES, MAX_INLINE_BYTES, MCP_DAILY_LIMIT, MCP_IMAGE_SIDE } from "../src/limits";
+import {
+  MAX_DRIVE_BYTES,
+  MAX_INLINE_BYTES,
+  MAX_MCP_REQUEST_BYTES,
+  MCP_BLOCK_DAILY_LIMIT,
+  MCP_DAILY_LIMIT,
+  MCP_IMAGE_SIDE,
+} from "../src/limits";
 import { utcDay } from "../src/store";
 
 const BASE = "https://i.snap2link.app";
@@ -111,6 +118,23 @@ describe("the protocol", () => {
     expect((await post("{")).status).toBe(400);
     expect((await post("x".repeat(20_000))).status).toBe(413);
     expect((await rpc("resources/list")).error?.code).toBe(-32601);
+  });
+
+  it("refuses a body past the limit even when it declares no size", async () => {
+    const body = new Blob([new Uint8Array(MAX_MCP_REQUEST_BYTES + 1)]).stream();
+    const request = new Request(`${BASE}/mcp`, { method: "POST", body });
+    request.headers.delete("Content-Length");
+    const response = await worker.fetch(request as Parameters<typeof worker.fetch>[0], env);
+    expect(response.status).toBe(413);
+  });
+
+  it("refuses requests from web pages", async () => {
+    const request = new Request(`${BASE}/mcp`, {
+      method: "POST",
+      headers: { Origin: "https://evil.example", "Content-Type": "text/plain" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }),
+    }) as Parameters<typeof worker.fetch>[0];
+    expect((await worker.fetch(request, env)).status).toBe(403);
   });
 
   it("refuses an unknown tool and a missing link", async () => {
@@ -239,6 +263,33 @@ describe("reading a capture on Drive", () => {
 });
 
 describe("the daily limit", () => {
+  it("stops one address block without stopping the others", async () => {
+    await store(ID, png());
+    const from = (ip: string) => {
+      const request = new Request(`${BASE}/mcp`, {
+        method: "POST",
+        headers: { "CF-Connecting-IP": ip },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call",
+          params: { name: "read_capture", arguments: { url: `${BASE}/${ID}` } },
+        }),
+      }) as Parameters<typeof worker.fetch>[0];
+      return worker
+        .fetch(request, env)
+        .then((response) => response.json<{ result: { isError?: boolean } }>());
+    };
+
+    await from("203.0.113.7");
+    await env.DB.prepare("UPDATE usage SET count = ?1 WHERE key LIKE 'mcp-%'")
+      .bind(MCP_BLOCK_DAILY_LIMIT)
+      .run();
+
+    expect((await from("203.0.113.7")).result.isError).toBe(true);
+    expect((await from("198.51.100.7")).result.isError).toBeUndefined();
+  });
+
   it("stops reading past it, and doesn't count refused links", async () => {
     await store(ID, png());
     await read("https://evil.example/capture.png");

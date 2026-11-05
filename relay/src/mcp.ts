@@ -3,6 +3,7 @@ import {
   MAX_DRIVE_BYTES,
   MAX_INLINE_BYTES,
   MAX_MCP_REQUEST_BYTES,
+  MCP_BLOCK_DAILY_LIMIT,
   MCP_DAILY_LIMIT,
   MCP_IMAGE_SIDE,
 } from "./limits";
@@ -95,24 +96,37 @@ function nextHop(response: Response, from: string): string {
   return target.href;
 }
 
+/** The whole stream, or null past `maxBytes`, whatever its sender declared. */
+async function readLimited(body: ReadableStream<Uint8Array>, maxBytes: number) {
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  const reader = body.getReader();
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
 async function readCapped(response: Response): Promise<Uint8Array> {
   const tooLarge = new CaptureError("This file is too large to be a capture.");
   if (Number(response.headers.get("Content-Length") ?? 0) > MAX_DRIVE_BYTES) throw tooLarge;
   if (!response.body) throw new CaptureError("The host sent an empty response.");
-
-  const bytes = new Uint8Array(MAX_DRIVE_BYTES);
-  let total = 0;
-  const reader = response.body.getReader();
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) return bytes.subarray(0, total);
-    if (total + value.byteLength > MAX_DRIVE_BYTES) {
-      await reader.cancel();
-      throw tooLarge;
-    }
-    bytes.set(value, total);
-    total += value.byteLength;
-  }
+  const bytes = await readLimited(response.body, MAX_DRIVE_BYTES);
+  if (!bytes) throw tooLarge;
+  return bytes;
 }
 
 async function driveCapture(link: string): Promise<Uint8Array> {
@@ -145,7 +159,7 @@ async function reduced(bytes: Uint8Array, env: Env): Promise<Uint8Array> {
   return new Uint8Array(await new Response(result.image()).arrayBuffer());
 }
 
-async function readCapture(url: string, env: Env): Promise<object> {
+async function readCapture(url: string, env: Env, block: string): Promise<object> {
   const name = url.startsWith(`${env.PUBLIC_URL}/`)
     ? CAPTURE_NAME.exec(url.slice(env.PUBLIC_URL.length + 1))
     : null;
@@ -155,8 +169,11 @@ async function readCapture(url: string, env: Env): Promise<object> {
     );
   }
 
-  const quota = { key: "mcp", limit: MCP_DAILY_LIMIT };
-  if (await takeQuotas(env.DB, [quota], utcDay(Date.now()))) {
+  const quotas = [
+    { key: `mcp-${block}`, limit: MCP_BLOCK_DAILY_LIMIT },
+    { key: "mcp", limit: MCP_DAILY_LIMIT },
+  ];
+  if (await takeQuotas(env.DB, quotas, utcDay(Date.now()))) {
     return toolError("The service is busy. Try again tomorrow, or open the link yourself.");
   }
 
@@ -179,7 +196,7 @@ async function readCapture(url: string, env: Env): Promise<object> {
   }
 }
 
-async function answer(message: unknown, env: Env): Promise<object | null> {
+async function answer(message: unknown, env: Env, block: string): Promise<object | null> {
   if (typeof message !== "object" || message === null || Array.isArray(message)) {
     return failure(null, INVALID_REQUEST, "Not a JSON-RPC message.");
   }
@@ -209,32 +226,40 @@ async function answer(message: unknown, env: Env): Promise<object | null> {
       if (typeof args.url !== "string") {
         return failure(id, INVALID_PARAMS, "read_capture needs a url.");
       }
-      return success(id, await readCapture(args.url, env));
+      return success(id, await readCapture(args.url, env, block));
     }
     default:
       return failure(id, METHOD_NOT_FOUND, `Unknown method: ${method}`);
   }
 }
 
-export async function handleMcp(request: Request, env: Env): Promise<Response> {
+/** `block` is the address block's quota key. */
+export async function handleMcp(request: Request, env: Env, block: string): Promise<Response> {
   // There is no stream to open with GET, and no session to end with DELETE.
   if (request.method !== "POST") {
     return new Response(null, { status: 405, headers: { Allow: "POST" } });
   }
 
-  const body = await request.text();
-  if (body.length > MAX_MCP_REQUEST_BYTES) {
-    return Response.json(failure(null, INVALID_REQUEST, "Too large."), { status: 413 });
+  // Claude's clients aren't web pages: a page must not spend the quotas of the
+  // person who visits it.
+  if (request.headers.has("Origin")) {
+    return Response.json(failure(null, INVALID_REQUEST, "Not from a web page."), { status: 403 });
   }
+
+  const tooLarge = () =>
+    Response.json(failure(null, INVALID_REQUEST, "Too large."), { status: 413 });
+  if (Number(request.headers.get("Content-Length") ?? 0) > MAX_MCP_REQUEST_BYTES) return tooLarge();
+  const body = request.body ? await readLimited(request.body, MAX_MCP_REQUEST_BYTES) : null;
+  if (request.body && !body) return tooLarge();
 
   let message: unknown;
   try {
-    message = JSON.parse(body);
+    message = JSON.parse(new TextDecoder().decode(body ?? new Uint8Array()));
   } catch {
     return Response.json(failure(null, PARSE_ERROR, "Not JSON."), { status: 400 });
   }
 
-  const reply = await answer(message, env);
+  const reply = await answer(message, env, block);
   if (!reply) return new Response(null, { status: 202 });
   return Response.json(reply, { headers: { "Cache-Control": "no-store" } });
 }

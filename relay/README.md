@@ -70,7 +70,7 @@ The picture for that card. A capture up to 300 KB is served as is, and a larger 
 
 ### `POST /mcp`
 
-A remote MCP server with one read-only tool, `read_capture`, for the Claude plugin in `integrations/claude-code`. It is stateless and needs no account, because it only reads public links: captures on this relay and PNG files on Google Drive. A capture over 600 KB comes back reduced to 1,568 pixels on its longest side. It allows 1,000 reads a day in all, then answers that it is busy.
+A remote MCP server with one read-only tool, `read_capture`, for the Claude plugin in `integrations/claude-code`. It is stateless and needs no account, because it only reads public links: captures on this relay and PNG files on Google Drive. A capture over 600 KB comes back reduced to 1,568 pixels on its longest side. It allows 200 reads a day per address block and 1,000 in all, then answers that it is busy. It refuses requests from web pages, recognized by their `Origin` header.
 
 ### `DELETE /v1/captures/{id}`
 

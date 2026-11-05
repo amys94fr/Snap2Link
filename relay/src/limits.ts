@@ -30,6 +30,13 @@ export const PREVIEW_SIDE = 800;
 /** Reads through the MCP server per UTC day, for everyone at once. */
 export const MCP_DAILY_LIMIT = 1_000;
 
+/**
+ * Reads through the MCP server per address block and UTC day, so that one source
+ * can't use up the day for everyone. Generous, because connectors arrive through
+ * a few addresses shared by many people.
+ */
+export const MCP_BLOCK_DAILY_LIMIT = 200;
+
 /** Largest MCP request: it only ever holds a link. */
 export const MAX_MCP_REQUEST_BYTES = 16_384;
 
