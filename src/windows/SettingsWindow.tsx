@@ -41,16 +41,21 @@ export function SettingsWindow({
   const { category, setCategory } = useAppStore();
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [email, setEmail] = useState("");
+  const [snapEmail, setSnapEmail] = useState("");
 
   useEffect(() => {
     void invoke<string | null>("get_account_email").then((e) =>
       setEmail(e ?? ""),
+    );
+    void invoke<string | null>("get_snap2link_email").then((e) =>
+      setSnapEmail(e ?? ""),
     );
     void invoke<AppConfig>("get_config").then(setConfig);
   }, []);
 
   const current = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
   const onDrive = config?.hosting === "drive";
+  const hostEmail = onDrive ? email : snapEmail;
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 text-sm">
@@ -101,9 +106,9 @@ export function SettingsWindow({
           <span className="font-semibold">
             {t(onDrive ? "settings.host.drive" : "settings.host.snap2link")}
           </span>
-          {onDrive && email ? (
+          {hostEmail ? (
             <span dir="ltr" className="text-xs text-slate-300 truncate text-start">
-              {email}
+              {hostEmail}
             </span>
           ) : (
             <span className="text-xs text-slate-300">
@@ -140,6 +145,7 @@ export function SettingsWindow({
                 onConfig={setConfig}
                 email={email}
                 onEmail={setEmail}
+                onSnapEmail={setSnapEmail}
               />
             )}
             {current.id === "general" && (

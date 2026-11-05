@@ -34,6 +34,7 @@ export default function App() {
 function MainApp() {
   const {
     setPage,
+    setCategory,
     setupDone,
     setSetupDone,
     autoCheckUpdates,
@@ -50,6 +51,9 @@ function MainApp() {
         setPage(p as AppPage);
       } else if (p === "check-updates") {
         requestAutoCheckUpdates();
+      } else if (p === "account") {
+        setPage("settings");
+        setCategory("hosting");
       }
       // Whenever the tray asks us to navigate we also need to make sure
       // the main window is visible.

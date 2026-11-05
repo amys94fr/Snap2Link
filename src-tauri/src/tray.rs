@@ -95,7 +95,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-fn show_main(app: &AppHandle, page: &str) {
+pub fn show_main(app: &AppHandle, page: &str) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.emit("navigate", page.to_string());
         let _ = window.show();

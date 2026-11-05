@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "toast",
-  "description": "Link copied message: can only delete the capture just shared.",
+  "description": "Link copied message: can only delete the capture just shared, or open the place to sign in.",
   "windows": [
     "toast"
   ],
@@ -12,6 +12,7 @@
     "core:event:allow-unlisten",
     "core:window:allow-hide",
     "allow-get-language",
-    "allow-delete-last-upload"
+    "allow-delete-last-upload",
+    "allow-open-account-settings"
   ]
 }

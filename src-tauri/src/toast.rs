@@ -27,11 +27,11 @@ fn place_in_corner(app: &AppHandle, window: &WebviewWindow) -> tauri::Result<()>
     ))
 }
 
-/// Shows the toast in `state` ("uploading" or "copied"), unless the user
-/// turned it off in the settings.
+/// Shows the toast in `state`, unless the user turned it off in the settings.
+/// That setting is about the link: the daily limit still has to be told.
 #[tauri::command]
 pub fn show_toast(app: AppHandle, state: String) -> Result<(), String> {
-    if !load_config().notify_link {
+    if !load_config().notify_link && state != "limit_reached" {
         return Ok(());
     }
     let window = app
