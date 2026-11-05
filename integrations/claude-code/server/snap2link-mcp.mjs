@@ -72,7 +72,7 @@ async function downloadCapture(link, fetcher = fetch) {
 }
 
 // server/src/protocol.ts
-var SERVER_VERSION = "0.2.1";
+var SERVER_VERSION = "0.2.2";
 var PROTOCOL_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 var PARSE_ERROR = -32700;
 var INVALID_REQUEST = -32600;
