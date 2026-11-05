@@ -42,6 +42,12 @@
     "allow-get-language",
     "allow-set-language",
     "allow-is-first-run",
-    "allow-set-hosting"
+    "allow-set-hosting",
+    "allow-request-login-code",
+    "allow-verify-login-code",
+    "allow-get-account",
+    "allow-get-snap2link-email",
+    "allow-sign-out",
+    "allow-delete-account"
   ]
 }

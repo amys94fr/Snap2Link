@@ -7,7 +7,7 @@ use tauri::AppHandle;
 
 use crate::commands::auth::is_authenticated_inner;
 use crate::commands::config::{load_config, Hosting};
-use crate::commands::{drive, guest, relay};
+use crate::commands::{account, drive, guest, relay};
 use crate::utils::resolve_capture_path;
 
 /// The latest upload. The toast's Delete button can only reach this one, so
@@ -19,6 +19,34 @@ enum LastUpload {
 }
 
 static LAST_UPLOAD: Mutex<Option<LastUpload>> = Mutex::new(None);
+
+/// An account used its day: nothing to sign up for, unlike a guest.
+const ACCOUNT_DAILY_LIMIT: &str = "relay_account_daily_limit";
+
+/// Sends with the account when signed in. A session the relay refuses is
+/// forgotten and the capture goes out as a guest: the link comes first.
+async fn upload_to_relay(
+    app: &AppHandle,
+    base: &str,
+    bytes: Vec<u8>,
+) -> Result<relay::Created, String> {
+    if let Some(session) = account::session(base) {
+        match relay::upload(base, &session, bytes.clone()).await {
+            Err(code) if code == relay::SESSION_REQUIRED => account::forget_session(),
+            Err(code) if code == relay::DAILY_LIMIT => return Err(ACCOUNT_DAILY_LIMIT.to_string()),
+            result => return result,
+        }
+    }
+
+    let token = guest::token(app, base).await?;
+    match relay::upload(base, &token, bytes.clone()).await {
+        Err(code) if code == relay::GUEST_REQUIRED => {
+            let token = guest::renew(app, base, &token).await?;
+            relay::upload(base, &token, bytes).await
+        }
+        result => result,
+    }
+}
 
 #[tauri::command]
 pub async fn upload_screenshot(app: AppHandle, image_path: String) -> Result<String, String> {
@@ -36,14 +64,7 @@ pub async fn upload_screenshot(app: AppHandle, image_path: String) -> Result<Str
         Hosting::Snap2link => {
             let base = cfg.relay_url();
             let bytes = fs::read(&image_path).map_err(|e| e.to_string())?;
-            let token = guest::token(&app, &base).await?;
-            let created = match relay::upload(&base, &token, bytes.clone()).await {
-                Err(code) if code == relay::GUEST_REQUIRED => {
-                    let token = guest::renew(&app, &base, &token).await?;
-                    relay::upload(&base, &token, bytes).await?
-                }
-                result => result?,
-            };
+            let created = upload_to_relay(&app, &base, bytes).await?;
             let last = LastUpload::Relay {
                 base,
                 id: created.id,

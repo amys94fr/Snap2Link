@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-get-snap2link-email"
+description = "Enables the get_snap2link_email command without any pre-configured scope."
+commands.allow = ["get_snap2link_email"]
+
+[[permission]]
+identifier = "deny-get-snap2link-email"
+description = "Denies the get_snap2link_email command without any pre-configured scope."
+commands.deny = ["get_snap2link_email"]

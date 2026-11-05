@@ -253,7 +253,8 @@ describe("<OverlayWindow />", () => {
   });
 
   it.each([
-    ["relay_daily_limit", /daily limit reached/i],
+    ["relay_account_daily_limit", /daily limit reached for your account/i],
+    ["relay_account_banned", /can no longer use/i],
     ["relay_service_busy", /busy right now/i],
     ["relay_too_large", /too large/i],
     ["relay_unreachable", /can't be reached/i],
@@ -276,6 +277,45 @@ describe("<OverlayWindow />", () => {
     await waitFor(() => {
       expect(sendNotification).toHaveBeenCalledWith(
         expect.objectContaining({ body: expect.stringMatching(message) }),
+      );
+    });
+  });
+
+  it("offers an account in the toast when a guest reaches the daily limit", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") throw "relay_daily_limit";
+      return undefined;
+    });
+
+    render(<OverlayWindow />);
+    dragRegion();
+    fireEvent.click(await screen.findByTestId("prompt-save"));
+
+    await waitFor(() => {
+      expect(invoke).toHaveBeenCalledWith("show_toast", { state: "limit_reached" });
+    });
+    expect(invoke).not.toHaveBeenCalledWith("hide_toast");
+    expect(sendNotification).not.toHaveBeenCalled();
+  });
+
+  it("falls back to a notification if that toast can't be shown", async () => {
+    vi.mocked(invoke).mockImplementation(async (cmd: string, args?: unknown) => {
+      if (cmd === "capture_region") return "C:/temp/cap.png";
+      if (cmd === "upload_screenshot") throw "relay_daily_limit";
+      if (cmd === "show_toast" && (args as { state: string }).state === "limit_reached") {
+        throw new Error("no toast");
+      }
+      return undefined;
+    });
+
+    render(<OverlayWindow />);
+    dragRegion();
+    fireEvent.click(await screen.findByTestId("prompt-save"));
+
+    await waitFor(() => {
+      expect(sendNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringMatching(/daily limit reached/i) }),
       );
     });
   });

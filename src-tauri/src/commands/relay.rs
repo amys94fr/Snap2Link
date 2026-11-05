@@ -2,7 +2,7 @@
 //!
 //! Failures come back as stable codes that the overlay translates.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// What the relay answers to an upload.
 #[derive(Deserialize, Debug, PartialEq, Eq)]
@@ -15,10 +15,31 @@ pub struct Created {
 /// The relay doesn't know this guest, or it expired: get a new token.
 pub const GUEST_REQUIRED: &str = "relay_guest_required";
 pub const VERIFICATION_FAILED: &str = "relay_verification_failed";
+/// The relay doesn't know this session, or it expired: sign in again.
+pub const SESSION_REQUIRED: &str = "relay_session_required";
+pub const DAILY_LIMIT: &str = "relay_daily_limit";
 
 #[derive(Deserialize)]
 struct NewGuest {
     guest_token: String,
+}
+
+/// What the relay answers to a valid login code.
+#[derive(Deserialize, Debug, PartialEq, Eq)]
+pub struct NewSession {
+    pub session_token: String,
+    pub email: String,
+}
+
+/// What an account has used, shown in the settings.
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct AccountStatus {
+    pub email: String,
+    pub plan: String,
+    pub captures_today: u32,
+    pub daily_captures: u32,
+    pub slots_used: u32,
+    pub slots: u32,
 }
 
 #[derive(Deserialize)]
@@ -32,14 +53,34 @@ fn endpoint(base: &str, path: &str) -> String {
 
 fn error_code(body: &str, status: reqwest::StatusCode) -> String {
     match serde_json::from_str::<RelayError>(body).map(|e| e.error).as_deref() {
-        Ok("daily_limit") => "relay_daily_limit".to_string(),
+        Ok("daily_limit") => DAILY_LIMIT.to_string(),
         Ok("service_busy") => "relay_service_busy".to_string(),
         Ok("too_large") => "relay_too_large".to_string(),
         Ok("guest_required") => GUEST_REQUIRED.to_string(),
         Ok("guest_banned") => "relay_guest_banned".to_string(),
         Ok("verification_failed") => VERIFICATION_FAILED.to_string(),
         Ok("verification_unavailable") => "relay_service_busy".to_string(),
+        Ok("session_required") => SESSION_REQUIRED.to_string(),
+        Ok("account_banned") => "relay_account_banned".to_string(),
+        Ok("invalid_email") => "relay_invalid_email".to_string(),
+        Ok("invalid_code") => "relay_invalid_code".to_string(),
+        Ok("mail_unavailable") => "relay_mail_unavailable".to_string(),
         _ => format!("Snap2Link hosting answered {status}"),
+    }
+}
+
+/// The body of a successful answer, or the code of a refusal.
+async fn body_of(response: Result<reqwest::Response, reqwest::Error>) -> Result<String, String> {
+    let response = response.map_err(|_| "relay_unreachable".to_string())?;
+    let status = response.status();
+    let body = response
+        .text()
+        .await
+        .map_err(|_| "relay_unreachable".to_string())?;
+    if status.is_success() {
+        Ok(body)
+    } else {
+        Err(error_code(&body, status))
     }
 }
 
@@ -63,6 +104,67 @@ pub async fn create_guest(base: &str, turnstile: &str) -> Result<String, String>
     let guest: NewGuest =
         serde_json::from_str(&body).map_err(|e| format!("invalid relay response: {e}"))?;
     Ok(guest.guest_token)
+}
+
+/// Sends a login code to `email`, in `language` when the relay knows it.
+pub async fn request_code(
+    base: &str,
+    guest: &str,
+    email: &str,
+    language: &str,
+) -> Result<(), String> {
+    let response = reqwest::Client::new()
+        .post(endpoint(base, "/v1/login/code"))
+        .bearer_auth(guest)
+        .json(&serde_json::json!({ "email": email, "language": language }))
+        .send()
+        .await;
+    body_of(response).await.map(|_| ())
+}
+
+/// Turns a login code into a session, creating the account the first time.
+pub async fn verify_code(
+    base: &str,
+    guest: &str,
+    email: &str,
+    code: &str,
+) -> Result<NewSession, String> {
+    let response = reqwest::Client::new()
+        .post(endpoint(base, "/v1/login/verify"))
+        .bearer_auth(guest)
+        .json(&serde_json::json!({ "email": email, "code": code }))
+        .send()
+        .await;
+    let body = body_of(response).await?;
+    serde_json::from_str(&body).map_err(|e| format!("invalid relay response: {e}"))
+}
+
+pub async fn account(base: &str, session: &str) -> Result<AccountStatus, String> {
+    let response = reqwest::Client::new()
+        .get(endpoint(base, "/v1/me"))
+        .bearer_auth(session)
+        .send()
+        .await;
+    let body = body_of(response).await?;
+    serde_json::from_str(&body).map_err(|e| format!("invalid relay response: {e}"))
+}
+
+pub async fn sign_out(base: &str, session: &str) -> Result<(), String> {
+    let response = reqwest::Client::new()
+        .post(endpoint(base, "/v1/logout"))
+        .bearer_auth(session)
+        .send()
+        .await;
+    body_of(response).await.map(|_| ())
+}
+
+pub async fn delete_account(base: &str, session: &str) -> Result<(), String> {
+    let response = reqwest::Client::new()
+        .delete(endpoint(base, "/v1/me"))
+        .bearer_auth(session)
+        .send()
+        .await;
+    body_of(response).await.map(|_| ())
 }
 
 pub async fn upload(base: &str, guest: &str, bytes: Vec<u8>) -> Result<Created, String> {
@@ -170,6 +272,119 @@ mod tests {
 
             assert_eq!(upload(&server.url(), "guest", vec![1]).await.unwrap_err(), code);
         }
+    }
+
+    #[tokio::test]
+    async fn request_code_sends_the_address_and_the_language() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("POST", "/v1/login/code")
+            .match_header("authorization", "Bearer guest")
+            .match_body(mockito::Matcher::Json(serde_json::json!({
+                "email": "someone@example.com",
+                "language": "fr",
+            })))
+            .with_status(202)
+            .with_body(r#"{"expires_at":"x"}"#)
+            .create_async()
+            .await;
+
+        request_code(&server.url(), "guest", "someone@example.com", "fr")
+            .await
+            .unwrap();
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn verify_code_returns_the_session() {
+        let mut server = mockito::Server::new_async().await;
+        server
+            .mock("POST", "/v1/login/verify")
+            .match_header("authorization", "Bearer guest")
+            .match_body(mockito::Matcher::Json(serde_json::json!({
+                "email": "someone@example.com",
+                "code": "123456",
+            })))
+            .with_status(200)
+            .with_body(
+                r#"{"session_token":"s_x","expires_at":"x","email":"someone@example.com","plan":"free"}"#,
+            )
+            .create_async()
+            .await;
+
+        let session = verify_code(&server.url(), "guest", "someone@example.com", "123456")
+            .await
+            .unwrap();
+        assert_eq!(
+            session,
+            NewSession {
+                session_token: "s_x".to_string(),
+                email: "someone@example.com".to_string(),
+            }
+        );
+    }
+
+    #[tokio::test]
+    async fn account_reads_what_the_relay_counted() {
+        let mut server = mockito::Server::new_async().await;
+        server
+            .mock("GET", "/v1/me")
+            .match_header("authorization", "Bearer s_x")
+            .with_status(200)
+            .with_body(
+                r#"{"email":"a@b.co","plan":"free","captures_today":12,"daily_captures":20,"slots_used":4,"slots":6}"#,
+            )
+            .create_async()
+            .await;
+
+        let status = account(&server.url(), "s_x").await.unwrap();
+        assert_eq!(status.captures_today, 12);
+        assert_eq!(status.slots, 6);
+    }
+
+    #[tokio::test]
+    async fn account_refusals_become_codes_the_settings_know() {
+        for (status, relay_code, code) in [
+            (400, "invalid_email", "relay_invalid_email"),
+            (400, "invalid_code", "relay_invalid_code"),
+            (401, "session_required", SESSION_REQUIRED),
+            (403, "account_banned", "relay_account_banned"),
+            (503, "mail_unavailable", "relay_mail_unavailable"),
+        ] {
+            let mut server = mockito::Server::new_async().await;
+            server
+                .mock("POST", "/v1/login/code")
+                .with_status(status)
+                .with_body(format!(r#"{{"error":"{relay_code}"}}"#))
+                .create_async()
+                .await;
+
+            let error = request_code(&server.url(), "guest", "a@b.co", "en").await;
+            assert_eq!(error.unwrap_err(), code);
+        }
+    }
+
+    #[tokio::test]
+    async fn sign_out_and_delete_send_the_session() {
+        let mut server = mockito::Server::new_async().await;
+        let logout = server
+            .mock("POST", "/v1/logout")
+            .match_header("authorization", "Bearer s_x")
+            .with_status(204)
+            .create_async()
+            .await;
+        let deleted = server
+            .mock("DELETE", "/v1/me")
+            .match_header("authorization", "Bearer s_x")
+            .with_status(204)
+            .create_async()
+            .await;
+
+        sign_out(&server.url(), "s_x").await.unwrap();
+        delete_account(&server.url(), "s_x").await.unwrap();
+
+        logout.assert_async().await;
+        deleted.assert_async().await;
     }
 
     #[tokio::test]

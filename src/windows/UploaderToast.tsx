@@ -6,11 +6,13 @@ export type UploaderState =
   | "copied"
   | "deleting"
   | "deleted"
-  | "delete_failed";
+  | "delete_failed"
+  | "limit_reached";
 
 interface Props {
   state: UploaderState;
   onDelete?: () => void;
+  onAccount?: () => void;
 }
 
 const TEXT: Record<UploaderState, { title: string; subtitle: string }> = {
@@ -31,13 +33,18 @@ const TEXT: Record<UploaderState, { title: string; subtitle: string }> = {
     title: "uploader.delete_failed.title",
     subtitle: "uploader.delete_failed.subtitle",
   },
+  limit_reached: {
+    title: "uploader.limit.title",
+    subtitle: "uploader.limit.subtitle",
+  },
 };
 
 /** Content of the toast window: progress, then the result of the share. */
-export function UploaderToast({ state, onDelete }: Props) {
+export function UploaderToast({ state, onDelete, onAccount }: Props) {
   const isSuccess = state === "copied" || state === "deleting";
-  const failed = state === "delete_failed";
-  const canDelete = isSuccess || failed;
+  const limited = state === "limit_reached";
+  const failed = state === "delete_failed" || limited;
+  const canDelete = isSuccess || state === "delete_failed";
   const { title, subtitle } = TEXT[state];
 
   return (
@@ -77,6 +84,16 @@ export function UploaderToast({ state, onDelete }: Props) {
             className="btn shrink-0 min-h-11 px-3 text-[13px] border border-red-300 text-red-300 hover:bg-red-300/10"
           >
             {state === "deleting" ? t("uploader.deleting") : t("uploader.delete")}
+          </button>
+        )}
+        {limited && (
+          <button
+            type="button"
+            data-testid="toast-account"
+            onClick={onAccount}
+            className="btn shrink-0 min-h-11 px-3 text-[13px] bg-brand hover:bg-brand-dark text-white"
+          >
+            {t("uploader.limit.action")}
           </button>
         )}
       </div>

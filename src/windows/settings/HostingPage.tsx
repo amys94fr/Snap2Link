@@ -4,6 +4,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
 import { t } from "@/i18n";
 import { RetentionControl } from "@/components/RetentionControl";
+import { AccountSection } from "./AccountSection";
 import type { AppConfig, Hosting } from "@/lib/config";
 import {
   BUTTON,
@@ -23,6 +24,8 @@ interface Props {
   /** Empty when no Google account is connected. */
   email: string;
   onEmail: (email: string) => void;
+  /** Called with the Snap2Link account's address, empty when signed out. */
+  onSnapEmail: (email: string) => void;
 }
 
 function HostCard({
@@ -63,17 +66,10 @@ function HostCard({
   );
 }
 
-function Snap2LinkOptions() {
+function Snap2LinkOptions({ onSnapEmail }: Pick<Props, "onSnapEmail">) {
   return (
     <>
-      <Section title={t("settings.hosting.plan")}>
-        <Card>
-          <Row
-            label={t("settings.host.no_account")}
-            hint={t("settings.hosting.plan_hint")}
-          />
-        </Card>
-      </Section>
+      <AccountSection onEmail={onSnapEmail} />
       <Section title={t("settings.hosting.access")}>
         <Card>
           <Row
@@ -263,7 +259,7 @@ export function HostingPage(props: Props) {
       {config.hosting === "drive" ? (
         <DriveOptions {...props} />
       ) : (
-        <Snap2LinkOptions />
+        <Snap2LinkOptions onSnapEmail={props.onSnapEmail} />
       )}
     </>
   );

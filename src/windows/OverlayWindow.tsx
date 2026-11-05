@@ -61,6 +61,8 @@ const UPLOAD_ERRORS: Record<string, string> = {
   relay_verification_failed: "uploader.error.verification_failed",
   relay_guest_cancelled: "uploader.error.verification_cancelled",
   relay_guest_banned: "uploader.error.banned",
+  relay_account_banned: "uploader.error.banned",
+  relay_account_daily_limit: "uploader.error.account_daily_limit",
   drive_not_connected: "uploader.error.drive_not_connected",
 };
 
@@ -448,7 +450,7 @@ export function OverlayWindow() {
     }
   };
 
-  const toast = async (state: "uploading" | "copied") => {
+  const toast = async (state: "uploading" | "copied" | "limit_reached") => {
     try {
       await invoke("show_toast", { state });
       return true;
@@ -483,6 +485,8 @@ export function OverlayWindow() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       dlog(`[overlay] upload FAILED: ${msg}`);
+      // A guest at the limit gets the toast: a notification can't carry a button.
+      if (msg === "relay_daily_limit" && (await toast("limit_reached"))) return false;
       void Promise.resolve(invoke("hide_toast")).catch(() => {});
       try {
         const known = UPLOAD_ERRORS[msg];

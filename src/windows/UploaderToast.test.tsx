@@ -21,6 +21,15 @@ describe("<UploaderToast />", () => {
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
+  it("offers an account at the daily limit, and nothing to delete", () => {
+    const onAccount = vi.fn();
+    render(<UploaderToast state="limit_reached" onAccount={onAccount} />);
+    expect(screen.getByText(/daily limit reached/i)).toBeInTheDocument();
+    expect(screen.queryByTestId("toast-delete")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("toast-account"));
+    expect(onAccount).toHaveBeenCalledTimes(1);
+  });
+
   it("offers a retry when the deletion failed", () => {
     render(<UploaderToast state="delete_failed" />);
     expect(screen.getByText(/still works/i)).toBeInTheDocument();

@@ -7,6 +7,7 @@ import { UploaderToast, type UploaderState } from "./UploaderToast";
 const VISIBLE_MS: Partial<Record<UploaderState, number>> = {
   copied: 15000,
   delete_failed: 15000,
+  limit_reached: 15000,
   deleted: 2500,
 };
 
@@ -43,5 +44,16 @@ export function ToastWindow() {
     }
   };
 
-  return <UploaderToast state={state} onDelete={() => void deleteCapture()} />;
+  const openAccount = () => {
+    void getCurrentWebviewWindow().hide();
+    void invoke("open_account_settings");
+  };
+
+  return (
+    <UploaderToast
+      state={state}
+      onDelete={() => void deleteCapture()}
+      onAccount={openAccount}
+    />
+  );
 }
