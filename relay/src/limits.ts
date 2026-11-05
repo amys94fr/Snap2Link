@@ -42,5 +42,40 @@ export const GLOBAL_DAILY_LIMIT = 3_000;
 /** Bytes kept at once. Leaves most of the free 10 GB to the rest of the account. */
 export const MAX_STORED_BYTES = 2_000_000_000;
 
+/**
+ * What each plan may do. `slots` is how many of an account's links work at
+ * once: a new capture ends the oldest. Stored bytes stay bounded by
+ * MAX_STORED_BYTES, whatever the number of accounts.
+ */
+export const PLANS = {
+  free: { slots: 6, dailyCaptures: 20 },
+} as const;
+
+export type Plan = keyof typeof PLANS;
+
+/** Captures one address block can send per UTC day through accounts. */
+export const ACCOUNT_BLOCK_DAILY_LIMIT = 100;
+
+/** A session lasts this long, and an account unused this long is forgotten. */
+export const SESSION_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
+
+/** How long a login code works. The emails say 10 minutes. */
+export const LOGIN_CODE_LIFETIME_MS = 10 * 60 * 1000;
+
+/** Guesses one login code allows. */
+export const LOGIN_CODE_ATTEMPTS = 5;
+
+/** Login codes one address can receive per UTC day. */
+export const EMAIL_DAILY_CODES = 5;
+
+/** Login codes one address block can ask for per UTC day. */
+export const BLOCK_DAILY_CODES = 10;
+
+/**
+ * Login codes the whole service sends per UTC day. Resend's free plan stops at
+ * 100 emails a day and 3,000 a month: this stays under both.
+ */
+export const GLOBAL_DAILY_CODES = 80;
+
 /** Objects freed per cleanup run: one bulk delete takes up to 1,000 keys. */
 export const PURGE_BATCH = 1_000;

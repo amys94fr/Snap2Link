@@ -1,4 +1,23 @@
-import { BLOCK_DAILY_LIMIT, GUEST_DAILY_LIMIT, MAX_CAPTURE_BYTES } from "./limits";
+import {
+  accountQuotaKey,
+  accountUsage,
+  cancelLoginCode,
+  closeSession,
+  createLoginCode,
+  deleteAccount,
+  openSession,
+  sessionAccount,
+  useLoginCode,
+  type Account,
+} from "./accounts";
+import {
+  ACCOUNT_BLOCK_DAILY_LIMIT,
+  BLOCK_DAILY_LIMIT,
+  GUEST_DAILY_LIMIT,
+  MAX_CAPTURE_BYTES,
+  PLANS,
+} from "./limits";
+import { sendLoginCode } from "./mail";
 import {
   createCapture,
   createGuest,
@@ -7,6 +26,7 @@ import {
   liveCaptureSize,
   purgeExpired,
   utcDay,
+  type NewCapture,
   type Storage,
 } from "./store";
 
@@ -23,6 +43,10 @@ export interface Env {
   TURNSTILE_SITEKEY: string;
   /** Secret key of that widget. */
   TURNSTILE_SECRET: string;
+  /** Sender of the login codes. */
+  MAIL_FROM: string;
+  /** Sends the login codes. */
+  RESEND_API_KEY: string;
 }
 
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -36,6 +60,11 @@ const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverif
 const TURNSTILE_ACTION = "guest";
 /** Turnstile tokens are 2,048 characters at most. */
 const MAX_GUEST_REQUEST_BYTES = 4_096;
+const MAX_LOGIN_REQUEST_BYTES = 1_024;
+const MAX_EMAIL_LENGTH = 254;
+
+/** Tells a session from a guest token before asking the database. */
+const SESSION_PREFIX = "s_";
 
 const storage = (env: Env): Storage => ({ db: env.DB, images: env.IMAGES });
 
@@ -53,6 +82,12 @@ function randomId(): string {
 function randomToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Six digits, each value equally likely. */
+function randomCode(): string {
+  const [value] = crypto.getRandomValues(new Uint32Array(1));
+  return value < 4_294_000_000 ? String(value % 1_000_000).padStart(6, "0") : randomCode();
 }
 
 async function sha256(text: string): Promise<string> {
@@ -94,14 +129,68 @@ function bearer(request: Request): string | null {
   return header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : null;
 }
 
-async function handleUpload(request: Request, env: Env): Promise<Response> {
-  const now = Date.now();
+/** The guest behind a request, or the answer that refuses it. */
+async function requireGuest(request: Request, env: Env, now: number): Promise<string | Response> {
   const token = bearer(request);
   if (!token) return error(401, "guest_required");
   const guestHash = await sha256(token);
   const status = await guestStatus(env.DB, guestHash, now);
   if (status === "unknown") return error(401, "guest_required");
   if (status === "banned") return error(403, "guest_banned");
+  return guestHash;
+}
+
+/** The account behind a request, or the answer that refuses it. */
+async function requireAccount(
+  request: Request,
+  env: Env,
+  now: number,
+): Promise<{ account: Account; tokenHash: string } | Response> {
+  const token = bearer(request);
+  if (!token?.startsWith(SESSION_PREFIX)) return error(401, "session_required");
+  const tokenHash = await sha256(token);
+  const account = await sessionAccount(env.DB, tokenHash, now);
+  if (account === "unknown") return error(401, "session_required");
+  if (account === "banned") return error(403, "account_banned");
+  return { account, tokenHash };
+}
+
+type Sender = Pick<NewCapture, "sender" | "quotas">;
+
+/** Who is uploading and what they may use, or the answer that refuses them. */
+async function uploadSender(request: Request, env: Env, now: number): Promise<Sender | Response> {
+  if (bearer(request)?.startsWith(SESSION_PREFIX)) {
+    const session = await requireAccount(request, env, now);
+    if (session instanceof Response) return session;
+    const { id, plan } = session.account;
+    const { slots, dailyCaptures } = PLANS[plan];
+    return {
+      sender: { accountId: id, slots },
+      quotas: [
+        { key: accountQuotaKey(id), limit: dailyCaptures },
+        {
+          key: `account-${await ownerKey(request, env.IP_SALT, now)}`,
+          limit: ACCOUNT_BLOCK_DAILY_LIMIT,
+        },
+      ],
+    };
+  }
+
+  const guestHash = await requireGuest(request, env, now);
+  if (guestHash instanceof Response) return guestHash;
+  return {
+    sender: { guestHash },
+    quotas: [
+      { key: `guest:${guestHash}`, limit: GUEST_DAILY_LIMIT },
+      { key: await ownerKey(request, env.IP_SALT, now), limit: BLOCK_DAILY_LIMIT },
+    ],
+  };
+}
+
+async function handleUpload(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const sender = await uploadSender(request, env, now);
+  if (sender instanceof Response) return sender;
 
   // The size has to be known up front: the body goes straight to R2.
   const size = Number(request.headers.get("Content-Length"));
@@ -115,13 +204,9 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
   const result = await createCapture(storage(env), {
     id,
     deleteHash: await sha256(deleteToken),
-    guestHash,
+    ...sender,
     body: request.body,
     size,
-    quotas: [
-      { key: `guest:${guestHash}`, limit: GUEST_DAILY_LIMIT },
-      { key: await ownerKey(request, env.IP_SALT, now), limit: BLOCK_DAILY_LIMIT },
-    ],
     now,
   });
 
@@ -202,6 +287,118 @@ async function handleGuest(request: Request, env: Env): Promise<Response> {
     { guest_token: guestToken, expires_at: new Date(result.expiresAt).toISOString() },
     { status: 201 },
   );
+}
+
+/** A JSON object from a small request body, or null. */
+async function loginBody(request: Request): Promise<Record<string, unknown> | null> {
+  const body = await request.text();
+  if (body.length > MAX_LOGIN_REQUEST_BYTES) return null;
+  try {
+    const value: unknown = JSON.parse(body);
+    return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The address as accounts know it, or null when it can't be one. */
+function normalizedEmail(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const email = value.trim().toLowerCase();
+  return email.length <= MAX_EMAIL_LENGTH && /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(email)
+    ? email
+    : null;
+}
+
+/** Keyed, since a plain hash of an address can be found by trying addresses. */
+const accountId = (email: string, env: Env) => sha256(`${env.IP_SALT}:account:${email}`);
+
+/** Six digits alone would take a moment to find from their hash. */
+const codeHash = (id: string, code: string, env: Env) =>
+  sha256(`${env.IP_SALT}:code:${id}:${code}`);
+
+/**
+ * Sends a code. A guest token is required, so that Turnstile stands in front of
+ * every email. The answer is the same for a new and a known address.
+ */
+async function handleLoginCode(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const guest = await requireGuest(request, env, now);
+  if (guest instanceof Response) return guest;
+
+  const body = await loginBody(request);
+  if (!body) return error(400, "bad_request");
+  const email = normalizedEmail(body.email);
+  if (!email) return error(400, "invalid_email");
+
+  const id = await accountId(email, env);
+  const code = randomCode();
+  const block = await ownerKey(request, env.IP_SALT, now);
+  const result = await createLoginCode(env.DB, id, await codeHash(id, code, env), block, now);
+  if ("refused" in result) {
+    return error(result.refused === "daily_limit" ? 429 : 503, result.refused);
+  }
+
+  if (!(await sendLoginCode(env, email, code, body.language))) {
+    await cancelLoginCode(env.DB, id, block, now);
+    return error(503, "mail_unavailable");
+  }
+  return Response.json({ expires_at: new Date(result.expiresAt).toISOString() }, { status: 202 });
+}
+
+async function handleLoginVerify(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const guest = await requireGuest(request, env, now);
+  if (guest instanceof Response) return guest;
+
+  const body = await loginBody(request);
+  const email = normalizedEmail(body?.email);
+  if (!email || typeof body?.code !== "string") return error(400, "bad_request");
+
+  const id = await accountId(email, env);
+  if (!(await useLoginCode(env.DB, id, await codeHash(id, body.code, env), now))) {
+    return error(400, "invalid_code");
+  }
+
+  const sessionToken = `${SESSION_PREFIX}${randomToken()}`;
+  const session = await openSession(env.DB, id, email, await sha256(sessionToken), now);
+  if (!session) return error(403, "account_banned");
+  return Response.json({
+    session_token: sessionToken,
+    expires_at: new Date(session.expiresAt).toISOString(),
+    email: session.account.email,
+    plan: session.account.plan,
+  });
+}
+
+async function handleMe(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const session = await requireAccount(request, env, now);
+  if (session instanceof Response) return session;
+  const { id, email, plan } = session.account;
+
+  if (request.method === "DELETE") {
+    await deleteAccount(storage(env), id);
+    return new Response(null, { status: 204 });
+  }
+
+  const usage = await accountUsage(env.DB, id, now);
+  const { slots, dailyCaptures } = PLANS[plan];
+  return Response.json({
+    email,
+    plan,
+    captures_today: usage.capturesToday,
+    daily_captures: dailyCaptures,
+    slots_used: usage.slotsUsed,
+    slots,
+  });
+}
+
+async function handleLogout(request: Request, env: Env): Promise<Response> {
+  const session = await requireAccount(request, env, Date.now());
+  if (session instanceof Response) return session;
+  await closeSession(env.DB, session.tokenHash);
+  return new Response(null, { status: 204 });
 }
 
 /**
@@ -328,6 +525,24 @@ export default {
 
     if (pathname === "/v1/guests") {
       return method === "POST" ? handleGuest(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/login/code") {
+      return method === "POST" ? handleLoginCode(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/login/verify") {
+      return method === "POST" ? handleLoginVerify(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/logout") {
+      return method === "POST" ? handleLogout(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/me") {
+      return method === "GET" || method === "DELETE"
+        ? handleMe(request, env)
+        : error(405, "method_not_allowed");
     }
 
     if (pathname === "/guest" || pathname === "/guest/done") {

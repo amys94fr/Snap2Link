@@ -10,6 +10,8 @@ declare global {
       IP_SALT: string;
       TURNSTILE_SITEKEY: string;
       TURNSTILE_SECRET: string;
+      RESEND_API_KEY: string;
+      MAIL_FROM: string;
       TEST_MIGRATIONS: D1Migration[];
     }
   }

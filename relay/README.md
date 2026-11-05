@@ -4,6 +4,8 @@ Temporary image hosting for Snap2Link, so that a capture can become a link witho
 
 The app ships no secret: anything it contained could be extracted. Each install gets a guest token instead, after passing Cloudflare Turnstile once. Quotas are enforced here, because forks can change the app.
 
+A free account raises the limits: it takes an email address and a 6-digit code, with no password. An account has a number of slots, the links that work at once: a new capture ends the oldest one.
+
 ## API
 
 ### `GET /guest`
@@ -32,7 +34,7 @@ The body is `{"turnstile": "<token>"}`. A Turnstile token works once, for 5 minu
 
 ### `POST /v1/captures`
 
-Needs `Authorization: Bearer <guest_token>`. The body is the PNG itself.
+Needs `Authorization: Bearer <guest_token>`, or `Bearer <session_token>` for an account. The body is the PNG itself.
 
 ```json
 {
@@ -47,11 +49,13 @@ Needs `Authorization: Bearer <guest_token>`. The body is the PNG itself.
 |---|---|---|
 | 201 | | Stored |
 | 401 | `guest_required` | No guest token, or an unknown or expired one: get a new one |
+| 401 | `session_required` | Unknown or expired session: sign in again |
 | 403 | `guest_banned` | This guest is banned |
+| 403 | `account_banned` | This account is banned |
 | 411 | `length_required` | No `Content-Length` |
 | 413 | `too_large` | Over 5 MB |
 | 415 | `not_png` | Not a PNG |
-| 429 | `daily_limit` | This guest used its 5 captures of the day, or this address its 30 |
+| 429 | `daily_limit` | This guest used its 5 captures of the day, this account its 20, or this address its 30 (100 through accounts) |
 | 503 | `service_busy` | A global limit is reached, try again later |
 
 ### `GET /{id}.png`
@@ -62,6 +66,65 @@ Returns the image, or 404 once it is deleted or expired. `HEAD` works too.
 
 Needs `Authorization: Bearer <delete_token>`. Returns 204, or 404 if the capture doesn't exist or the token is wrong.
 
+### `POST /v1/login/code`
+
+Needs `Authorization: Bearer <guest_token>`, so that Turnstile stands in front of every email. The body is `{"email": "…", "language": "fr"}`. The language is optional and falls back to English. The answer doesn't depend on whether the address has an account.
+
+| Status | `error` | Meaning |
+|---|---|---|
+| 202 | | The code is on its way, and works for 10 minutes |
+| 400 | `bad_request` | The body isn't valid |
+| 400 | `invalid_email` | That can't be an address |
+| 401 | `guest_required` | No valid guest token |
+| 403 | `guest_banned` | This guest is banned |
+| 429 | `daily_limit` | This address received 5 codes today, or this network asked for 10 |
+| 503 | `service_busy` | The global limit of codes is reached |
+| 503 | `mail_unavailable` | The email couldn't be sent. Nothing is counted |
+
+### `POST /v1/login/verify`
+
+Needs the guest token too. The body is `{"email": "…", "code": "123456"}`. This signs in, creating the account the first time. A code allows 5 guesses.
+
+```json
+{
+  "session_token": "s_…",
+  "expires_at": "2027-11-05T12:00:00.000Z",
+  "email": "someone@example.com",
+  "plan": "free"
+}
+```
+
+| Status | `error` | Meaning |
+|---|---|---|
+| 200 | | Signed in |
+| 400 | `bad_request` | The body isn't valid |
+| 400 | `invalid_code` | Wrong, expired or used code |
+| 401 | `guest_required` | No valid guest token |
+| 403 | `account_banned` | This account is banned |
+
+### `GET /v1/me`
+
+Needs `Authorization: Bearer <session_token>`. Returns 401 `session_required` when the session is over.
+
+```json
+{
+  "email": "someone@example.com",
+  "plan": "free",
+  "captures_today": 12,
+  "daily_captures": 20,
+  "slots_used": 4,
+  "slots": 6
+}
+```
+
+### `DELETE /v1/me`
+
+Needs the session token. Deletes the account, its sessions and its captures, and returns 204.
+
+### `POST /v1/logout`
+
+Needs the session token. Ends this session and returns 204.
+
 ## Limits
 
 All of them are in [`src/limits.ts`](src/limits.ts), which also explains how they keep the service inside the free tiers. Raising one can create a bill.
@@ -69,6 +132,8 @@ All of them are in [`src/limits.ts`](src/limits.ts), which also explains how the
 ## Privacy
 
 Addresses are never stored. Quotas use a hash of the address that changes every UTC day, and IPv6 addresses count per /64. A guest is a random token, kept as a hash with its dates: nothing about the device is collected. A capture keeps the hash of its guest until it expires, so that abuse can be traced to a guest and to nothing else. Images are removed at expiry, and a link stops working at that moment even if the cleanup job hasn't run.
+
+An account stores its email address, its plan and the date it was created. An address is only stored once its code is used: until then, only a keyed hash of it exists. Codes and session tokens are stored as hashes. Resend receives the address and the code to send the email. A free account with no session left is deleted a year after it was created.
 
 ## Run it yourself
 
@@ -83,11 +148,12 @@ The relay is MIT, like the rest of Snap2Link. For your own instance:
    pnpm exec wrangler d1 migrations apply snap2link-relay --remote
    ```
 
-3. Set the salt to a long random value, and the secret key of the widget:
+3. Set the salt to a long random value, the secret key of the widget, and a [Resend](https://resend.com) API key for a domain of yours, with `MAIL_FROM` changed in `wrangler.jsonc`. Account ids derive from the salt: changing it later orphans every account.
 
    ```bash
    pnpm exec wrangler secret put IP_SALT
    pnpm exec wrangler secret put TURNSTILE_SECRET
+   pnpm exec wrangler secret put RESEND_API_KEY
    ```
 
 4. Deploy, then add a rate limiting rule on the hostname in the Cloudflare dashboard. A rule stops a single source before it reaches the Worker. Workers quotas are per account, so a flood here can affect your other Workers.

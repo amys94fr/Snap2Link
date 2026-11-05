@@ -20,6 +20,7 @@
   "vars": {
     "PUBLIC_URL": "https://i.snap2link.app",
     "ABUSE_CONTACT": "abuse@snap2link.app",
+    "MAIL_FROM": "Snap2Link <noreply@snap2link.app>",
     "TURNSTILE_SITEKEY": "0x4AAAAAAF0C_X7NcOtuLv5w"
   },
   // Links are refused the moment they expire: this only frees the space.
