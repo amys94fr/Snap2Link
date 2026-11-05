@@ -347,9 +347,7 @@ jobs:
           set -euo pipefail
           latest="$(gh release view --json tagName --jq .tagName)"
           latest="${latest#v}"
-          newest="$(printf '%s
-%s
-' "$latest" "$VERSION" | sort -V | tail -n 1)"
+          newest="$(printf '%s\n' "$latest" "$VERSION" | sort -V | tail -n 1)"
           if [ "$VERSION" = "$latest" ] || [ "$newest" != "$VERSION" ]; then
             echo "::error::$VERSION isn't newer than the latest release, $latest"
             exit 1
