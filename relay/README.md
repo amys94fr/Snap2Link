@@ -97,16 +97,7 @@ The relay is MIT, like the rest of Snap2Link. For your own instance:
 
 ## Deployment of snap2link.app
 
-Workers Builds deploys `main`, with these settings:
-
-| Setting | Value |
-|---|---|
-| Root directory | `relay` |
-| Build command | `pnpm test` |
-| Deploy command | `pnpm exec wrangler deploy` |
-| Build watch paths | `relay/*` |
-
-The default build token can't write to D1, so a new migration has to be applied separately, before the code that needs it is deployed.
+GitHub Actions deploys `main` after the tests pass (`.github/workflows/relay.yml`). It applies new migrations first, then deploys. The token is the `CLOUDFLARE_API_TOKEN` secret of the `relay` environment, which only `main` can use. It needs the "Edit Cloudflare Workers" template plus D1 Edit.
 
 ## Taking a capture down
 
