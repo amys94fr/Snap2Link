@@ -15,7 +15,9 @@ import {
   BLOCK_DAILY_LIMIT,
   GUEST_DAILY_LIMIT,
   MAX_CAPTURE_BYTES,
+  MAX_PREVIEW_BYTES,
   PLANS,
+  PREVIEW_SIDE,
 } from "./limits";
 import { sendLoginCode } from "./mail";
 import {
@@ -33,6 +35,8 @@ import {
 export interface Env {
   DB: D1Database;
   IMAGES: R2Bucket;
+  /** Shrinks a capture for link previews. */
+  RESIZER: ImagesBinding;
   /** Base of the links handed out, without a trailing slash. */
   PUBLIC_URL: string;
   /** Where to report a capture. Shown on the home page. */
@@ -53,8 +57,14 @@ const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 const ID_LENGTH = 22;
 
 /** Links are only as private as they are unguessable: about 131 random bits. */
-const CAPTURE_PATH = /^\/([0-9A-Za-z]{22})\.png$/;
+const CAPTURE_PATH = /^\/([0-9A-Za-z]{22})(\.png|\.jpg)?$/;
 const API_CAPTURE_PATH = /^\/v1\/captures\/([0-9A-Za-z]{22})$/;
+
+/**
+ * These show a link as a card and need a page to build it from. Everything else
+ * gets the image: browsers display it, and AI tools download it.
+ */
+const PREVIEW_BOT = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i;
 
 const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const TURNSTILE_ACTION = "guest";
@@ -217,7 +227,7 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
   return Response.json(
     {
       id,
-      url: `${env.PUBLIC_URL}/${id}.png`,
+      url: `${env.PUBLIC_URL}/${id}`,
       delete_token: deleteToken,
       expires_at: new Date(result.expiresAt).toISOString(),
     },
@@ -470,26 +480,86 @@ function guestDone(): Response {
   });
 }
 
-async function handleImage(id: string, env: Env, head: boolean): Promise<Response> {
-  // D1 decides whether the link is alive: R2 may still hold an expired image.
-  const size = await liveCaptureSize(env.DB, id, Date.now());
-  if (size === null) return error(404, "not_found");
+const CAPTURE_HEADERS = {
+  // A deleted or expired link must stop working at once, everywhere.
+  "Cache-Control": "no-store",
+  "Content-Security-Policy": "default-src 'none'; sandbox",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+  "X-Robots-Tag": "noindex, nofollow",
+};
 
+async function serveCapture(id: string, size: number, env: Env, head: boolean): Promise<Response> {
   const image = head ? null : await env.IMAGES.get(id);
   if (!head && !image) return error(404, "not_found");
 
   return new Response(image?.body ?? null, {
     headers: {
+      ...CAPTURE_HEADERS,
       "Content-Type": "image/png",
       "Content-Length": String(size),
-      // A deleted or expired link must stop working at once, everywhere.
-      "Cache-Control": "no-store",
-      "Content-Security-Policy": "default-src 'none'; sandbox",
-      "Referrer-Policy": "no-referrer",
-      "X-Content-Type-Options": "nosniff",
-      "X-Robots-Tag": "noindex, nofollow",
     },
   });
+}
+
+async function handleImage(id: string, env: Env, head: boolean): Promise<Response> {
+  // D1 decides whether the link is alive: R2 may still hold an expired image.
+  const size = await liveCaptureSize(env.DB, id, Date.now());
+  if (size === null) return error(404, "not_found");
+  return serveCapture(id, size, env, head);
+}
+
+/** The page a preview bot reads. People never see it. */
+async function handlePreviewPage(id: string, env: Env, head: boolean): Promise<Response> {
+  const size = await liveCaptureSize(env.DB, id, Date.now());
+  if (size === null) return error(404, "not_found");
+
+  const link = `${env.PUBLIC_URL}/${id}`;
+  const page = `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Screenshot</title>
+<meta property="og:site_name" content="Snap2Link">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Screenshot">
+<meta property="og:url" content="${link}">
+<meta property="og:image" content="${link}.jpg">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body><img src="${link}.png" alt="Screenshot"></body>
+</html>
+`;
+  return new Response(head ? null : page, {
+    headers: {
+      ...CAPTURE_HEADERS,
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Security-Policy": "default-src 'none'; img-src 'self'; sandbox",
+    },
+  });
+}
+
+async function handlePreviewImage(id: string, env: Env, head: boolean): Promise<Response> {
+  const size = await liveCaptureSize(env.DB, id, Date.now());
+  if (size === null) return error(404, "not_found");
+  if (size <= MAX_PREVIEW_BYTES) return serveCapture(id, size, env, head);
+  if (head) return new Response(null, { headers: { ...CAPTURE_HEADERS, "Content-Type": "image/jpeg" } });
+
+  const image = await env.IMAGES.get(id);
+  if (!image) return error(404, "not_found");
+
+  try {
+    const preview = await env.RESIZER.input(image.body)
+      .transform({ width: PREVIEW_SIDE, height: PREVIEW_SIDE, fit: "scale-down" })
+      .output({ format: "image/jpeg", quality: 75 });
+    return preview.response({ headers: CAPTURE_HEADERS });
+  } catch (cause) {
+    // Past its free monthly resizes, Cloudflare refuses new ones and bills nothing.
+    // The link still works: it just shows no picture in the chat.
+    console.log(`preview refused: ${cause instanceof Error ? cause.message : "unknown"}`);
+    return error(404, "not_found");
+  }
 }
 
 async function handleDelete(
@@ -557,11 +627,16 @@ export default {
         : error(405, "method_not_allowed");
     }
 
-    const image = CAPTURE_PATH.exec(pathname);
-    if (image) {
-      return method === "GET" || method === "HEAD"
-        ? handleImage(image[1], env, method === "HEAD")
-        : error(405, "method_not_allowed");
+    const capture = CAPTURE_PATH.exec(pathname);
+    if (capture) {
+      if (method !== "GET" && method !== "HEAD") return error(405, "method_not_allowed");
+      const [, id, extension] = capture;
+      const head = method === "HEAD";
+      if (extension === ".jpg") return handlePreviewImage(id, env, head);
+      if (!extension && PREVIEW_BOT.test(request.headers.get("User-Agent") ?? "")) {
+        return handlePreviewPage(id, env, head);
+      }
+      return handleImage(id, env, head);
     }
 
     if (pathname === "/robots.txt") {

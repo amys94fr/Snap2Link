@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Links on `i.snap2link.app` are shorter: they no longer end in `.png`. Older links keep working. Update the Claude Code plugin to 0.2.0, as earlier versions refuse the new links.
+
+### Added
+
+- Links on `i.snap2link.app` show a preview of the capture in WhatsApp, Facebook, X and LinkedIn.
+
 ## [1.7.0] – 2026-11-05
 
 ### Added

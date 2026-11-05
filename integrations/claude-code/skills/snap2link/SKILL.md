@@ -1,6 +1,6 @@
 ---
 name: snap2link
-description: Reads screenshots shared with Snap2Link. Use when the user gives a link of the form https://i.snap2link.app/....png or https://drive.google.com/uc?id=...&export=download, or mentions a Snap2Link capture, a screenshot link, or showing you their screen from a machine where image paste does not work, such as over SSH.
+description: Reads screenshots shared with Snap2Link. Use when the user gives a link of the form https://i.snap2link.app/... or https://drive.google.com/uc?id=...&export=download, or mentions a Snap2Link capture, a screenshot link, or showing you their screen from a machine where image paste does not work, such as over SSH.
 ---
 
 # Reading Snap2Link captures
@@ -17,7 +17,7 @@ If the user gives several links, read them all before answering.
 
 ## If it fails
 
-- **"Not a Snap2Link link"**: the tool only accepts `https://i.snap2link.app/....png` and `https://drive.google.com/uc?id=...&export=download`. Don't work around this with curl or another tool. Ask the user for the link Snap2Link copied.
+- **"Not a Snap2Link link"**: the tool only accepts `https://i.snap2link.app/...` and `https://drive.google.com/uc?id=...&export=download`. Don't work around this with curl or another tool. Ask the user for the link Snap2Link copied.
 - **"not a PNG image" or a 404**: the capture was deleted, expired or is no longer public. Links on `i.snap2link.app` last 6 hours, and Snap2Link removes old captures automatically. Ask the user to capture it again.
 
 ## Rules

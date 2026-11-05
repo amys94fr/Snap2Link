@@ -1,5 +1,5 @@
 const SHARE_LINK = /^https:\/\/drive\.google\.com\/uc\?id=[A-Za-z0-9_-]{1,128}&export=download$/;
-const RELAY_LINK = /^https:\/\/i\.snap2link\.app\/[0-9A-Za-z]{22}\.png$/;
+const RELAY_LINK = /^https:\/\/i\.snap2link\.app\/[0-9A-Za-z]{22}(\.png)?$/;
 const DOWNLOAD_HOSTS = new Set(["drive.google.com", "drive.usercontent.google.com"]);
 const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -57,7 +57,7 @@ async function readCapped(response: Response): Promise<Uint8Array> {
 export async function downloadCapture(link: string, fetcher: typeof fetch = fetch): Promise<Uint8Array> {
   if (!isShareLink(link)) {
     throw new Error(
-      "Not a Snap2Link link: expected https://i.snap2link.app/....png or https://drive.google.com/uc?id=...&export=download",
+      "Not a Snap2Link link: expected https://i.snap2link.app/... or https://drive.google.com/uc?id=...&export=download",
     );
   }
 

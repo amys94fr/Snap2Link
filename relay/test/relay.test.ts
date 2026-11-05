@@ -11,7 +11,9 @@ import {
   GUEST_LIFETIME_MS,
   LINK_LIFETIME_MS,
   MAX_CAPTURE_BYTES,
+  MAX_PREVIEW_BYTES,
   MAX_STORED_BYTES,
+  PREVIEW_SIDE,
 } from "../src/limits";
 import { purgeExpired, utcDay } from "../src/store";
 
@@ -112,17 +114,122 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+const WHATSAPP = { "User-Agent": "WhatsApp/2.26.21.74 A" };
+
+/** Stands in for Cloudflare's resizer, which needs a real image. */
+function resizer(outcome: "resizes" | "refuses") {
+  const asked: unknown[] = [];
+  const binding = {
+    input: (stream: ReadableStream) => ({
+      unread: stream.cancel(),
+      transform(options: unknown) {
+        asked.push(options);
+        return this;
+      },
+      async output() {
+        if (outcome === "refuses") throw new Error("IMAGES_TRANSFORM_ERROR 9422");
+        return {
+          response: ({ headers }: { headers: Record<string, string> }) =>
+            new Response("small", { headers: { ...headers, "Content-Type": "image/jpeg" } }),
+        };
+      },
+    }),
+  } as unknown as ImagesBinding;
+  return { asked, binding };
+}
+
+async function callWith(binding: ImagesBinding, path: string): Promise<Response> {
+  const request = new Request(`${BASE}${path}`) as Parameters<typeof worker.fetch>[0];
+  return worker.fetch(request, { ...env, RESIZER: binding });
+}
+
+describe("link previews", () => {
+  it("gives preview bots a page that points to the picture", async () => {
+    const { id } = await (await upload()).json<Created>();
+    const response = await call(`/${id}`, { headers: WHATSAPP });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/html");
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(await response.text()).toContain(`property="og:image" content="${BASE}/${id}.jpg"`);
+  });
+
+  it.each([
+    ["a browser", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/142.0.0.0 Safari/537.36"],
+    ["curl", "curl/8.9.1"],
+    ["no agent", ""],
+  ])("gives %s the image", async (_, agent) => {
+    const { id } = await (await upload()).json<Created>();
+    const response = await call(`/${id}`, { headers: { "User-Agent": agent } });
+    expect(response.headers.get("Content-Type")).toBe("image/png");
+  });
+
+  it("gives preview bots the image on an old .png link", async () => {
+    const { id } = await (await upload()).json<Created>();
+    const response = await call(`/${id}.png`, { headers: WHATSAPP });
+    expect(response.headers.get("Content-Type")).toBe("image/png");
+  });
+
+  it("shows no page for a link that doesn't exist", async () => {
+    const response = await call(`/${"a".repeat(22)}`, { headers: WHATSAPP });
+    expect(response.status).toBe(404);
+  });
+
+  it("stops the page and the picture when the capture is deleted", async () => {
+    const { id, delete_token } = await (await upload()).json<Created>();
+    await call(`/v1/captures/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${delete_token}` },
+    });
+    expect((await call(`/${id}`, { headers: WHATSAPP })).status).toBe(404);
+    expect((await call(`/${id}.jpg`)).status).toBe(404);
+  });
+
+  it("serves a small capture as its own picture, without a resize", async () => {
+    const image = png(MAX_PREVIEW_BYTES);
+    const { id } = await (await upload(image)).json<Created>();
+    const { asked, binding } = resizer("resizes");
+    const response = await callWith(binding, `/${id}.jpg`);
+    expect(response.headers.get("Content-Type")).toBe("image/png");
+    expect((await response.arrayBuffer()).byteLength).toBe(MAX_PREVIEW_BYTES);
+    expect(asked).toEqual([]);
+  });
+
+  it("resizes a large capture and keeps it out of caches", async () => {
+    const { id } = await (await upload(png(MAX_PREVIEW_BYTES + 1))).json<Created>();
+    const { asked, binding } = resizer("resizes");
+    const response = await callWith(binding, `/${id}.jpg`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("image/jpeg");
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(asked).toEqual([{ width: PREVIEW_SIDE, height: PREVIEW_SIDE, fit: "scale-down" }]);
+  });
+
+  it("keeps the link working when the resizer refuses", async () => {
+    const { id } = await (await upload(png(MAX_PREVIEW_BYTES + 1))).json<Created>();
+    const { binding } = resizer("refuses");
+    expect((await callWith(binding, `/${id}.jpg`)).status).toBe(404);
+    expect((await call(`/${id}`)).status).toBe(200);
+  });
+});
+
 describe("upload and read", () => {
   it("returns a link that serves the exact image", async () => {
     const image = png(5000);
     const response = await upload(image);
     expect(response.status).toBe(201);
     const created = await response.json<Created>();
-    expect(created.url).toBe(`${BASE}/${created.id}.png`);
+    expect(created.url).toBe(`${BASE}/${created.id}`);
 
-    const served = await call(`/${created.id}.png`);
+    const served = await call(`/${created.id}`);
     expect(served.status).toBe(200);
     expect(served.headers.get("Content-Type")).toBe("image/png");
+    expect(new Uint8Array(await served.arrayBuffer())).toEqual(image);
+  });
+
+  it("still serves links made with .png", async () => {
+    const image = png(5000);
+    const { id } = await (await upload(image)).json<Created>();
+    const served = await call(`/${id}.png`);
     expect(new Uint8Array(await served.arrayBuffer())).toEqual(image);
   });
 

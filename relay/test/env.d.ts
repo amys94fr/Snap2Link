@@ -5,6 +5,7 @@ declare global {
     interface Env {
       DB: D1Database;
       IMAGES: R2Bucket;
+      RESIZER: ImagesBinding;
       PUBLIC_URL: string;
       ABUSE_CONTACT: string;
       IP_SALT: string;
