@@ -336,6 +336,25 @@ jobs:
           cp scripts/release-out/latest.json release-files/
           ls -lh release-files/
 
+      # The updater follows releases/latest: re-running an old tag must not send
+      # every install back to it. Comes first, as the next step would turn a
+      # published release back into a draft.
+      - name: Refuse anything but a newer version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          latest="$(gh release view --json tagName --jq .tagName)"
+          latest="${latest#v}"
+          newest="$(printf '%s
+%s
+' "$latest" "$VERSION" | sort -V | tail -n 1)"
+          if [ "$VERSION" = "$latest" ] || [ "$newest" != "$VERSION" ]; then
+            echo "::error::$VERSION isn't newer than the latest release, $latest"
+            exit 1
+          fi
+
       # A draft first: the updater reads releases/latest, so a release must not
       # be public before latest.json is attached to it.
       - name: Create GitHub release
@@ -355,13 +374,14 @@ jobs:
         run: gh release edit "$TAG" --draft=false --latest
 
   # In this workflow, because a release published with GITHUB_TOKEN doesn't start
-  # other workflows.
+  # other workflows. Only a pushed tag gets here: this job holds WINGET_PAT, and
+  # the manual trigger shouldn't reach it. The tag format rules out prereleases.
   submit-winget:
     name: Submit winget update PR
     needs: [resolve, release]
     runs-on: windows-latest
     environment: release
-    if: ${{ vars.SUBMIT_WINGET == 'true' }}
+    if: ${{ github.event_name == 'push' && vars.SUBMIT_WINGET == 'true' }}
     env:
       TAG: ${{ needs.resolve.outputs.tag }}
       VERSION: ${{ needs.resolve.outputs.version }}
