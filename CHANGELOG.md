@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The Claude Code plugin `snap2link` now connects to a server hosted by Snap2Link, so it needs no Node.js and works anywhere Claude can reach it. The version that runs on your machine, with its notification, is now `snap2link-local`.
+
+### Changed
+
 - Links on `i.snap2link.app` are shorter: they no longer end in `.png`. Older links keep working. Update the Claude Code plugin to 0.2.0, as earlier versions refuse the new links.
 
 ### Added

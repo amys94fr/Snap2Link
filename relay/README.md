@@ -68,6 +68,10 @@ WhatsApp, Facebook, X and LinkedIn get a small page with Open Graph tags instead
 
 The picture for that card. A capture up to 300 KB is served as is, and a larger one is reduced to 800 pixels on its longest side. Past Cloudflare's 5,000 free resizes of the month, larger captures answer 404 and their card has no picture: the link itself keeps working.
 
+### `POST /mcp`
+
+A remote MCP server with one read-only tool, `read_capture`, for the Claude plugin in `integrations/claude-code`. It is stateless and needs no account, because it only reads public links: captures on this relay and PNG files on Google Drive. A capture over 600 KB comes back reduced to 1,568 pixels on its longest side. It allows 1,000 reads a day in all, then answers that it is busy.
+
 ### `DELETE /v1/captures/{id}`
 
 Needs `Authorization: Bearer <delete_token>`. Returns 204, or 404 if the capture doesn't exist or the token is wrong.

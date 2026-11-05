@@ -11,7 +11,12 @@
     {
       "name": "snap2link",
       "source": "./integrations/claude-code",
-      "description": "Read Snap2Link screenshot links in Claude Code, including over SSH where image paste does not work."
+      "description": "Read Snap2Link screenshot links in Claude, including over SSH where image paste does not work."
+    },
+    {
+      "name": "snap2link-local",
+      "source": "./integrations/claude-code-local",
+      "description": "The same for Claude Code, running on your own machine, with a notification when you paste a link."
     }
   ]
 }

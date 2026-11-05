@@ -130,7 +130,7 @@ To let Claude Code read your links directly, even over SSH, type this at its pro
 /plugin install snap2link --marketplace amys94fr/Snap2Link
 ```
 
-See [integrations/claude-code](integrations/claude-code) for details.
+See [integrations/claude-code](integrations/claude-code) for details. To run everything on your own machine, with a notification when you paste a link, install [Snap2Link local](integrations/claude-code-local) instead.
 
 ## 💡 Use Cases
 

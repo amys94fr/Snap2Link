@@ -3,7 +3,7 @@
  * its validators made a 700 KB bundle around a single tool, and people, like the
  * plugin directory, should be able to read what the plugin runs.
  */
-export const SERVER_VERSION = "0.2.3";
+export const SERVER_VERSION = "0.3.0";
 
 const PROTOCOL_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 
