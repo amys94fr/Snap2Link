@@ -210,7 +210,7 @@
   "account.resend": "Renvoyer",
   "account.resend_wait": "Renvoyer dans {seconds} s",
   "account.change_email": "Changer d’adresse",
-  "account.plan_free": "Forfait gratuit",
+  "account.plan_free": "Offre gratuite",
   "account.captures_today": "Captures aujourd’hui",
   "account.active_links": "Liens actifs",
   "account.active_links_hint": "Quand ils sont tous utilisés, une nouvelle capture met fin au lien le plus ancien.",
@@ -231,6 +231,6 @@
   "account.error.banned": "Ce compte ne peut plus utiliser l’hébergement Snap2Link.",
   "uploader.limit.title": "Limite du jour atteinte",
   "uploader.limit.subtitle": "Un compte gratuit vous donne 20 captures par jour.",
-  "uploader.limit.action": "Créer un compte",
+  "uploader.limit.action": "S’inscrire",
   "uploader.error.account_daily_limit": "Limite du jour atteinte pour votre compte. Elle revient à minuit UTC."
 }

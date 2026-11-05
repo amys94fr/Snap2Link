@@ -231,6 +231,6 @@
   "account.error.banned": "Akun ini tidak dapat lagi menggunakan hosting Snap2Link.",
   "uploader.limit.title": "Batas harian tercapai",
   "uploader.limit.subtitle": "Akun gratis memberi Anda 20 tangkapan layar per hari.",
-  "uploader.limit.action": "Buat akun",
+  "uploader.limit.action": "Daftar",
   "uploader.error.account_daily_limit": "Akun Anda mencapai batas harian. Batas diatur ulang pada tengah malam UTC."
 }

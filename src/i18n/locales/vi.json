@@ -231,6 +231,6 @@
   "account.error.banned": "Tài khoản này không còn dùng được dịch vụ lưu trữ Snap2Link.",
   "uploader.limit.title": "Đã đạt giới hạn hằng ngày",
   "uploader.limit.subtitle": "Tài khoản miễn phí cho bạn 20 ảnh chụp mỗi ngày.",
-  "uploader.limit.action": "Tạo tài khoản",
+  "uploader.limit.action": "Đăng ký",
   "uploader.error.account_daily_limit": "Tài khoản của bạn đã đạt giới hạn hằng ngày. Giới hạn đặt lại lúc nửa đêm UTC."
 }

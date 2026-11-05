@@ -18,9 +18,9 @@ const EMAILS: Record<string, CodeEmail> = {
     outro: "تنتهي صلاحية هذا الرمز خلال 10 دقائق. إذا لم تطلبه، فتجاهل هذه الرسالة.",
   },
   de: {
-    subject: "Dein Snap2Link-Code: {code}",
-    intro: "Dein Anmeldecode für Snap2Link:",
-    outro: "Der Code läuft in 10 Minuten ab. Wenn du ihn nicht angefordert hast, ignoriere diese E-Mail.",
+    subject: "Ihr Snap2Link-Code: {code}",
+    intro: "Ihr Anmeldecode für Snap2Link:",
+    outro: "Der Code läuft in 10 Minuten ab. Wenn Sie ihn nicht angefordert haben, ignorieren Sie diese E-Mail.",
   },
   en: {
     subject: "Your Snap2Link code: {code}",
@@ -103,9 +103,9 @@ const EMAILS: Record<string, CodeEmail> = {
     outro: "Mã hết hạn sau 10 phút. Nếu bạn không yêu cầu, hãy bỏ qua email này.",
   },
   "zh-CN": {
-    subject: "您的 Snap2Link 验证码：{code}",
-    intro: "您的 Snap2Link 登录验证码：",
-    outro: "验证码将在 10 分钟后失效。如果这不是您本人的操作，请忽略此邮件。",
+    subject: "你的 Snap2Link 验证码：{code}",
+    intro: "你的 Snap2Link 登录验证码：",
+    outro: "验证码将在 10 分钟后失效。如果这不是你本人的操作，请忽略此邮件。",
   },
   "zh-TW": {
     subject: "您的 Snap2Link 驗證碼：{code}",

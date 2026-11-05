@@ -231,6 +231,6 @@
   "account.error.banned": "To konto nie może już korzystać z hostingu Snap2Link.",
   "uploader.limit.title": "Osiągnięto dzienny limit",
   "uploader.limit.subtitle": "Darmowe konto daje 20 zrzutów dziennie.",
-  "uploader.limit.action": "Utwórz konto",
+  "uploader.limit.action": "Załóż konto",
   "uploader.error.account_daily_limit": "Twoje konto osiągnęło dzienny limit. Odnawia się o północy UTC."
 }

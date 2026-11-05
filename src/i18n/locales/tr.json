@@ -231,6 +231,6 @@
   "account.error.banned": "Bu hesap artık Snap2Link barındırmayı kullanamaz.",
   "uploader.limit.title": "Günlük sınıra ulaşıldı",
   "uploader.limit.subtitle": "Ücretsiz hesap günde 20 görüntü sağlar.",
-  "uploader.limit.action": "Hesap oluştur",
+  "uploader.limit.action": "Kaydol",
   "uploader.error.account_daily_limit": "Hesabınız günlük sınıra ulaştı. UTC gece yarısında sıfırlanır."
 }

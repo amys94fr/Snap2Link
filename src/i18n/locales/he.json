@@ -231,6 +231,6 @@
   "account.error.banned": "החשבון הזה כבר לא יכול להשתמש באחסון של Snap2Link.",
   "uploader.limit.title": "הגעת למגבלה היומית",
   "uploader.limit.subtitle": "חשבון חינמי נותן 20 צילומים ביום.",
-  "uploader.limit.action": "יצירת חשבון",
+  "uploader.limit.action": "הרשמה",
   "uploader.error.account_daily_limit": "החשבון שלך הגיע למגבלה היומית. היא מתאפסת בחצות UTC."
 }

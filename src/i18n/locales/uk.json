@@ -210,7 +210,7 @@
   "account.resend": "Надіслати ще раз",
   "account.resend_wait": "Надіслати ще раз за {seconds} с",
   "account.change_email": "Змінити адресу",
-  "account.plan_free": "Безкоштовний план",
+  "account.plan_free": "Безкоштовний тариф",
   "account.captures_today": "Знімків сьогодні",
   "account.active_links": "Активні посилання",
   "account.active_links_hint": "Коли всі зайняті, новий знімок завершує найстаріше посилання.",
@@ -231,6 +231,6 @@
   "account.error.banned": "Цей обліковий запис більше не може використовувати хостинг Snap2Link.",
   "uploader.limit.title": "Денний ліміт вичерпано",
   "uploader.limit.subtitle": "Безкоштовний обліковий запис дає 20 знімків на день.",
-  "uploader.limit.action": "Створити обліковий запис",
+  "uploader.limit.action": "Реєстрація",
   "uploader.error.account_daily_limit": "Денний ліміт вашого облікового запису вичерпано. Він оновиться опівночі UTC."
 }

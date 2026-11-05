@@ -231,6 +231,6 @@
   "account.error.banned": "Этот аккаунт больше не может использовать хостинг Snap2Link.",
   "uploader.limit.title": "Дневной лимит исчерпан",
   "uploader.limit.subtitle": "Бесплатный аккаунт даёт 20 снимков в день.",
-  "uploader.limit.action": "Создать аккаунт",
+  "uploader.limit.action": "Регистрация",
   "uploader.error.account_daily_limit": "Дневной лимит вашего аккаунта исчерпан. Он обновится в полночь UTC."
 }

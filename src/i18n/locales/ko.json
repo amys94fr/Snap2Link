@@ -231,6 +231,6 @@
   "account.error.banned": "이 계정은 더 이상 Snap2Link 호스팅을 사용할 수 없습니다.",
   "uploader.limit.title": "일일 한도 도달",
   "uploader.limit.subtitle": "무료 계정은 하루 20개까지 캡처할 수 있습니다.",
-  "uploader.limit.action": "계정 만들기",
+  "uploader.limit.action": "가입하기",
   "uploader.error.account_daily_limit": "계정의 일일 한도에 도달했습니다. UTC 자정에 초기화됩니다."
 }

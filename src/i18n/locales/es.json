@@ -231,6 +231,6 @@
   "account.error.banned": "Esta cuenta ya no puede usar el alojamiento de Snap2Link.",
   "uploader.limit.title": "Límite diario alcanzado",
   "uploader.limit.subtitle": "Una cuenta gratuita te da 20 capturas al día.",
-  "uploader.limit.action": "Crear una cuenta",
+  "uploader.limit.action": "Registrarse",
   "uploader.error.account_daily_limit": "Tu cuenta ha alcanzado el límite diario. Se reinicia a medianoche UTC."
 }

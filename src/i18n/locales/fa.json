@@ -231,6 +231,6 @@
   "account.error.banned": "این حساب دیگر نمی‌تواند از میزبانی Snap2Link استفاده کند.",
   "uploader.limit.title": "به سقف روزانه رسیدید",
   "uploader.limit.subtitle": "حساب رایگان 20 تصویر در روز به شما می‌دهد.",
-  "uploader.limit.action": "ساخت حساب",
+  "uploader.limit.action": "ثبت‌نام",
   "uploader.error.account_daily_limit": "حساب شما به سقف روزانه رسید. این سقف در نیمه‌شب UTC بازنشانی می‌شود."
 }

@@ -231,6 +231,6 @@
   "account.error.banned": "Questo account non può più usare l'hosting Snap2Link.",
   "uploader.limit.title": "Limite giornaliero raggiunto",
   "uploader.limit.subtitle": "Un account gratuito ti dà 20 screenshot al giorno.",
-  "uploader.limit.action": "Crea un account",
+  "uploader.limit.action": "Registrati",
   "uploader.error.account_daily_limit": "Limite giornaliero del tuo account raggiunto. Si azzera a mezzanotte UTC."
 }

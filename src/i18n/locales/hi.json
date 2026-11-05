@@ -231,6 +231,6 @@
   "account.error.banned": "यह खाता अब Snap2Link होस्टिंग का उपयोग नहीं कर सकता।",
   "uploader.limit.title": "दैनिक सीमा पूरी हो गई",
   "uploader.limit.subtitle": "मुफ़्त खाते से हर दिन 20 कैप्चर मिलते हैं।",
-  "uploader.limit.action": "खाता बनाएँ",
+  "uploader.limit.action": "साइन अप करें",
   "uploader.error.account_daily_limit": "आपके खाते की दैनिक सीमा पूरी हो गई। यह UTC मध्यरात्रि पर रीसेट होगी।"
 }
