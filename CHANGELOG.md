@@ -6,12 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] – 2026-11-05
+
 ### Added
 
 - Free Snap2Link accounts: an email address and a 6-digit code, with no password, give 20 captures a day and 6 links at once. Once they are all in use, a new capture ends the oldest link. You can sign out or delete the account from the settings.
 - At the daily limit, the toast offers to create an account.
-
-## [1.6.1] – 2026-11-05
 
 ### Fixed
 
