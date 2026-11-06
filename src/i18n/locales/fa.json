@@ -232,5 +232,11 @@
   "uploader.limit.title": "به سقف روزانه رسیدید",
   "uploader.limit.subtitle": "حساب رایگان 20 تصویر در روز به شما می‌دهد.",
   "uploader.limit.action": "ثبت‌نام",
-  "uploader.error.account_daily_limit": "حساب شما به سقف روزانه رسید. این سقف در نیمه‌شب UTC بازنشانی می‌شود."
+  "uploader.error.account_daily_limit": "حساب شما به سقف روزانه رسید. این سقف در نیمه‌شب UTC بازنشانی می‌شود.",
+  "account.google": "ادامه با Google",
+  "account.google_waiting": "ورود را در مرورگر خود کامل کنید.",
+  "account.or_email": "یا دریافت کد از طریق ایمیل",
+  "account.error.google": "ورود با Google کامل نشد. دوباره تلاش کنید.",
+  "oauth.signed_in.title": "وارد شدید!",
+  "oauth.not_signed_in.title": "وارد نشدید"
 }

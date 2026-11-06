@@ -232,5 +232,11 @@
   "uploader.limit.title": "Денний ліміт вичерпано",
   "uploader.limit.subtitle": "Безкоштовний обліковий запис дає 20 знімків на день.",
   "uploader.limit.action": "Реєстрація",
-  "uploader.error.account_daily_limit": "Денний ліміт вашого облікового запису вичерпано. Він оновиться опівночі UTC."
+  "uploader.error.account_daily_limit": "Денний ліміт вашого облікового запису вичерпано. Він оновиться опівночі UTC.",
+  "account.google": "Продовжити з Google",
+  "account.google_waiting": "Завершіть вхід у браузері.",
+  "account.or_email": "Або отримайте код поштою",
+  "account.error.google": "Вхід через Google не завершено. Спробуйте ще раз.",
+  "oauth.signed_in.title": "Вхід виконано!",
+  "oauth.not_signed_in.title": "Вхід не виконано"
 }

@@ -6,6 +6,7 @@ import {
   BUTTON_DANGER,
   BUTTON_PRIMARY,
   Card,
+  GoogleIcon,
   Row,
   Section,
 } from "./ui";
@@ -37,6 +38,8 @@ const INPUT =
 const ERRORS: Record<string, string> = {
   relay_invalid_email: "account.error.invalid_email",
   relay_invalid_code: "account.error.invalid_code",
+  relay_google_refused: "account.error.google",
+  google_sign_in_failed: "account.error.google",
   relay_daily_limit: "account.error.too_many_codes",
   relay_service_busy: "account.error.busy",
   relay_mail_unavailable: "account.error.mail",
@@ -64,10 +67,35 @@ function FormError({ text }: { text: string | null }) {
   );
 }
 
-function SignedOut({ onSent }: { onSent: (email: string) => void }) {
+function SignedOut({
+  onSent,
+  onSignedIn,
+}: {
+  onSent: (email: string) => void;
+  onSignedIn: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState(false);
+  const attempt = useRef(0);
+
+  // The browser can be closed without telling anyone, and the flow then waits
+  // for minutes. So the button stays usable, and only the last click counts.
+  const google = async () => {
+    const mine = ++attempt.current;
+    setWaiting(true);
+    setError(null);
+    try {
+      await invoke("sign_in_with_google");
+      if (mine === attempt.current) onSignedIn();
+    } catch (e) {
+      if (mine === attempt.current) {
+        setError(errorText(e));
+        setWaiting(false);
+      }
+    }
+  };
 
   const send = async (event: FormEvent) => {
     event.preventDefault();
@@ -93,12 +121,23 @@ function SignedOut({ onSent }: { onSent: (email: string) => void }) {
         label={t("settings.host.no_account")}
         hint={t("settings.hosting.plan_hint")}
       />
-      <form onSubmit={(e) => void send(e)} noValidate>
-        <Row
-          label={t("account.free_title")}
-          hint={t("account.free_hint")}
-          htmlFor="account-email"
+      <Row label={t("account.free_title")} hint={t("account.free_hint")}>
+        <button
+          type="button"
+          onClick={() => void google()}
+          className={`${BUTTON} inline-flex items-center gap-2`}
         >
+          <GoogleIcon />
+          {t("account.google")}
+        </button>
+      </Row>
+      {waiting && (
+        <p role="status" className="px-4 py-3 text-[13px] text-slate-300">
+          {t("account.google_waiting")}
+        </p>
+      )}
+      <form onSubmit={(e) => void send(e)} noValidate>
+        <Row label={t("account.or_email")} htmlFor="account-email">
           <div className="flex flex-wrap gap-2">
             <input
               id="account-email"
@@ -374,7 +413,10 @@ export function AccountSection({
         </Card>
       )}
       {view.name === "signed_out" && (
-        <SignedOut onSent={(email) => setView({ name: "code", email })} />
+        <SignedOut
+          onSent={(email) => setView({ name: "code", email })}
+          onSignedIn={() => void load()}
+        />
       )}
       {view.name === "code" && (
         <CodeStep

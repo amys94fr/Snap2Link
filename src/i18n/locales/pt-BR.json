@@ -232,5 +232,11 @@
   "uploader.limit.title": "Limite diário atingido",
   "uploader.limit.subtitle": "Uma conta gratuita dá 20 capturas por dia.",
   "uploader.limit.action": "Cadastrar",
-  "uploader.error.account_daily_limit": "Sua conta atingiu o limite diário. Ele reinicia à meia-noite UTC."
+  "uploader.error.account_daily_limit": "Sua conta atingiu o limite diário. Ele reinicia à meia-noite UTC.",
+  "account.google": "Continuar com o Google",
+  "account.google_waiting": "Termine de entrar no seu navegador.",
+  "account.or_email": "Ou receba um código por e-mail",
+  "account.error.google": "O login com o Google não foi concluído. Tente novamente.",
+  "oauth.signed_in.title": "Você entrou!",
+  "oauth.not_signed_in.title": "Você não entrou"
 }

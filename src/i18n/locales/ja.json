@@ -232,5 +232,11 @@
   "uploader.limit.title": "1 日の上限に達しました",
   "uploader.limit.subtitle": "無料アカウントなら 1 日 20 枚まで使えます。",
   "uploader.limit.action": "登録する",
-  "uploader.error.account_daily_limit": "アカウントが 1 日の上限に達しました。UTC の午前 0 時にリセットされます。"
+  "uploader.error.account_daily_limit": "アカウントが 1 日の上限に達しました。UTC の午前 0 時にリセットされます。",
+  "account.google": "Google で続行",
+  "account.google_waiting": "ブラウザでサインインを完了してください。",
+  "account.or_email": "またはメールでコードを受け取る",
+  "account.error.google": "Google でのサインインが完了しませんでした。もう一度お試しください。",
+  "oauth.signed_in.title": "サインインしました",
+  "oauth.not_signed_in.title": "サインインしていません"
 }

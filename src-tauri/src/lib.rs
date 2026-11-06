@@ -44,6 +44,7 @@ pub fn run() {
             commands::config::set_hosting,
             commands::account::request_login_code,
             commands::account::verify_login_code,
+            commands::account::sign_in_with_google,
             commands::account::get_account,
             commands::account::get_snap2link_email,
             commands::account::sign_out,

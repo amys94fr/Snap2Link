@@ -1,8 +1,8 @@
 //! The Snap2Link account of this install.
 //!
-//! Signing in takes an email address and a code. Both go through the relay,
-//! which only answers an install that holds a guest token: a sign-in can open
-//! the Turnstile window, like a first upload.
+//! Signing in takes an email address and a code, or a Google account. Both go
+//! through the relay, which only answers an install that holds a guest token: a
+//! sign-in can open the Turnstile window, like a first upload.
 
 use std::fs;
 use std::future::Future;
@@ -12,10 +12,13 @@ use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
 use crate::commands::config::load_config;
-use crate::commands::{guest, relay};
+use crate::commands::{auth, guest, relay};
 use crate::i18n;
 use crate::tray;
 use crate::utils::{app_data_dir, ensure_private_dir, write_private_file};
+
+/// Anything that kept Google from answering: the user closed it, or it failed.
+const GOOGLE_FAILED: &str = "google_sign_in_failed";
 
 /// The relay is saved with its session, which means nothing to another relay.
 #[derive(Serialize, Deserialize)]
@@ -92,7 +95,26 @@ pub async fn verify_login_code(app: AppHandle, email: String, code: String) -> R
         async move { relay::verify_code(&base, &guest, &email, &code).await }
     })
     .await?;
+    keep_session(base, session)
+}
 
+/// Signs in through the browser. Google's token only proves the address to the
+/// relay: this install keeps the relay's session, like after a code.
+#[tauri::command]
+pub async fn sign_in_with_google(app: AppHandle) -> Result<(), String> {
+    let base = load_config().relay_url();
+    let id_token = auth::identity_token(&app)
+        .await
+        .map_err(|_| GOOGLE_FAILED.to_string())?;
+    let session = with_guest(&app, &base, |guest| {
+        let (base, id_token) = (base.clone(), id_token.clone());
+        async move { relay::sign_in_with_google(&base, &guest, &id_token).await }
+    })
+    .await?;
+    keep_session(base, session)
+}
+
+fn keep_session(base: String, session: relay::NewSession) -> Result<(), String> {
     let saved = SavedSession {
         base,
         token: session.session_token,

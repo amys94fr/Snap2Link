@@ -232,5 +232,11 @@
   "uploader.limit.title": "Tageslimit erreicht",
   "uploader.limit.subtitle": "Ein kostenloses Konto bietet 20 Screenshots pro Tag.",
   "uploader.limit.action": "Registrieren",
-  "uploader.error.account_daily_limit": "Tageslimit Ihres Kontos erreicht. Es wird um Mitternacht UTC zurückgesetzt."
+  "uploader.error.account_daily_limit": "Tageslimit Ihres Kontos erreicht. Es wird um Mitternacht UTC zurückgesetzt.",
+  "account.google": "Weiter mit Google",
+  "account.google_waiting": "Schließen Sie die Anmeldung in Ihrem Browser ab.",
+  "account.or_email": "Oder Code per E-Mail erhalten",
+  "account.error.google": "Die Google-Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut.",
+  "oauth.signed_in.title": "Sie sind angemeldet!",
+  "oauth.not_signed_in.title": "Sie sind nicht angemeldet"
 }

@@ -232,5 +232,11 @@
   "uploader.limit.title": "Günlük sınıra ulaşıldı",
   "uploader.limit.subtitle": "Ücretsiz hesap günde 20 görüntü sağlar.",
   "uploader.limit.action": "Kaydol",
-  "uploader.error.account_daily_limit": "Hesabınız günlük sınıra ulaştı. UTC gece yarısında sıfırlanır."
+  "uploader.error.account_daily_limit": "Hesabınız günlük sınıra ulaştı. UTC gece yarısında sıfırlanır.",
+  "account.google": "Google ile devam et",
+  "account.google_waiting": "Girişi tarayıcınızda tamamlayın.",
+  "account.or_email": "Ya da e-postayla kod alın",
+  "account.error.google": "Google ile giriş tamamlanmadı. Yeniden deneyin.",
+  "oauth.signed_in.title": "Giriş yapıldı!",
+  "oauth.not_signed_in.title": "Giriş yapılmadı"
 }

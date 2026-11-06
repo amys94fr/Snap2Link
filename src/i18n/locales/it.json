@@ -232,5 +232,11 @@
   "uploader.limit.title": "Limite giornaliero raggiunto",
   "uploader.limit.subtitle": "Un account gratuito ti dà 20 screenshot al giorno.",
   "uploader.limit.action": "Registrati",
-  "uploader.error.account_daily_limit": "Limite giornaliero del tuo account raggiunto. Si azzera a mezzanotte UTC."
+  "uploader.error.account_daily_limit": "Limite giornaliero del tuo account raggiunto. Si azzera a mezzanotte UTC.",
+  "account.google": "Continua con Google",
+  "account.google_waiting": "Completa l'accesso nel browser.",
+  "account.or_email": "Oppure ricevi un codice via email",
+  "account.error.google": "L'accesso con Google non è stato completato. Riprova.",
+  "oauth.signed_in.title": "Accesso effettuato!",
+  "oauth.not_signed_in.title": "Accesso non effettuato"
 }

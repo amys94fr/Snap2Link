@@ -96,6 +96,69 @@ describe("<AccountSection />", () => {
     });
   });
 
+  describe("Google", () => {
+    const button = () => screen.findByRole("button", { name: /continue with google/i });
+
+    it("signs in and shows the account", async () => {
+      let signedIn = false;
+      relay({
+        get_account: () => (signedIn ? ACCOUNT : null),
+        sign_in_with_google: () => {
+          signedIn = true;
+        },
+      });
+      render(<AccountSection onEmail={onEmail} />);
+
+      await userEvent.click(await button());
+
+      expect(await screen.findByText(ACCOUNT.email)).toBeInTheDocument();
+      expect(onEmail).toHaveBeenLastCalledWith(ACCOUNT.email);
+    });
+
+    it("says where to finish, and keeps both ways open", async () => {
+      relay({ get_account: () => null, sign_in_with_google: () => new Promise(() => {}) });
+      render(<AccountSection onEmail={onEmail} />);
+
+      await userEvent.click(await button());
+
+      expect(await screen.findByRole("status")).toHaveTextContent(/in your browser/i);
+      expect(await button()).toBeEnabled();
+      expect(screen.getByRole("textbox", { name: /email address/i })).toBeEnabled();
+    });
+
+    it.each(["google_sign_in_failed", "relay_google_refused"])(
+      "explains %s",
+      async (code) => {
+        relay({ get_account: () => null, sign_in_with_google: refuse(code) });
+        render(<AccountSection onEmail={onEmail} />);
+
+        await userEvent.click(await button());
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(/didn't finish/i);
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      },
+    );
+
+    it("ignores an old attempt once a new one started", async () => {
+      const finish: Array<(error?: string) => void> = [];
+      relay({
+        get_account: () => null,
+        sign_in_with_google: () =>
+          new Promise<void>((resolve, reject) => {
+            finish.push((error) => (error ? reject(error) : resolve()));
+          }),
+      });
+      render(<AccountSection onEmail={onEmail} />);
+
+      await userEvent.click(await button());
+      await userEvent.click(await button());
+      await act(async () => finish[0]("google_sign_in_failed"));
+
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
+  });
+
   describe("the code", () => {
     async function atTheCode(handlers: Record<string, Handler> = {}) {
       relay({ get_account: () => null, ...handlers });

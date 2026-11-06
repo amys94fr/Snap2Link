@@ -232,5 +232,11 @@
   "uploader.limit.title": "Limite du jour atteinte",
   "uploader.limit.subtitle": "Un compte gratuit vous donne 20 captures par jour.",
   "uploader.limit.action": "S’inscrire",
-  "uploader.error.account_daily_limit": "Limite du jour atteinte pour votre compte. Elle revient à minuit UTC."
+  "uploader.error.account_daily_limit": "Limite du jour atteinte pour votre compte. Elle revient à minuit UTC.",
+  "account.google": "Continuer avec Google",
+  "account.google_waiting": "Terminez la connexion dans votre navigateur.",
+  "account.or_email": "Ou recevez un code par e-mail",
+  "account.error.google": "La connexion Google n’a pas abouti. Réessayez.",
+  "oauth.signed_in.title": "Vous êtes connecté !",
+  "oauth.not_signed_in.title": "Vous n’êtes pas connecté"
 }
