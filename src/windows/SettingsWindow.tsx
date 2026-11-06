@@ -8,10 +8,12 @@ import logoUrl from "@/assets/logo.png";
 import { AboutWindow } from "./AboutWindow";
 import { CapturePage } from "./settings/CapturePage";
 import { GeneralPage } from "./settings/GeneralPage";
+import { HistoryPage } from "./settings/HistoryPage";
 import { HostingPage } from "./settings/HostingPage";
 import {
   CameraIcon,
   CheckIcon,
+  ClockIcon,
   CloudIcon,
   InfoIcon,
   SlidersIcon,
@@ -30,6 +32,7 @@ const CATEGORIES: ReadonlyArray<{
 }> = [
   { id: "capture", icon: <CameraIcon />, descKey: "settings.capture.desc" },
   { id: "hosting", icon: <CloudIcon />, descKey: "settings.hosting.desc" },
+  { id: "history", icon: <ClockIcon />, descKey: "settings.history.desc" },
   { id: "general", icon: <SlidersIcon />, descKey: "settings.general.desc" },
   { id: "about", icon: <InfoIcon />, descKey: "settings.about.desc" },
 ];
@@ -126,10 +129,12 @@ export function SettingsWindow({
             </h1>
             <p className="mt-1 text-slate-300">{t(current.descKey)}</p>
           </div>
-          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-green-300">
-            <CheckIcon />
-            {t("settings.saved")}
-          </p>
+          {current.id !== "history" && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-green-300">
+              <CheckIcon />
+              {t("settings.saved")}
+            </p>
+          )}
         </header>
 
         {config === null ? (
@@ -145,9 +150,11 @@ export function SettingsWindow({
                 onConfig={setConfig}
                 email={email}
                 onEmail={setEmail}
+                snapEmail={snapEmail}
                 onSnapEmail={setSnapEmail}
               />
             )}
+            {current.id === "history" && <HistoryPage />}
             {current.id === "general" && (
               <GeneralPage
                 config={config}

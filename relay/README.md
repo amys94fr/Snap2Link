@@ -72,6 +72,29 @@ The picture for that card. A capture up to 300 KB is served as is, and a larger 
 
 A remote MCP server with one read-only tool, `read_capture`, for the Claude plugin in `integrations/claude-code`. It is stateless and needs no account, because it only reads public links: captures on this relay and PNG files on Google Drive. A capture over 600 KB comes back reduced to 1,568 pixels on its longest side. It allows 200 reads a day per address block and 1,000 in all, then answers that it is busy. It refuses requests from web pages, recognized by their `Origin` header.
 
+### `GET /v1/captures`
+
+The links of a guest or an account that still work, newest first, with `Authorization: Bearer <guest or session token>`. `max_pins` is 0 for a guest: nothing replaces a guest's links.
+
+```json
+{
+  "captures": [
+    {
+      "id": "...",
+      "url": "https://i.snap2link.app/...",
+      "created_at": "2026-11-06T10:00:00.000Z",
+      "expires_at": "2026-11-08T10:00:00.000Z",
+      "pinned": false
+    }
+  ],
+  "max_pins": 5
+}
+```
+
+### `PUT /v1/captures/{id}/pin` and `DELETE /v1/captures/{id}/pin`
+
+Pins or unpins a link, with a session token. When the slots are full, a new capture ends the oldest unpinned link. A pin doesn't extend the link. Past the plan's pins, the answer is `409 pin_limit`.
+
 ### `DELETE /v1/captures/{id}`
 
 Needs `Authorization: Bearer <delete_token>`. Returns 204, or 404 if the capture doesn't exist or the token is wrong.

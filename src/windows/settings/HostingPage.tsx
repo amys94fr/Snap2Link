@@ -24,6 +24,8 @@ interface Props {
   /** Empty when no Google account is connected. */
   email: string;
   onEmail: (email: string) => void;
+  /** The Snap2Link account's address, empty when signed out. */
+  snapEmail: string;
   /** Called with the Snap2Link account's address, empty when signed out. */
   onSnapEmail: (email: string) => void;
 }
@@ -66,14 +68,14 @@ function HostCard({
   );
 }
 
-function Snap2LinkOptions({ onSnapEmail }: Pick<Props, "onSnapEmail">) {
+function Snap2LinkOptions({ snapEmail, onSnapEmail }: Pick<Props, "snapEmail" | "onSnapEmail">) {
   return (
     <>
       <AccountSection onEmail={onSnapEmail} />
       <Section title={t("settings.hosting.access")}>
         <Card>
           <Row
-            label={t("settings.hosting.link_life")}
+            label={t(snapEmail ? "settings.hosting.link_life_account" : "settings.hosting.link_life")}
             hint={t("settings.hosting.link_life_hint")}
           />
           <Row label={t("settings.hosting.access_title")} />
@@ -259,7 +261,7 @@ export function HostingPage(props: Props) {
       {config.hosting === "drive" ? (
         <DriveOptions {...props} />
       ) : (
-        <Snap2LinkOptions onSnapEmail={props.onSnapEmail} />
+        <Snap2LinkOptions snapEmail={props.snapEmail} onSnapEmail={props.onSnapEmail} />
       )}
     </>
   );
