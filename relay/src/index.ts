@@ -22,6 +22,7 @@ import {
 } from "./limits";
 import { verifiedGoogleEmail } from "./google";
 import { sendLoginCode } from "./mail";
+import { handleMcp } from "./mcp";
 import {
   createCapture,
   createGuest,
@@ -626,6 +627,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
     const { method } = request;
+
+    if (pathname === "/mcp") {
+      return handleMcp(request, env, await ownerKey(request, env.IP_SALT, Date.now()));
+    }
 
     if (pathname === "/v1/captures") {
       return method === "POST" ? handleUpload(request, env) : error(405, "method_not_allowed");

@@ -1,7 +1,7 @@
 {
-  "name": "snap2link-claude-code",
+  "name": "snap2link-claude-code-local",
   "private": true,
-  "version": "0.2.3",
+  "version": "0.3.0",
   "type": "module",
   "description": "Snap2Link plugin for Claude Code: MCP server, skill and mod.",
   "license": "MIT",

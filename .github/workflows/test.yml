@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: integrations/claude-code
+        working-directory: integrations/claude-code-local
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -60,7 +60,7 @@ jobs:
           node-version: "22"
           check-latest: true
           cache: "pnpm"
-          cache-dependency-path: integrations/claude-code/pnpm-lock.yaml
+          cache-dependency-path: integrations/claude-code-local/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
 

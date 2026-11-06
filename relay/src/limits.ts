@@ -27,6 +27,28 @@ export const MAX_PREVIEW_BYTES = 300_000;
 /** Longest side of a resized preview, in pixels. */
 export const PREVIEW_SIDE = 800;
 
+/** Reads through the MCP server per UTC day, for everyone at once. */
+export const MCP_DAILY_LIMIT = 1_000;
+
+/**
+ * Reads through the MCP server per address block and UTC day, so that one source
+ * can't use up the day for everyone. Generous, because connectors arrive through
+ * a few addresses shared by many people.
+ */
+export const MCP_BLOCK_DAILY_LIMIT = 200;
+
+/** Largest MCP request: it only ever holds a link. */
+export const MAX_MCP_REQUEST_BYTES = 16_384;
+
+/** Up to this size, the MCP server returns a capture as is. */
+export const MAX_INLINE_BYTES = 600_000;
+
+/** Longest side of a capture reduced for Claude, in pixels. */
+export const MCP_IMAGE_SIDE = 1_568;
+
+/** Largest file the MCP server reads from Drive: what the resizer accepts. */
+export const MAX_DRIVE_BYTES = 20_000_000;
+
 /** Captures one guest can send per UTC day. */
 export const GUEST_DAILY_LIMIT = 5;
 
