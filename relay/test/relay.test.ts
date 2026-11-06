@@ -9,7 +9,7 @@ import {
   GLOBAL_GUESTS_DAILY_LIMIT,
   GUEST_DAILY_LIMIT,
   GUEST_LIFETIME_MS,
-  LINK_LIFETIME_MS,
+  GUEST_LINK_LIFETIME_MS,
   MAX_CAPTURE_BYTES,
   MAX_PREVIEW_BYTES,
   MAX_STORED_BYTES,
@@ -326,8 +326,8 @@ describe("expiry", () => {
   it("kills the link at expiry, even before the cleanup job", async () => {
     const { id, expires_at } = await (await upload()).json<Created>();
     const lifetime = new Date(expires_at).getTime() - Date.now();
-    expect(lifetime).toBeGreaterThan(LINK_LIFETIME_MS - 60_000);
-    expect(lifetime).toBeLessThanOrEqual(LINK_LIFETIME_MS);
+    expect(lifetime).toBeGreaterThan(GUEST_LINK_LIFETIME_MS - 60_000);
+    expect(lifetime).toBeLessThanOrEqual(GUEST_LINK_LIFETIME_MS);
 
     vi.useFakeTimers({ now: new Date(expires_at).getTime() + 1 });
     expect((await call(`/${id}.png`)).status).toBe(404);

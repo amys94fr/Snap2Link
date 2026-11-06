@@ -15,6 +15,7 @@ import {
   ACCOUNT_BLOCK_DAILY_LIMIT,
   BLOCK_DAILY_LIMIT,
   GUEST_DAILY_LIMIT,
+  GUEST_LINK_LIFETIME_MS,
   MAX_CAPTURE_BYTES,
   MAX_PREVIEW_BYTES,
   PLANS,
@@ -172,7 +173,7 @@ async function requireAccount(
   return { account, tokenHash };
 }
 
-type Sender = Pick<NewCapture, "sender" | "quotas">;
+type Sender = Pick<NewCapture, "sender" | "quotas" | "lifetimeMs">;
 
 /** Who is uploading and what they may use, or the answer that refuses them. */
 async function uploadSender(request: Request, env: Env, now: number): Promise<Sender | Response> {
@@ -180,9 +181,10 @@ async function uploadSender(request: Request, env: Env, now: number): Promise<Se
     const session = await requireAccount(request, env, now);
     if (session instanceof Response) return session;
     const { id, plan } = session.account;
-    const { slots, dailyCaptures } = PLANS[plan];
+    const { slots, dailyCaptures, linkLifetimeMs } = PLANS[plan];
     return {
       sender: { accountId: id, slots },
+      lifetimeMs: linkLifetimeMs,
       quotas: [
         { key: accountQuotaKey(id), limit: dailyCaptures },
         {
@@ -197,6 +199,7 @@ async function uploadSender(request: Request, env: Env, now: number): Promise<Se
   if (guestHash instanceof Response) return guestHash;
   return {
     sender: { guestHash },
+    lifetimeMs: GUEST_LINK_LIFETIME_MS,
     quotas: [
       { key: `guest:${guestHash}`, limit: GUEST_DAILY_LIMIT },
       { key: await ownerKey(request, env.IP_SALT, now), limit: BLOCK_DAILY_LIMIT },
@@ -616,7 +619,7 @@ async function handleDelete(
 function home(env: Env): Response {
   return new Response(
     `Snap2Link relay: temporary links for screenshots.\n` +
-      `Links expire after 6 hours.\n\n` +
+      `Links expire after 24 hours, or 48 hours with a free account.\n\n` +
       `Report a capture: ${env.ABUSE_CONTACT}\n` +
       `Source code: https://github.com/amys94fr/Snap2Link/tree/main/relay\n`,
     { headers: { "Content-Type": "text/plain; charset=utf-8" } },

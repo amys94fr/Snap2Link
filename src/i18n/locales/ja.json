@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "画面をキャプチャして、\nどこにでも貼り付けられるリンクをすぐに取得できます。",
   "wizard.welcome.no_account": "アカウントなしではじめる",
-  "wizard.welcome.no_account_hint": "リンクの有効期間は 6 時間、キャプチャは 1 日 5 枚までです。",
+  "wizard.welcome.no_account_hint": "リンクの有効期間は 24 時間、キャプチャは 1 日 5 枚までです。",
   "wizard.welcome.drive": "自分の Google Drive を使う",
 
   "wizard.connect.title": "Google Drive に接続",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "お使いの Google アカウント。キャプチャは Drive に残ります。",
   "settings.hosting.plan": "ご利用のプラン",
   "settings.hosting.plan_hint": "1 日 5 枚まで、1 枚あたり最大 5 MB。",
-  "settings.hosting.link_life": "リンクの有効期間は 6 時間です",
+  "settings.hosting.link_life": "リンクの有効期間は 24 時間、無料アカウントなら最大 48 時間です",
   "settings.hosting.link_life_hint": "この期間を過ぎると、リンクは無効になり、キャプチャは消去されます。",
   "settings.hosting.connect": "Google Drive に接続",
   "settings.hosting.connect_hint": "アカウントを接続すると、キャプチャを Drive に送信できます。",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "ログインがキャンセルされました。このタブを閉じて、Snap2Link からもう一度お試しください。",
 
   "account.free_title": "無料アカウント",
-  "account.free_hint": "1 日 20 枚、同時に 6 件のリンク。必要なのはメールアドレスだけです。",
+  "account.free_hint": "1 日 20 枚、同時に 6 件のリンク、最大 48 時間。必要なのはメールアドレスだけです。",
   "account.email_label": "メールアドレス",
   "account.send_code": "コードを受け取る",
   "account.sending": "送信中…",

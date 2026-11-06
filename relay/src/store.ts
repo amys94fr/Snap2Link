@@ -3,7 +3,6 @@ import {
   GLOBAL_DAILY_LIMIT,
   GLOBAL_GUESTS_DAILY_LIMIT,
   GUEST_LIFETIME_MS,
-  LINK_LIFETIME_MS,
   MAX_STORED_BYTES,
   PURGE_BATCH,
   SESSION_LIFETIME_MS,
@@ -118,6 +117,8 @@ export interface NewCapture {
   body: ReadableStream;
   /** What the sender declared. The stream fails if it carries anything else. */
   size: number;
+  /** How long the link works. */
+  lifetimeMs: number;
   /** What the sender may use, checked in this order. */
   quotas: Quota[];
   now: number;
@@ -132,7 +133,7 @@ export async function createCapture(
   { db, images }: Storage,
   capture: NewCapture,
 ): Promise<{ expiresAt: number } | { refused: Refusal | "not_png" }> {
-  const { id, deleteHash, sender, body, size, now } = capture;
+  const { id, deleteHash, sender, body, size, lifetimeMs, now } = capture;
   const day = utcDay(now);
   const quotas = [...capture.quotas, { key: GLOBAL_KEY, limit: GLOBAL_DAILY_LIMIT }];
   const giveBack = () => quotas.map(({ key }) => returnQuota(db, key, day));
@@ -146,7 +147,7 @@ export async function createCapture(
     return { refused: "service_busy" };
   }
 
-  const expiresAt = now + LINK_LIFETIME_MS;
+  const expiresAt = now + lifetimeMs;
   try {
     await images.put(id, body.pipeThrough(new FixedLengthStream(size)), {
       httpMetadata: { contentType: "image/png" },

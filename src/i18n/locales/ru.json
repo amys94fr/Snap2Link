@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Сделайте снимок экрана и сразу получите\nссылку, которую можно вставить куда угодно.",
   "wizard.welcome.no_account": "Начать без аккаунта",
-  "wizard.welcome.no_account_hint": "Ссылки работают 6 часов, до 5 снимков в день.",
+  "wizard.welcome.no_account_hint": "Ссылки работают 24 часа, до 5 снимков в день.",
   "wizard.welcome.drive": "Использовать мой Google Drive",
 
   "wizard.connect.title": "Подключите Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Ваш аккаунт Google. Снимки остаются на вашем Drive.",
   "settings.hosting.plan": "Ваш тариф",
   "settings.hosting.plan_hint": "5 снимков в день, до 5 МБ каждый.",
-  "settings.hosting.link_life": "Ссылки работают 6 часов",
+  "settings.hosting.link_life": "Ссылки работают 24 часа, до 48 с бесплатным аккаунтом",
   "settings.hosting.link_life_hint": "По истечении этого срока ссылка перестаёт работать, а снимок удаляется.",
   "settings.hosting.connect": "Подключить Google Drive",
   "settings.hosting.connect_hint": "Подключите аккаунт, чтобы отправлять снимки на ваш Drive.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "Вход отменён. Закройте эту вкладку и повторите попытку в Snap2Link.",
 
   "account.free_title": "Бесплатный аккаунт",
-  "account.free_hint": "20 снимков в день и 6 ссылок одновременно. Нужен только адрес электронной почты.",
+  "account.free_hint": "20 снимков в день и 6 ссылок одновременно, до 48 часов. Нужен только адрес электронной почты.",
   "account.email_label": "Электронная почта",
   "account.send_code": "Получить код",
   "account.sending": "Отправка…",

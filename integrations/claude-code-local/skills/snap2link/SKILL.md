@@ -18,7 +18,7 @@ If the user gives several links, read them all before answering.
 ## If it fails
 
 - **"Not a Snap2Link link"**: the tool only accepts `https://i.snap2link.app/...` and `https://drive.google.com/uc?id=...&export=download`. Don't work around this with curl or another tool. Ask the user for the link Snap2Link copied.
-- **"not a PNG image" or a 404**: the capture was deleted, expired or is no longer public. Links on `i.snap2link.app` last 6 hours, and Snap2Link removes old captures automatically. Ask the user to capture it again.
+- **"not a PNG image" or a 404**: the capture was deleted, expired or is no longer public. Links on `i.snap2link.app` last 24 hours, or 48 with a free account, and Snap2Link removes old captures automatically. Ask the user to capture it again.
 
 ## Rules
 

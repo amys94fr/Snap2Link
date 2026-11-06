@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Ekranınızın görüntüsünü alın ve anında\nher yere yapıştırabileceğiniz bir bağlantı edinin.",
   "wizard.welcome.no_account": "Hesapsız başla",
-  "wizard.welcome.no_account_hint": "Bağlantılar 6 saat geçerlidir, günde en fazla 5 görüntü.",
+  "wizard.welcome.no_account_hint": "Bağlantılar 24 saat geçerlidir, günde en fazla 5 görüntü.",
   "wizard.welcome.drive": "Google Drive'ımı kullan",
 
   "wizard.connect.title": "Google Drive'ı bağlayın",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Google hesabınız. Görüntüler Drive'ınızda kalır.",
   "settings.hosting.plan": "Planınız",
   "settings.hosting.plan_hint": "Günde 5 görüntü, her biri en fazla 5 MB.",
-  "settings.hosting.link_life": "Bağlantılar 6 saat geçerlidir",
+  "settings.hosting.link_life": "Bağlantılar 24 saat geçerlidir, ücretsiz hesapla 48 saate kadar",
   "settings.hosting.link_life_hint": "Bu sürenin sonunda bağlantı çalışmaz ve görüntü silinir.",
   "settings.hosting.connect": "Google Drive'ı bağla",
   "settings.hosting.connect_hint": "Görüntüleri Drive'ınıza göndermek için hesabınızı bağlayın.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "Oturum açma iptal edildi. Bu sekmeyi kapatıp Snap2Link'ten yeniden deneyebilirsiniz.",
 
   "account.free_title": "Ücretsiz hesap",
-  "account.free_hint": "Günde 20 görüntü ve aynı anda 6 bağlantı. Yalnızca e-posta adresiniz yeterli.",
+  "account.free_hint": "Günde 20 görüntü ve aynı anda 6 bağlantı, 48 saate kadar. Yalnızca e-posta adresiniz yeterli.",
   "account.email_label": "E-posta adresi",
   "account.send_code": "Kod al",
   "account.sending": "Gönderiliyor…",

@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "صفحه را ثبت کنید و فوراً\nلینکی بگیرید که می‌توانید هر جا بچسبانید.",
   "wizard.welcome.no_account": "بدون حساب شروع کنید",
-  "wizard.welcome.no_account_hint": "لینک‌ها 6 ساعت کار می‌کنند، تا 5 تصویر در روز.",
+  "wizard.welcome.no_account_hint": "لینک‌ها 24 ساعت کار می‌کنند، تا 5 تصویر در روز.",
   "wizard.welcome.drive": "استفاده از Google Drive من",
 
   "wizard.connect.title": "اتصال به Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "حساب Google شما. تصویرها در Drive شما می‌مانند.",
   "settings.hosting.plan": "طرح شما",
   "settings.hosting.plan_hint": "5 تصویر در روز، هر کدام تا 5 مگابایت.",
-  "settings.hosting.link_life": "لینک‌ها 6 ساعت کار می‌کنند",
+  "settings.hosting.link_life": "لینک‌ها 24 ساعت کار می‌کنند، با حساب رایگان تا 48 ساعت",
   "settings.hosting.link_life_hint": "پس از این مدت، لینک دیگر کار نمی‌کند و تصویر پاک می‌شود.",
   "settings.hosting.connect": "اتصال به Google Drive",
   "settings.hosting.connect_hint": "حساب خود را متصل کنید تا تصویرها به Drive شما فرستاده شوند.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "ورود لغو شد. می‌توانید این زبانه را ببندید و از Snap2Link دوباره تلاش کنید.",
 
   "account.free_title": "حساب رایگان",
-  "account.free_hint": "20 تصویر در روز و 6 پیوند هم‌زمان. فقط نشانی ایمیل شما لازم است.",
+  "account.free_hint": "20 تصویر در روز و 6 پیوند هم‌زمان، تا 48 ساعت. فقط نشانی ایمیل شما لازم است.",
   "account.email_label": "نشانی ایمیل",
   "account.send_code": "دریافت کد",
   "account.sending": "در حال ارسال…",

@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "التقط شاشتك واحصل فورًا\nعلى رابط يمكنك لصقه في أي مكان.",
   "wizard.welcome.no_account": "ابدأ دون حساب",
-  "wizard.welcome.no_account_hint": "تعمل الروابط لمدة 6 ساعات، بحد أقصى 5 لقطات في اليوم.",
+  "wizard.welcome.no_account_hint": "تعمل الروابط لمدة 24 ساعة، بحد أقصى 5 لقطات في اليوم.",
   "wizard.welcome.drive": "استخدم Google Drive الخاص بي",
 
   "wizard.connect.title": "ربط Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "حسابك على Google. تبقى اللقطات في Drive.",
   "settings.hosting.plan": "خطتك",
   "settings.hosting.plan_hint": "5 لقطات في اليوم، بحد أقصى 5 ميغابايت لكل لقطة.",
-  "settings.hosting.link_life": "تعمل الروابط لمدة 6 ساعات",
+  "settings.hosting.link_life": "تعمل الروابط لمدة 24 ساعة، وحتى 48 ساعة مع حساب مجاني",
   "settings.hosting.link_life_hint": "بعد هذه المدة، يتوقف الرابط عن العمل وتُحذف اللقطة.",
   "settings.hosting.connect": "ربط Google Drive",
   "settings.hosting.connect_hint": "اربط حسابك لإرسال اللقطات إلى Drive.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "تم إلغاء تسجيل الدخول. يمكنك إغلاق علامة التبويب هذه والمحاولة مرة أخرى من Snap2Link.",
 
   "account.free_title": "حساب مجاني",
-  "account.free_hint": "20 لقطة في اليوم و6 روابط في الوقت نفسه. كل ما تحتاجه هو بريدك الإلكتروني.",
+  "account.free_hint": "20 لقطة في اليوم و6 روابط في الوقت نفسه، لمدة تصل إلى 48 ساعة. كل ما تحتاجه هو بريدك الإلكتروني.",
   "account.email_label": "البريد الإلكتروني",
   "account.send_code": "احصل على رمز",
   "account.sending": "جارٍ الإرسال…",

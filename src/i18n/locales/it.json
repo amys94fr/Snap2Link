@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Cattura lo schermo e ottieni subito\nun link da incollare ovunque.",
   "wizard.welcome.no_account": "Inizia senza account",
-  "wizard.welcome.no_account_hint": "I link durano 6 ore, fino a 5 screenshot al giorno.",
+  "wizard.welcome.no_account_hint": "I link durano 24 ore, fino a 5 screenshot al giorno.",
   "wizard.welcome.drive": "Usa il mio Google Drive",
 
   "wizard.connect.title": "Connetti Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Il tuo account Google. Gli screenshot restano nel tuo Drive.",
   "settings.hosting.plan": "Il tuo piano",
   "settings.hosting.plan_hint": "5 screenshot al giorno, fino a 5 MB ciascuno.",
-  "settings.hosting.link_life": "I link durano 6 ore",
+  "settings.hosting.link_life": "I link durano 24 ore, fino a 48 con un account gratuito",
   "settings.hosting.link_life_hint": "Trascorso questo periodo, il link smette di funzionare e lo screenshot viene cancellato.",
   "settings.hosting.connect": "Connetti Google Drive",
   "settings.hosting.connect_hint": "Connetti il tuo account per inviare gli screenshot al tuo Drive.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "L’accesso è stato annullato. Puoi chiudere questa scheda e riprovare da Snap2Link.",
 
   "account.free_title": "Account gratuito",
-  "account.free_hint": "20 screenshot al giorno e 6 link contemporaneamente. Basta il tuo indirizzo email.",
+  "account.free_hint": "20 screenshot al giorno e 6 link contemporaneamente, per un massimo di 48 ore. Basta il tuo indirizzo email.",
   "account.email_label": "Indirizzo email",
   "account.send_code": "Ricevi un codice",
   "account.sending": "Invio…",

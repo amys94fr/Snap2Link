@@ -275,12 +275,12 @@ describe("<SettingsWindow />", () => {
       const user = userEvent.setup();
       open("hosting");
       expect(await screen.findByText(/drive folder: snap2link/i)).toBeInTheDocument();
-      expect(screen.queryByText(/links last 6 hours/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/links last 24 hours/i)).not.toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: /^snap2link/i }));
 
       expect(invoke).toHaveBeenCalledWith("set_hosting", { hosting: "snap2link" });
-      expect(await screen.findByText(/links last 6 hours/i)).toBeInTheDocument();
+      expect(await screen.findByText(/links last 24 hours/i)).toBeInTheDocument();
       expect(screen.queryByText(/drive folder/i)).not.toBeInTheDocument();
       expect(screen.queryByRole("switch", { name: /automatic deletion/i })).not.toBeInTheDocument();
     });

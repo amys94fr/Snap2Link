@@ -1,7 +1,7 @@
 {
   "wizard.welcome.subtitle": "Capturez votre écran et obtenez aussitôt\nun lien à coller où vous voulez.",
   "wizard.welcome.no_account": "Commencer sans compte",
-  "wizard.welcome.no_account_hint": "Les liens durent 6 heures, jusqu’à 5 captures par jour.",
+  "wizard.welcome.no_account_hint": "Les liens durent 24 heures, jusqu’à 5 captures par jour.",
   "wizard.welcome.drive": "Utiliser mon Google Drive",
 
   "wizard.connect.title": "Connecter Google Drive",
@@ -72,7 +72,7 @@
   "settings.hosting.drive_card": "Votre compte Google. Les captures restent sur votre Drive.",
   "settings.hosting.plan": "Votre offre",
   "settings.hosting.plan_hint": "5 captures par jour, jusqu’à 5 Mo chacune.",
-  "settings.hosting.link_life": "Les liens durent 6 heures",
+  "settings.hosting.link_life": "Les liens durent 24 heures, jusqu’à 48 avec un compte gratuit",
   "settings.hosting.link_life_hint": "Passé ce délai, le lien ne fonctionne plus et la capture est effacée.",
   "settings.hosting.connect": "Connecter Google Drive",
   "settings.hosting.connect_hint": "Connectez votre compte pour envoyer les captures sur votre Drive.",
@@ -199,7 +199,7 @@
   "oauth.failure.body": "La connexion a été annulée. Vous pouvez fermer cet onglet et réessayer depuis Snap2Link.",
 
   "account.free_title": "Compte gratuit",
-  "account.free_hint": "20 captures par jour et 6 liens en même temps. Il suffit de votre adresse e-mail.",
+  "account.free_hint": "20 captures par jour et 6 liens en même temps, pendant 48 heures au plus. Il suffit de votre adresse e-mail.",
   "account.email_label": "Adresse e-mail",
   "account.send_code": "Recevoir un code",
   "account.sending": "Envoi…",
