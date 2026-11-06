@@ -70,14 +70,6 @@ const toolError = (text: string) => ({ content: [{ type: "text", text }], isErro
 /** What the user should read, as opposed to a bug. */
 class CaptureError extends Error {}
 
-function base64(bytes: Uint8Array): string {
-  let binary = "";
-  for (let start = 0; start < bytes.length; start += 0x8000) {
-    binary += String.fromCharCode(...bytes.subarray(start, start + 0x8000));
-  }
-  return btoa(binary);
-}
-
 async function relayCapture(id: string, env: Env): Promise<Uint8Array> {
   const gone = new CaptureError("This capture was deleted or has expired.");
   if ((await liveCaptureSize(env.DB, id, Date.now())) === null) throw gone;
@@ -185,10 +177,10 @@ async function readCapture(url: string, env: Env, block: string): Promise<object
       );
     }
     if (bytes.byteLength <= MAX_INLINE_BYTES) {
-      return { content: [{ type: "image", data: base64(bytes), mimeType: "image/png" }] };
+      return { content: [{ type: "image", data: bytes.toBase64(), mimeType: "image/png" }] };
     }
     const smaller = await reduced(bytes, env);
-    return { content: [{ type: "image", data: base64(smaller), mimeType: "image/jpeg" }] };
+    return { content: [{ type: "image", data: smaller.toBase64(), mimeType: "image/jpeg" }] };
   } catch (cause) {
     if (cause instanceof CaptureError) return toolError(cause.message);
     console.log(`read_capture failed: ${cause instanceof Error ? cause.message : "unknown"}`);
