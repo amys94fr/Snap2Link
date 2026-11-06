@@ -327,13 +327,12 @@ pub async fn cleanup_old_screenshots_inner(app: &AppHandle) -> Result<u32, Strin
         if let Some(ref pt) = page_token {
             req = req.query(&[("pageToken", pt.as_str())]);
         }
-        let resp: Value = req
-            .send()
-            .await
-            .map_err(|e| e.to_string())?
-            .json()
-            .await
-            .map_err(|e| e.to_string())?;
+        let response = req.send().await.map_err(|e| e.to_string())?;
+        // A refused query has no files: without this, it would look like nothing to clean.
+        if !response.status().is_success() {
+            return Err(format!("Drive cleanup failed ({})", response.status()));
+        }
+        let resp: Value = response.json().await.map_err(|e| e.to_string())?;
 
         if let Some(files) = resp["files"].as_array() {
             for file in files {

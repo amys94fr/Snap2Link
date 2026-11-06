@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Signed in, the hosting settings now say how long your links last instead of comparing plans.
+- A Drive cleanup that Google refuses now reports an error instead of looking like there was nothing to clean.
 
 ## [1.8.0] – 2026-11-06
 
