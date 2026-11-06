@@ -18,6 +18,7 @@ pub const VERIFICATION_FAILED: &str = "relay_verification_failed";
 /// The relay doesn't know this session, or it expired: sign in again.
 pub const SESSION_REQUIRED: &str = "relay_session_required";
 pub const DAILY_LIMIT: &str = "relay_daily_limit";
+pub const PIN_LIMIT: &str = "relay_pin_limit";
 
 #[derive(Deserialize)]
 struct NewGuest {
@@ -40,6 +41,28 @@ pub struct AccountStatus {
     pub daily_captures: u32,
     pub slots_used: u32,
     pub slots: u32,
+}
+
+/// One link of the history.
+#[derive(Deserialize, Debug, PartialEq, Eq)]
+pub struct Link {
+    pub id: String,
+    pub url: String,
+    pub created_at: String,
+    pub expires_at: String,
+    pub pinned: bool,
+}
+
+/// The links of a guest or an account, and how many it may pin.
+#[derive(Deserialize, Debug, PartialEq, Eq)]
+pub struct Links {
+    pub captures: Vec<Link>,
+    pub max_pins: u32,
+}
+
+/// Ids come back from the web page: they go into a path, so they have to be ids.
+pub fn is_capture_id(id: &str) -> bool {
+    id.len() == 22 && id.chars().all(|c| c.is_ascii_alphanumeric())
 }
 
 #[derive(Deserialize)]
@@ -66,6 +89,7 @@ fn error_code(body: &str, status: reqwest::StatusCode) -> String {
         Ok("invalid_code") => "relay_invalid_code".to_string(),
         Ok("google_refused") => "relay_google_refused".to_string(),
         Ok("mail_unavailable") => "relay_mail_unavailable".to_string(),
+        Ok("pin_limit") => PIN_LIMIT.to_string(),
         _ => format!("Snap2Link hosting answered {status}"),
     }
 }
@@ -210,6 +234,28 @@ pub async fn upload(base: &str, guest: &str, bytes: Vec<u8>) -> Result<Created, 
         return Err("invalid relay response: unexpected link".to_string());
     }
     Ok(created)
+}
+
+/// The links of a guest or a session that still work, newest first.
+pub async fn history(base: &str, token: &str) -> Result<Links, String> {
+    let response = reqwest::Client::new()
+        .get(endpoint(base, "/v1/captures"))
+        .bearer_auth(token)
+        .send()
+        .await;
+    let body = body_of(response).await?;
+    let mut links: Links =
+        serde_json::from_str(&body).map_err(|e| format!("invalid relay response: {e}"))?;
+    // These links are shown and copied: they have to be the relay's.
+    links.captures.retain(|link| link.url.starts_with(&endpoint(base, "/")));
+    Ok(links)
+}
+
+pub async fn set_pinned(base: &str, id: &str, session: &str, pinned: bool) -> Result<(), String> {
+    let client = reqwest::Client::new();
+    let url = endpoint(base, &format!("/v1/captures/{id}/pin"));
+    let request = if pinned { client.put(url) } else { client.delete(url) };
+    body_of(request.bearer_auth(session).send().await).await.map(|_| ())
 }
 
 pub async fn delete(base: &str, id: &str, token: &str) -> Result<(), String> {

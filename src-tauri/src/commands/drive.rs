@@ -1,13 +1,14 @@
 //! Google Drive API — folder management, upload, cleanup.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
 use tauri::AppHandle;
 
 use crate::commands::auth::get_valid_token;
-use crate::commands::config::{load_config_from, save_config_to};
+use crate::commands::config::{load_config_from, save_config_to, AppConfig};
+use crate::commands::history::{Entry, History};
 use crate::utils::app_data_dir;
 
 /// Drive file ids are URL-safe base64-ish tokens. Anything else in
@@ -214,6 +215,79 @@ pub async fn delete_file(app: &AppHandle, file_id: &str) -> Result<(), String> {
     }
 }
 
+/// Marks a kept capture in its `appProperties`, so that it's the same on every
+/// PC. Only this app can see them.
+const KEEP_KEY: &str = "snap2link_keep";
+
+/// Captures the History page shows: the newest ones, and more than anyone reads.
+const HISTORY_SIZE: &str = "100";
+
+fn entry_from(file: &Value, retention_days: Option<u32>) -> Option<Entry> {
+    let id = file["id"].as_str().filter(|id| is_valid_drive_id(id))?;
+    let created_at = file["createdTime"].as_str()?;
+    let kept = file["appProperties"][KEEP_KEY].as_str() == Some("1");
+    let expires_at = retention_days.filter(|_| !kept).and_then(|days| {
+        let created = DateTime::parse_from_rfc3339(created_at).ok()?;
+        Some((created.with_timezone(&Utc) + Duration::days(days.into())).to_rfc3339())
+    });
+    Some(Entry {
+        id: id.to_string(),
+        url: share_link_for(id),
+        thumbnail: file["thumbnailLink"].as_str().map(str::to_string),
+        created_at: created_at.to_string(),
+        expires_at,
+        kept,
+    })
+}
+
+pub async fn history(app: &AppHandle, cfg: &AppConfig) -> Result<History, String> {
+    let token = get_valid_token(app).await?;
+    let folder_id = get_or_create_folder(&token, app).await?;
+    let query = format!("'{folder_id}' in parents and trashed=false");
+    let response = reqwest::Client::new()
+        .get("https://www.googleapis.com/drive/v3/files")
+        .bearer_auth(&token)
+        .query(&[
+            ("q", query.as_str()),
+            ("orderBy", "createdTime desc"),
+            ("fields", "files(id,createdTime,thumbnailLink,appProperties)"),
+            ("pageSize", HISTORY_SIZE),
+        ])
+        .send()
+        .await
+        .map_err(|e| format!("history network error: {e}"))?;
+    if !response.status().is_success() {
+        return Err(format!("Drive history failed ({})", response.status()));
+    }
+    let answer: Value = response.json().await.map_err(|e| e.to_string())?;
+    let retention_days = cfg.auto_delete.then_some(cfg.retention_days);
+    let entries = answer["files"]
+        .as_array()
+        .map(|files| files.iter().filter_map(|f| entry_from(f, retention_days)).collect())
+        .unwrap_or_default();
+    Ok(History { entries, max_kept: None })
+}
+
+pub async fn set_kept(app: &AppHandle, file_id: &str, kept: bool) -> Result<(), String> {
+    let token = get_valid_token(app).await?;
+    let value = if kept { Value::from("1") } else { Value::Null };
+    let response = reqwest::Client::new()
+        .patch(format!(
+            "https://www.googleapis.com/drive/v3/files/{file_id}"
+        ))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({ "appProperties": { KEEP_KEY: value } }))
+        .send()
+        .await
+        .map_err(|e| format!("keep network error: {e}"))?;
+
+    if response.status().is_success() {
+        Ok(())
+    } else {
+        Err(format!("Drive keep failed ({})", response.status()))
+    }
+}
+
 fn truncate(s: &str, max: usize) -> String {
     if s.chars().count() <= max {
         s.to_string()
@@ -233,7 +307,8 @@ pub async fn cleanup_old_screenshots_inner(app: &AppHandle) -> Result<u32, Strin
 
     let cutoff = retention_cutoff(Utc::now(), cfg.retention_days);
     let query = format!(
-        "'{folder_id}' in parents and createdTime < '{cutoff}' and trashed=false"
+        "'{folder_id}' in parents and createdTime < '{cutoff}' and trashed=false \
+         and not appProperties has {{ key='{KEEP_KEY}' and value='1' }}"
     );
 
     let mut deleted: u32 = 0;
@@ -292,6 +367,41 @@ pub async fn cleanup_old_screenshots_inner(app: &AppHandle) -> Result<u32, Strin
 mod tests {
     use super::*;
     use chrono::TimeZone;
+
+    #[test]
+    fn a_capture_ends_with_the_cleanup_unless_it_is_kept() {
+        let file = serde_json::json!({
+            "id": "abc123",
+            "createdTime": "2026-11-01T10:00:00.000Z",
+            "thumbnailLink": "https://lh3.googleusercontent.com/x",
+        });
+        let entry = entry_from(&file, Some(30)).unwrap();
+        assert!(!entry.kept);
+        assert!(entry.expires_at.unwrap().starts_with("2026-12-01T10:00:00"));
+        assert_eq!(entry.url, share_link_for("abc123"));
+
+        let kept = serde_json::json!({
+            "id": "abc123",
+            "createdTime": "2026-11-01T10:00:00.000Z",
+            "appProperties": { KEEP_KEY: "1" },
+        });
+        let entry = entry_from(&kept, Some(30)).unwrap();
+        assert!(entry.kept);
+        assert_eq!(entry.expires_at, None);
+        assert_eq!(entry.thumbnail, None);
+    }
+
+    #[test]
+    fn a_capture_lasts_without_the_cleanup() {
+        let file = serde_json::json!({ "id": "abc123", "createdTime": "2026-11-01T10:00:00.000Z" });
+        assert_eq!(entry_from(&file, None).unwrap().expires_at, None);
+    }
+
+    #[test]
+    fn a_file_with_a_strange_id_is_left_out() {
+        let file = serde_json::json!({ "id": "../x", "createdTime": "2026-11-01T10:00:00.000Z" });
+        assert!(entry_from(&file, None).is_none());
+    }
 
     #[test]
     fn share_link_uses_public_drive_format() {

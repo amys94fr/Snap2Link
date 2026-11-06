@@ -3,6 +3,7 @@ pub mod auth;
 pub mod config;
 pub mod drive;
 pub mod guest;
+pub mod history;
 pub mod screenshot;
 pub mod updater;
 pub mod relay;

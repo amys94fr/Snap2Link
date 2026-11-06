@@ -148,6 +148,11 @@ async fn obtain(app: &AppHandle, base: &str, rejected: Option<&str>) -> Result<S
     Ok(token)
 }
 
+/// The saved token, if this install has one for this relay.
+pub fn saved(base: &str) -> Option<String> {
+    load_from(&app_data_dir(), base)
+}
+
 /// The saved token, or a new one if this install has none for this relay.
 pub async fn token(app: &AppHandle, base: &str) -> Result<String, String> {
     match load_from(&app_data_dir(), base) {
