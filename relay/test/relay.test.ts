@@ -734,7 +734,7 @@ describe("routing", () => {
   });
 
   it("refuses the wrong methods and unknown paths", async () => {
-    expect((await call("/v1/captures")).status).toBe(405);
+    expect((await call("/v1/captures", { method: "PUT" })).status).toBe(405);
     expect((await call("/v1/guests")).status).toBe(405);
     expect((await call("/guest", { method: "POST" })).status).toBe(405);
     expect((await call(`/${"a".repeat(22)}.png`, { method: "POST" })).status).toBe(405);

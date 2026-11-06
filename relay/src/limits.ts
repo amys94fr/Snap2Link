@@ -75,14 +75,19 @@ export const MAX_STORED_BYTES = 8_000_000_000;
 
 /**
  * What each plan may do. `slots` is how many of an account's links work at
- * once: a new capture ends the oldest, even before `linkLifetimeMs`. Stored
- * bytes stay bounded by MAX_STORED_BYTES, whatever the number of accounts.
+ * once: a new capture ends the oldest unpinned one, even before
+ * `linkLifetimeMs`. `pins` stays below `slots`, so that a capture always has a
+ * place. Stored bytes stay bounded by MAX_STORED_BYTES, whatever the number of
+ * accounts.
  */
 export const PLANS = {
-  free: { slots: 6, dailyCaptures: 20, linkLifetimeMs: 48 * 60 * 60 * 1000 },
+  free: { slots: 6, pins: 5, dailyCaptures: 20, linkLifetimeMs: 48 * 60 * 60 * 1000 },
 } as const;
 
 export type Plan = keyof typeof PLANS;
+
+/** Links a history answer can hold. */
+export const MAX_HISTORY = 100;
 
 /** Captures one address block can send per UTC day through accounts. */
 export const ACCOUNT_BLOCK_DAILY_LIMIT = 100;

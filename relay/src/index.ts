@@ -28,11 +28,16 @@ import {
   createCapture,
   createGuest,
   deleteCapture,
+  deleteOwnCapture,
   guestStatus,
+  listCaptures,
   liveCaptureSize,
+  pinCapture,
   purgeExpired,
+  unpinCapture,
   utcDay,
   type NewCapture,
+  type Owner,
   type Storage,
 } from "./store";
 
@@ -65,6 +70,7 @@ const ID_LENGTH = 22;
 /** Links are only as private as they are unguessable: about 131 random bits. */
 const CAPTURE_PATH = /^\/([0-9A-Za-z]{22})(\.png|\.jpg)?$/;
 const API_CAPTURE_PATH = /^\/v1\/captures\/([0-9A-Za-z]{22})$/;
+const API_PIN_PATH = /^\/v1\/captures\/([0-9A-Za-z]{22})\/pin$/;
 
 /**
  * These show a link as a card and need a page to build it from. Everything else
@@ -611,9 +617,66 @@ async function handleDelete(
 ): Promise<Response> {
   const token = bearer(request);
   if (!token) return error(401, "missing_token");
-  const deleted = await deleteCapture(storage(env), id, await sha256(token));
+
+  let deleted: boolean;
+  if (token.startsWith(SESSION_PREFIX)) {
+    const session = await requireAccount(request, env, Date.now());
+    if (session instanceof Response) return session;
+    deleted = await deleteOwnCapture(storage(env), id, { accountId: session.account.id });
+  } else {
+    // Either the capture's own delete token, or the guest who sent it.
+    const hash = await sha256(token);
+    deleted =
+      (await deleteCapture(storage(env), id, hash)) ||
+      (await deleteOwnCapture(storage(env), id, { guestHash: hash }));
+  }
   // The same answer either way: this can't be used to test which ids exist.
   return deleted ? new Response(null, { status: 204 }) : error(404, "not_found");
+}
+
+/** The links of whoever asks. A guest gets `max_pins: 0`: nothing replaces a guest's links. */
+async function handleHistory(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  let owner: Owner;
+  let maxPins = 0;
+  if (bearer(request)?.startsWith(SESSION_PREFIX)) {
+    const session = await requireAccount(request, env, now);
+    if (session instanceof Response) return session;
+    owner = { accountId: session.account.id };
+    maxPins = PLANS[session.account.plan].pins;
+  } else {
+    const guestHash = await requireGuest(request, env, now);
+    if (guestHash instanceof Response) return guestHash;
+    owner = { guestHash };
+  }
+
+  const captures = await listCaptures(env.DB, owner, now);
+  return Response.json({
+    captures: captures.map(({ id, created_at, expires_at, pinned }) => ({
+      id,
+      url: `${env.PUBLIC_URL}/${id}`,
+      created_at: new Date(created_at).toISOString(),
+      expires_at: new Date(expires_at).toISOString(),
+      pinned: pinned === 1,
+    })),
+    max_pins: maxPins,
+  });
+}
+
+async function handlePin(id: string, request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const session = await requireAccount(request, env, now);
+  if (session instanceof Response) return session;
+  const { id: accountId, plan } = session.account;
+
+  if (request.method === "DELETE") {
+    return (await unpinCapture(env.DB, id, accountId, now))
+      ? new Response(null, { status: 204 })
+      : error(404, "not_found");
+  }
+  const result = await pinCapture(env.DB, id, accountId, PLANS[plan].pins, now);
+  if (result === "pinned") return new Response(null, { status: 204 });
+  return result === "pin_limit" ? error(409, "pin_limit") : error(404, "not_found");
 }
 
 function home(env: Env): Response {
@@ -636,7 +699,8 @@ export default {
     }
 
     if (pathname === "/v1/captures") {
-      return method === "POST" ? handleUpload(request, env) : error(405, "method_not_allowed");
+      if (method === "POST") return handleUpload(request, env);
+      return method === "GET" ? handleHistory(request, env) : error(405, "method_not_allowed");
     }
 
     if (pathname === "/v1/guests") {
@@ -674,6 +738,13 @@ export default {
     if (apiCapture) {
       return method === "DELETE"
         ? handleDelete(apiCapture[1], request, env)
+        : error(405, "method_not_allowed");
+    }
+
+    const apiPin = API_PIN_PATH.exec(pathname);
+    if (apiPin) {
+      return method === "PUT" || method === "DELETE"
+        ? handlePin(apiPin[1], request, env)
         : error(405, "method_not_allowed");
     }
 

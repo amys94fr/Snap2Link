@@ -3,6 +3,7 @@ import {
   GLOBAL_DAILY_LIMIT,
   GLOBAL_GUESTS_DAILY_LIMIT,
   GUEST_LIFETIME_MS,
+  MAX_HISTORY,
   MAX_STORED_BYTES,
   PURGE_BATCH,
   SESSION_LIFETIME_MS,
@@ -177,9 +178,10 @@ export async function createCapture(
 }
 
 /**
- * Ends every link of an account past its newest `slots`. Only the date changes:
- * an upload has little CPU left, and the cleanup job frees the image and its
- * bytes. Sorted by rowid, since two captures can share a millisecond.
+ * Ends every link of an account past its `slots`, keeping pinned links first,
+ * then the newest. Only the date changes: an upload has little CPU left, and
+ * the cleanup job frees the image and its bytes. Sorted by rowid, since two
+ * captures can share a millisecond.
  */
 function endOldestLinks(
   db: D1Database,
@@ -192,7 +194,7 @@ function endOldestLinks(
       `UPDATE captures SET expires_at = ?3
        WHERE account_id = ?1 AND expires_at > ?3 AND id NOT IN (
          SELECT id FROM captures WHERE account_id = ?1 AND expires_at > ?3
-         ORDER BY rowid DESC LIMIT ?2
+         ORDER BY pinned DESC, rowid DESC LIMIT ?2
        )`,
     )
     .bind(accountId, slots, now);
@@ -254,24 +256,113 @@ export async function liveCaptureSize(
   return capture?.size ?? null;
 }
 
-/** True when the capture existed and `deleteHash` matched it. */
-export async function deleteCapture(
+async function removeCapture(
   { db, images }: Storage,
   id: string,
-  deleteHash: string,
+  capture: { size: number } | null,
 ): Promise<boolean> {
-  const capture = await db
-    .prepare("SELECT size FROM captures WHERE id = ?1 AND delete_hash = ?2")
-    .bind(id, deleteHash)
-    .first<{ size: number }>();
   if (!capture) return false;
-
   await images.delete(id);
   await db.batch([
     db.prepare("DELETE FROM captures WHERE id = ?1").bind(id),
     releaseBytes(db, capture.size),
   ]);
   return true;
+}
+
+/** True when the capture existed and `deleteHash` matched it. */
+export async function deleteCapture(
+  storage: Storage,
+  id: string,
+  deleteHash: string,
+): Promise<boolean> {
+  const capture = await storage.db
+    .prepare("SELECT size FROM captures WHERE id = ?1 AND delete_hash = ?2")
+    .bind(id, deleteHash)
+    .first<{ size: number }>();
+  return removeCapture(storage, id, capture);
+}
+
+/** Whoever a capture belongs to. */
+export type Owner = { guestHash: string } | { accountId: string };
+
+const ownerColumn = (owner: Owner) => ("accountId" in owner ? "account_id" : "guest_hash");
+const ownerValue = (owner: Owner) => ("accountId" in owner ? owner.accountId : owner.guestHash);
+
+/** True when the capture existed and belonged to `owner`. */
+export async function deleteOwnCapture(
+  storage: Storage,
+  id: string,
+  owner: Owner,
+): Promise<boolean> {
+  const capture = await storage.db
+    .prepare(`SELECT size FROM captures WHERE id = ?1 AND ${ownerColumn(owner)} = ?2`)
+    .bind(id, ownerValue(owner))
+    .first<{ size: number }>();
+  return removeCapture(storage, id, capture);
+}
+
+export interface HistoryCapture {
+  id: string;
+  created_at: number;
+  expires_at: number;
+  pinned: number;
+}
+
+/** The links of `owner` that still work, newest first. */
+export async function listCaptures(
+  db: D1Database,
+  owner: Owner,
+  now: number,
+): Promise<HistoryCapture[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT id, created_at, expires_at, pinned FROM captures
+       WHERE ${ownerColumn(owner)} = ?1 AND expires_at > ?2
+       ORDER BY rowid DESC LIMIT ?3`,
+    )
+    .bind(ownerValue(owner), now, MAX_HISTORY)
+    .all<HistoryCapture>();
+  return results;
+}
+
+/** Pins a live link, unless the account has `maxPins`. One statement, so two calls can't both pass. */
+export async function pinCapture(
+  db: D1Database,
+  id: string,
+  accountId: string,
+  maxPins: number,
+  now: number,
+): Promise<"pinned" | "not_found" | "pin_limit"> {
+  const live = "account_id = ?2 AND expires_at > ?3";
+  const { meta } = await db
+    .prepare(
+      `UPDATE captures SET pinned = 1
+       WHERE id = ?1 AND ${live} AND (pinned = 1 OR
+         (SELECT COUNT(*) FROM captures WHERE ${live} AND pinned = 1) < ?4)`,
+    )
+    .bind(id, accountId, now, maxPins)
+    .run();
+  if (meta.changes > 0) return "pinned";
+  const exists = await db
+    .prepare(`SELECT 1 FROM captures WHERE id = ?1 AND ${live}`)
+    .bind(id, accountId, now)
+    .first();
+  return exists ? "pin_limit" : "not_found";
+}
+
+/** True when the link is live and belongs to the account, pinned or not. */
+export async function unpinCapture(
+  db: D1Database,
+  id: string,
+  accountId: string,
+  now: number,
+): Promise<boolean> {
+  const { meta } = await db
+    .prepare("UPDATE captures SET pinned = 0 WHERE id = ?1 AND account_id = ?2 AND expires_at > ?3")
+    .bind(id, accountId, now)
+    .run();
+  return meta.changes > 0;
 }
 
 /** Cron job: frees what expired, and forgets past counters, old guests and old accounts. */
