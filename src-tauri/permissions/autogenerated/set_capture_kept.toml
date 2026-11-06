@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-capture-kept"
+description = "Enables the set_capture_kept command without any pre-configured scope."
+commands.allow = ["set_capture_kept"]
+
+[[permission]]
+identifier = "deny-set-capture-kept"
+description = "Denies the set_capture_kept command without any pre-configured scope."
+commands.deny = ["set_capture_kept"]

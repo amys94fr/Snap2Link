@@ -157,6 +157,15 @@ export function CameraIcon() {
   );
 }
 
+export function ClockIcon() {
+  return (
+    <svg {...ICON_PROPS}>
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 7 12 12 15.5 14" />
+    </svg>
+  );
+}
+
 export function CloudIcon() {
   return (
     <svg {...ICON_PROPS}>

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type AppPage = "wizard" | "settings" | "about";
-export type SettingsCategory = "capture" | "hosting" | "general" | "about";
+export type SettingsCategory = "capture" | "hosting" | "history" | "general" | "about";
 
 export interface AppState {
   page: AppPage;

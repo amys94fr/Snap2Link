@@ -28,6 +28,10 @@
         }
       ]
     },
+    "clipboard-manager:allow-write-text",
+    "allow-get-history",
+    "allow-delete-capture",
+    "allow-set-capture-kept",
     "allow-get-config",
     "allow-save-config",
     "allow-is-authenticated",
