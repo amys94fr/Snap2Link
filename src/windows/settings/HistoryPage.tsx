@@ -224,7 +224,7 @@ export function HistoryPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    className={BUTTON}
+                    className={`${BUTTON} min-w-24`}
                     aria-label={`${t("history.copy")}, ${date}`}
                     onClick={() => void copy(entry)}
                   >
