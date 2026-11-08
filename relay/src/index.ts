@@ -72,6 +72,8 @@ export interface Env {
   GOOGLE_CLIENT_ID: string;
   /** The website whose account area may use the session cookie. */
   SITE_ORIGIN: string;
+  /** Google client of that website, a Web one. Empty turns Google sign-in on the site off. */
+  GOOGLE_WEB_CLIENT_ID: string;
 }
 
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -474,6 +476,11 @@ async function handleWebLoginVerify(request: Request, env: Env): Promise<Respons
   if (!(await useLoginCode(env.DB, id, await codeHash(id, body.code, env), now))) {
     return error(400, "invalid_code");
   }
+  return openWebSession(id, email, env, now);
+}
+
+/** Signs in on the website: the token goes in the cookie, never in the answer. */
+async function openWebSession(id: string, email: string, env: Env, now: number): Promise<Response> {
   const token = `${SESSION_PREFIX}${randomToken()}`;
   const session = await openSession(env.DB, id, email, await sha256(token), now, "web");
   if (!session) return error(403, "account_banned");
@@ -481,6 +488,21 @@ async function handleWebLoginVerify(request: Request, env: Env): Promise<Respons
     { email: session.account.email, plan: session.account.plan },
     { headers: { "Set-Cookie": sessionCookie(env, token, WEB_SESSION_LIFETIME_MS) } },
   );
+}
+
+/**
+ * Google's button on the account page. Its token is made for the website's own
+ * client, so a token made for the app, or for another site, is refused.
+ */
+async function handleWebLoginGoogle(request: Request, env: Env): Promise<Response> {
+  if (!env.GOOGLE_WEB_CLIENT_ID) return error(503, "service_busy");
+  const now = Date.now();
+  const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
+  if (typeof body?.credential !== "string") return error(400, "bad_request");
+
+  const email = await googleEmail(request, env, body.credential, env.GOOGLE_WEB_CLIENT_ID, now);
+  if (email instanceof Response) return email;
+  return openWebSession(await accountId(email, env), email, env, now);
 }
 
 async function handleWebLogout(request: Request, env: Env): Promise<Response> {
@@ -635,15 +657,26 @@ async function handleLoginGoogle(request: Request, env: Env): Promise<Response> 
   const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
   if (typeof body?.id_token !== "string") return error(400, "bad_request");
 
+  const email = await googleEmail(request, env, body.id_token, env.GOOGLE_CLIENT_ID, now);
+  if (email instanceof Response) return email;
+  return signIn(await accountId(email, env), email, env, now);
+}
+
+/** The address a Google ID token made for `clientId` vouches for, or the answer that refuses it. */
+async function googleEmail(
+  request: Request,
+  env: Env,
+  idToken: string,
+  clientId: string,
+  now: number,
+): Promise<string | Response> {
   const block = await ownerKey(request, env.IP_SALT, now);
   if (!(await takeGoogleAttempt(env.DB, block, now))) return error(429, "daily_limit");
 
-  const result = await verifiedGoogleEmail(body.id_token, env.GOOGLE_CLIENT_ID, now);
+  const result = await verifiedGoogleEmail(idToken, clientId, now);
   if (result === "unavailable") return error(503, "service_busy");
   const email = result === "refused" ? null : normalizedEmail(result.email);
-  if (!email) return error(403, "google_refused");
-
-  return signIn(await accountId(email, env), email, env, now);
+  return email ?? error(403, "google_refused");
 }
 
 async function handleMe(request: Request, env: Env): Promise<Response> {
@@ -1010,6 +1043,10 @@ async function route(request: Request, env: Env): Promise<Response> {
 
     if (pathname === "/v1/web/login/verify") {
       return method === "POST" ? handleWebLoginVerify(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/web/login/google") {
+      return method === "POST" ? handleWebLoginGoogle(request, env) : error(405, "method_not_allowed");
     }
 
     if (pathname === "/v1/web/logout") {

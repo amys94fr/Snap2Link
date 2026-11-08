@@ -15,6 +15,7 @@ declare global {
       MAIL_FROM: string;
       GOOGLE_CLIENT_ID: string;
       SITE_ORIGIN: string;
+      GOOGLE_WEB_CLIENT_ID: string;
       TEST_MIGRATIONS: D1Migration[];
     }
   }

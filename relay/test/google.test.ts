@@ -219,3 +219,52 @@ describe("signing in with Google", () => {
     expect(await count("sessions")).toBe(1);
   });
 });
+
+describe("Google on the website", () => {
+  function webLogin(credential: unknown, origin = "https://snap2link.app"): Promise<Response> {
+    const request = new Request(`${BASE}/v1/web/login/google`, {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+      headers: { "CF-Connecting-IP": IP, Origin: origin, "Content-Type": "application/json" },
+    }) as Parameters<typeof worker.fetch>[0];
+    return worker.fetch(request, env);
+  }
+
+  it("signs in with a token made for the website's client, in a cookie", async () => {
+    googleAnswers();
+
+    const answer = await webLogin(await token(claims({ aud: env.GOOGLE_WEB_CLIENT_ID })));
+
+    expect(answer.status).toBe(200);
+    expect(answer.headers.get("Set-Cookie")).toContain("HttpOnly");
+    expect(await answer.json()).toEqual({ email: EMAIL, plan: "free" });
+    expect(await env.DB.prepare("SELECT kind FROM sessions").first<{ kind: string }>()).toEqual({ kind: "web" });
+  });
+
+  it("refuses a token made for the app", async () => {
+    googleAnswers();
+
+    const answer = await webLogin(await token(claims()));
+
+    expect(answer.status).toBe(403);
+    expect(answer.headers.get("Set-Cookie")).toBeNull();
+  });
+
+  it("joins the account of the same address", async () => {
+    googleAnswers();
+    await login(await token());
+
+    await webLogin(await token(claims({ aud: env.GOOGLE_WEB_CLIENT_ID })));
+
+    expect(await count("accounts")).toBe(1);
+    expect(await count("sessions")).toBe(2);
+  });
+
+  it("counts against the same daily limit as the app", async () => {
+    googleAnswers();
+    const credential = await token(claims({ aud: env.GOOGLE_WEB_CLIENT_ID }));
+    for (let i = 0; i < BLOCK_DAILY_GOOGLE; i += 1) await webLogin(credential);
+
+    expect((await webLogin(credential)).status).toBe(429);
+  });
+});

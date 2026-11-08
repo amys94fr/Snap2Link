@@ -26,7 +26,9 @@
     // Public by nature: it is in every sign-in URL. The client secret is not here.
     "GOOGLE_CLIENT_ID": "565416375675-jfhsjr9c3j5fanto9htmdin7hibea83u.apps.googleusercontent.com",
     "TURNSTILE_SITEKEY": "0x4AAAAAAF0C_X7NcOtuLv5w",
-    "SITE_ORIGIN": "https://snap2link.app"
+    "SITE_ORIGIN": "https://snap2link.app",
+    // The website's Google client, public like the app's. Empty until it exists.
+    "GOOGLE_WEB_CLIENT_ID": ""
   },
   // Links are refused the moment they expire: this only frees the space.
   "triggers": { "crons": ["*/30 * * * *"] },
