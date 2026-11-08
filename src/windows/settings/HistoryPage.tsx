@@ -55,7 +55,25 @@ function timeLeft(date: string, now: number): string {
   return hours > 48 ? format.format(Math.round(hours / 24), "day") : format.format(hours, "hour");
 }
 
-function Thumbnail({ entry, label }: { entry: Entry; label: string }) {
+/**
+ * The picture at full size: a relay link is the image itself, and a Drive
+ * thumbnail link takes its size at the end, such as `=s220`.
+ */
+export function fullImage(entry: Entry): string | null {
+  if (!entry.thumbnail) return null;
+  if (entry.thumbnail === entry.url) return entry.url;
+  return /=s\d+$/.test(entry.thumbnail) ? entry.thumbnail.replace(/=s\d+$/, "=s2400") : entry.thumbnail;
+}
+
+function Thumbnail({
+  entry,
+  label,
+  onOpen,
+}: {
+  entry: Entry;
+  label: string;
+  onOpen: () => void;
+}) {
   const [failed, setFailed] = useState(false);
   const box = "w-24 h-16 shrink-0 rounded-md bg-slate-950 border border-slate-800";
 
@@ -67,15 +85,96 @@ function Thumbnail({ entry, label }: { entry: Entry; label: string }) {
     );
   }
   return (
-    <img
-      src={entry.thumbnail}
-      alt={label}
-      loading="lazy"
-      referrerPolicy="no-referrer"
-      draggable={false}
-      onError={() => setFailed(true)}
-      className={`${box} object-cover`}
-    />
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={t("history.view", { date: label })}
+      title={t("history.view", { date: label })}
+      className={`${box} group relative overflow-hidden cursor-zoom-in focus-visible:outline-2 focus-visible:outline-brand`}
+    >
+      <img
+        src={entry.thumbnail}
+        alt=""
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        draggable={false}
+        onError={() => setFailed(true)}
+        className="size-full object-cover transition-opacity group-hover:opacity-80"
+      />
+    </button>
+  );
+}
+
+/** The capture at full size, over the page. Escape, the backdrop or Close shut it. */
+function Viewer({
+  entry,
+  date,
+  onClose,
+  onCopy,
+  copied,
+}: {
+  entry: Entry;
+  date: string;
+  onClose: () => void;
+  onCopy: () => void;
+  copied: boolean;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [state, setState] = useState<"loading" | "ready" | "failed">("loading");
+  const source = fullImage(entry);
+  // `close()` fires the close event, which calls onClose; older engines lack it.
+  const shut = () => (dialog.current?.close ? dialog.current.close() : onClose());
+
+  useEffect(() => {
+    const element = dialog.current;
+    if (!element) return;
+    if (!element.open) element.showModal?.();
+    const close = () => onClose();
+    element.addEventListener("close", close);
+    return () => element.removeEventListener("close", close);
+  }, [onClose]);
+
+  return (
+    <dialog
+      ref={dialog}
+      aria-label={t("history.thumbnail", { date })}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) shut();
+      }}
+      className="m-auto max-w-[92vw] max-h-[92vh] p-0 bg-transparent backdrop:bg-black/80 text-slate-100"
+    >
+      <div className="flex flex-col gap-3">
+        <div className="relative flex items-center justify-center min-w-[240px] min-h-[160px] rounded-lg bg-slate-950 border border-slate-800 overflow-hidden">
+          {state === "loading" && (
+            <span aria-busy="true" className="absolute size-8 rounded-full border-2 border-slate-600 border-t-slate-200 animate-spin" />
+          )}
+          {state === "failed" || !source ? (
+            <p className="p-6 text-[13px] text-slate-300">{t("history.view_failed")}</p>
+          ) : (
+            <img
+              src={source}
+              alt={t("history.thumbnail", { date })}
+              referrerPolicy="no-referrer"
+              draggable={false}
+              onLoad={() => setState("ready")}
+              onError={() => setState("failed")}
+              className={`block max-w-[92vw] max-h-[80vh] object-contain ${state === "ready" ? "" : "invisible"}`}
+            />
+          )}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-[13px] text-slate-300">{date}</span>
+          <div className="flex gap-2">
+            <button type="button" className={`${BUTTON} min-w-24`} onClick={onCopy}>
+              <span aria-live="polite">{t(copied ? "history.copied" : "history.copy")}</span>
+            </button>
+            <button type="button" className={BUTTON_PRIMARY} onClick={shut} autoFocus>
+              {t("history.close")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </dialog>
   );
 }
 
@@ -87,6 +186,8 @@ export function HistoryPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<Entry | null>(null);
+  const closeViewer = useCallback(() => setViewing(null), []);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const load = useCallback(async () => {
@@ -212,7 +313,7 @@ export function HistoryPage() {
             const asking = confirming === entry.id;
             return (
               <li key={entry.id} className="flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 py-3">
-                <Thumbnail entry={entry} label={t("history.thumbnail", { date })} />
+                <Thumbnail entry={entry} label={date} onOpen={() => setViewing(entry)} />
                 <div className="flex-[1_1_140px] min-w-0">
                   <div className="text-sm font-semibold break-words">{date}</div>
                   <p className="mt-0.5 text-[13px] text-slate-300">
@@ -260,6 +361,15 @@ export function HistoryPage() {
           })}
         </ul>
       </Card>
+      {viewing && (
+        <Viewer
+          entry={viewing}
+          date={formatDate(viewing.created_at)}
+          onClose={closeViewer}
+          onCopy={() => void copy(viewing)}
+          copied={copied === viewing.id}
+        />
+      )}
     </Section>
   );
 }
