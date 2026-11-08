@@ -27,8 +27,8 @@
     "GOOGLE_CLIENT_ID": "565416375675-jfhsjr9c3j5fanto9htmdin7hibea83u.apps.googleusercontent.com",
     "TURNSTILE_SITEKEY": "0x4AAAAAAF0C_X7NcOtuLv5w",
     "SITE_ORIGIN": "https://snap2link.app",
-    // The website's Google client, public like the app's. Empty until it exists.
-    "GOOGLE_WEB_CLIENT_ID": ""
+    // The website's Google client, a Web one: public, like the app's.
+    "GOOGLE_WEB_CLIENT_ID": "565416375675-r39tbd633anirdjvhj4el4kncmfeb1uq.apps.googleusercontent.com"
   },
   // Links are refused the moment they expire: this only frees the space.
   "triggers": { "crons": ["*/30 * * * *"] },
