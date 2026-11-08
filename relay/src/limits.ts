@@ -92,6 +92,12 @@ export const MAX_HISTORY = 100;
 /** Captures one address block can send per UTC day through accounts. */
 export const ACCOUNT_BLOCK_DAILY_LIMIT = 100;
 
+/** A session opened on the website lasts this long. */
+export const WEB_SESSION_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Longest display name. */
+export const MAX_NAME_LENGTH = 60;
+
 /** A session lasts this long, and an account unused this long is forgotten. */
 export const SESSION_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
 

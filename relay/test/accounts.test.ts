@@ -487,6 +487,8 @@ describe("/v1/me", () => {
 
     expect(await answer.json()).toEqual({
       email: EMAIL,
+      name: "",
+      language: null,
       plan: "free",
       captures_today: 2,
       daily_captures: FREE.dailyCaptures,
