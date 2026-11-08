@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useAppStore } from "@/store/appStore";
-import { HistoryPage } from "./HistoryPage";
+import { HistoryPage, fullImage } from "./HistoryPage";
 
 const HOUR = 3_600_000;
 
@@ -151,14 +151,36 @@ describe("HistoryPage", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
   });
 
+  it("shows the capture at full size when its thumbnail is clicked, and closes", async () => {
+    host({ entries: [entry("a")], max_kept: 0 });
+    render(<HistoryPage />);
+
+    await userEvent.click(await screen.findByRole("button", { name: /view the capture/i }));
+
+    const dialog = await screen.findByRole("dialog", { hidden: true });
+    expect(within(dialog).getByRole("img", { hidden: true })).toHaveAttribute("src", "https://i.snap2link.app/a");
+    await userEvent.click(within(dialog).getByRole("button", { name: /close/i, hidden: true }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { hidden: true })).not.toBeInTheDocument());
+  });
+
+  it("asks Drive for a large picture instead of its small thumbnail", () => {
+    const drive = entry("d", {
+      url: "https://drive.google.com/uc?id=d&export=download",
+      thumbnail: "https://lh3.googleusercontent.com/abc=s220",
+    });
+
+    expect(fullImage(drive)).toBe("https://lh3.googleusercontent.com/abc=s2400");
+    expect(fullImage(entry("a"))).toBe("https://i.snap2link.app/a");
+    expect(fullImage(entry("n", { thumbnail: null }))).toBeNull();
+  });
+
   it("falls back on an icon when a thumbnail fails", async () => {
     host({ entries: [entry("a")], max_kept: 0 });
     render(<HistoryPage />);
-    const image = await screen.findByRole("img");
+    await screen.findByRole("button", { name: /view the capture/i });
+    document.querySelector("img")!.dispatchEvent(new Event("error"));
 
-    image.dispatchEvent(new Event("error"));
-
-    await waitFor(() => expect(screen.queryByRole("img")).not.toBeInTheDocument());
+    await waitFor(() => expect(document.querySelector("img")).toBeNull());
   });
 
   it("sends to Hosting when Drive isn't connected", async () => {
