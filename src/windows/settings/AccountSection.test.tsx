@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { invoke } from "@tauri-apps/api/core";
-import { AccountSection } from "./AccountSection";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { ACCOUNT_PAGE, AccountSection } from "./AccountSection";
 
 const ACCOUNT = {
   email: "someone@example.com",
@@ -251,6 +252,16 @@ describe("<AccountSection />", () => {
       expect(screen.getByText("12 / 20")).toBeInTheDocument();
       expect(screen.getByText("4 / 6")).toBeInTheDocument();
       expect(screen.getByText(/ends the oldest link/i)).toBeInTheDocument();
+    });
+
+    it("opens the account page on the website", async () => {
+      relay({ get_account: () => ACCOUNT });
+      render(<AccountSection onEmail={onEmail} />);
+
+      await userEvent.click(await screen.findByRole("button", { name: /^open$/i }));
+
+      expect(openUrl).toHaveBeenCalledWith(ACCOUNT_PAGE);
+      expect(ACCOUNT_PAGE).toBe("https://snap2link.app/account/");
     });
 
     it("updates the counters when the window comes back", async () => {
