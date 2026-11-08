@@ -122,6 +122,16 @@ pnpm tauri dev         # hot-reload dev build
 pnpm tauri build       # produces a signed installer in src-tauri/target/release/bundle/
 ```
 
+### opencode
+
+To let opencode read your links, even over SSH or in a VM, run:
+
+```bash
+opencode mcp add snap2link --url https://i.snap2link.app/mcp
+```
+
+See [integrations/opencode](integrations/opencode) for the optional skill and details.
+
 ### Claude Code plugin
 
 To let Claude Code read your links directly, even over SSH, type this at its prompt:
