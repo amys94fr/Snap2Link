@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - A History page with every link of the chosen host: its thumbnail, the time it has left, and buttons to copy or delete it. It works with Snap2Link hosting, with or without an account, and with Google Drive.
+- With a Snap2Link account, Hosting has a button to open your account on snap2link.app, where your links, devices and profile are also available.
 - Keep a link from the History page. With a Snap2Link account, a new capture no longer replaces it. With Google Drive, the automatic cleanup leaves it alone.
 
 ### Fixed

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { t } from "@/i18n";
 import {
   BUTTON,
@@ -10,6 +11,9 @@ import {
   Row,
   Section,
 } from "./ui";
+
+/** The account area on the website: links, devices and profile. */
+export const ACCOUNT_PAGE = "https://snap2link.app/account/";
 
 interface AccountStatus {
   email: string;
@@ -328,6 +332,11 @@ function SignedIn({
         <span dir="ltr" className="text-sm font-semibold tabular-nums">
           {account.slots_used} / {account.slots}
         </span>
+      </Row>
+      <Row label={t("account.online_title")} hint={t("account.online_hint")}>
+        <button type="button" className={BUTTON} onClick={() => void openUrl(ACCOUNT_PAGE)}>
+          {t("account.online_open")}
+        </button>
       </Row>
       {confirming ? (
         <Row label={t("account.delete_confirm")}>
