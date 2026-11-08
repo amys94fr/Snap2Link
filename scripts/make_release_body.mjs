@@ -42,7 +42,9 @@ const lines = [
   "### Installation",
   "",
   "**Windows**",
-  `- Download \`Snap2Link_${version}_x64-setup.exe\` and run it. SmartScreen may flag the binary as *"unrecognised app"* (not yet EV-code-signed); click *More info → Run anyway*.`,
+  process.env.WINDOWS_SIGNED === "true"
+    ? `- Download \`Snap2Link_${version}_x64-setup.exe\` and run it. The installer is signed: free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/). See the [code signing policy](https://snap2link.app/code-signing/).`
+    : `- Download \`Snap2Link_${version}_x64-setup.exe\` and run it. SmartScreen may flag it as an *"unrecognised app"* because it isn't code-signed yet; click *More info → Run anyway*. See the [code signing policy](https://snap2link.app/code-signing/).`,
   "",
   "**macOS**",
   `- Download \`Snap2Link_${version}_universal.dmg\` — a single Universal binary that runs natively on both Apple Silicon and Intel Macs.`,
@@ -55,7 +57,7 @@ const lines = [
   `- \`.rpm\` (Fedora/RHEL): \`sudo dnf install ./snap2link-${version}-1.x86_64.rpm\``,
   "- The system tray needs `libayatana-appindicator3-1` (preinstalled on most desktop environments).",
   "",
-  "After install, complete the OAuth wizard to connect your Google Drive.",
+  "After install, the setup wizard lets you choose where captures go: Snap2Link hosting, with no account needed, or your own Google Drive.",
   "",
   "### Files in this release",
   "",

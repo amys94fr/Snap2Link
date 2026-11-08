@@ -197,6 +197,67 @@ jobs:
         shell: bash
         run: rm -f credentials.json
 
+      # Windows: SignPath signs the installer once a maintainer approves the
+      # request on signpath.io. Off until the repository variable
+      # SIGNPATH_ENABLED is "true", so releases keep working before the
+      # project is accepted. See https://snap2link.app/code-signing/.
+      - name: Upload the unsigned installer for SignPath
+        id: unsigned-installer
+        if: matrix.platform.name == 'windows-x86_64' && vars.SIGNPATH_ENABLED == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-windows-installer
+          path: src-tauri/target/${{ matrix.platform.target }}/release/bundle/nsis/Snap2Link_${{ needs.resolve.outputs.version }}_x64-setup.exe
+          archive: false
+          if-no-files-found: error
+
+      - name: Sign the installer with SignPath (waits for approval)
+        if: matrix.platform.name == 'windows-x86_64' && vars.SIGNPATH_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'snap2link' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG || 'installer' }}
+          github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
+          skip-decompress: true
+          wait-for-completion: true
+          # Approval is a person on signpath.io: give them time.
+          wait-for-completion-timeout-in-seconds: 14400
+          output-artifact-directory: signpath-out
+          parameters: |
+            version: ${{ toJSON(needs.resolve.outputs.version) }}
+
+      # The updater checks a signature of the exact file it downloads, so it
+      # has to be made again for the signed installer.
+      - name: Use the signed installer and sign it for the updater
+        if: matrix.platform.name == 'windows-x86_64' && vars.SIGNPATH_ENABLED == 'true'
+        shell: bash
+        env:
+          TARGET: ${{ matrix.platform.target }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
+        run: |
+          set -euo pipefail
+          NAME="Snap2Link_${VERSION}_x64-setup.exe"
+          SIGNED=$(find signpath-out -type f -name "$NAME" | head -1)
+          if [ -z "$SIGNED" ]; then
+            echo "::error::SignPath returned no $NAME"; ls -R signpath-out; exit 1
+          fi
+          STATUS=$(pwsh -NoProfile -Command "(Get-AuthenticodeSignature '$SIGNED').Status")
+          if [ "$STATUS" != "Valid" ]; then
+            echo "::error::The installer from SignPath isn't validly signed: $STATUS"; exit 1
+          fi
+          DEST="src-tauri/target/$TARGET/release/bundle/nsis/$NAME"
+          cp "$SIGNED" "$DEST"
+          rm -f "$DEST.sig"
+          KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r\n\t "'"'"'' | sed 's/^\xEF\xBB\xBF//')
+          export TAURI_SIGNING_PRIVATE_KEY="$KEY"
+          pnpm tauri signer sign "$DEST"
+          test -s "$DEST.sig"
+
       # The Tauri AppImage bundler leaves two things in a state that fails
       # the AppImageHub catalog test:
       #   1. .DirIcon is an absolute symlink to the build-time AppDir path on
@@ -348,6 +409,8 @@ jobs:
             --notes "Automated release $TAG. See the release description for details."
 
       - name: Generate release body from CHANGELOG
+        env:
+          WINDOWS_SIGNED: ${{ vars.SIGNPATH_ENABLED == 'true' }}
         run: |
           node scripts/make_release_body.mjs \
             --tag "$TAG" \

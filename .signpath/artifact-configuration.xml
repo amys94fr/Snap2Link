@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Reference copy of the SignPath artifact configuration for the Windows
+  installer. SignPath reads its own copy: paste this one into the project's
+  "installer" artifact configuration, and keep both in step.
+
+  The release workflow uploads the NSIS installer alone (not zipped) and passes
+  the version, so a file whose product name or version doesn't match is refused.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
+  <pe-file product-name="Snap2Link" product-version="${version}">
+    <authenticode-sign />
+  </pe-file>
+</artifact-configuration>
