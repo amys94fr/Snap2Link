@@ -1,0 +1,9 @@
+{
+  "skills": [
+    {
+      "name": "snap2link",
+      "version": "1",
+      "files": ["SKILL.md"]
+    }
+  ]
+}
