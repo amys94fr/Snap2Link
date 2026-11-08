@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] – 2026-11-08
+
 ### Added
 
 - A History page with every link of the chosen host: its thumbnail, the time it has left, and buttons to copy or delete it. It works with Snap2Link hosting, with or without an account, and with Google Drive.
