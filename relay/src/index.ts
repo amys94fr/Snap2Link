@@ -1,11 +1,17 @@
 import {
+  accountProfile,
   accountQuotaKey,
   accountUsage,
   cancelLoginCode,
+  changeEmail,
+  closeOtherSessions,
   closeSession,
+  closeSessionById,
   createLoginCode,
   deleteAccount,
+  listSessions,
   openSession,
+  updateProfile,
   sessionAccount,
   takeGoogleAttempt,
   useLoginCode,
@@ -13,6 +19,8 @@ import {
 } from "./accounts";
 import {
   ACCOUNT_BLOCK_DAILY_LIMIT,
+  MAX_NAME_LENGTH,
+  WEB_SESSION_LIFETIME_MS,
   BLOCK_DAILY_LIMIT,
   GUEST_DAILY_LIMIT,
   GUEST_LINK_LIFETIME_MS,
@@ -22,8 +30,8 @@ import {
   PREVIEW_SIDE,
 } from "./limits";
 import { verifiedGoogleEmail } from "./google";
-import { sendLoginCode } from "./mail";
-import { handleMcp } from "./mcp";
+import { isLanguage, sendLoginCode } from "./mail";
+import { handleMcp, readLimited } from "./mcp";
 import {
   createCapture,
   createGuest,
@@ -62,6 +70,10 @@ export interface Env {
   RESEND_API_KEY: string;
   /** Google ID tokens must be made for this client: the app's. */
   GOOGLE_CLIENT_ID: string;
+  /** The website whose account area may use the session cookie. */
+  SITE_ORIGIN: string;
+  /** Google client of that website, a Web one. Empty turns Google sign-in on the site off. */
+  GOOGLE_WEB_CLIENT_ID: string;
 }
 
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -71,6 +83,7 @@ const ID_LENGTH = 22;
 const CAPTURE_PATH = /^\/([0-9A-Za-z]{22})(\.png|\.jpg)?$/;
 const API_CAPTURE_PATH = /^\/v1\/captures\/([0-9A-Za-z]{22})$/;
 const API_PIN_PATH = /^\/v1\/captures\/([0-9A-Za-z]{22})\/pin$/;
+const API_SESSION_PATH = /^\/v1\/sessions\/([0-9a-f]{24})$/;
 
 /**
  * These show a link as a card and need a page to build it from. Everything else
@@ -80,6 +93,10 @@ const PREVIEW_BOT = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot
 
 const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const TURNSTILE_ACTION = "guest";
+const WEB_TURNSTILE_ACTION = "web_login";
+
+/** Holds the website's session. Only the relay reads it: the page's script can't. */
+const SESSION_COOKIE = "s2l_session";
 /** Turnstile tokens are 2,048 characters at most. */
 const MAX_GUEST_REQUEST_BYTES = 4_096;
 const MAX_LOGIN_REQUEST_BYTES = 1_024;
@@ -148,14 +165,38 @@ function ownerKey(request: Request, salt: string, now: number): Promise<string> 
   return sha256(`${salt}:${utcDay(now)}:${block}`).then((hash) => `ip:${hash}`);
 }
 
-function bearer(request: Request): string | null {
+/** True for a request made by the account area's own page. */
+const fromSite = (request: Request, env: Env) => request.headers.get("Origin") === env.SITE_ORIGIN;
+
+function cookie(request: Request, name: string): string | null {
+  for (const part of (request.headers.get("Cookie") ?? "").split(";")) {
+    const [key, ...value] = part.trim().split("=");
+    if (key === name) return value.join("=") || null;
+  }
+  return null;
+}
+
+/**
+ * The token of a request: its Authorization header, or the session cookie when
+ * the website's own page sent it. Any other page gets no cookie session, so it
+ * can't act for whoever is signed in.
+ */
+function bearer(request: Request, env?: Env): string | null {
   const header = request.headers.get("Authorization");
-  return header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : null;
+  if (header?.startsWith("Bearer ")) return header.slice("Bearer ".length);
+  if (!env || !fromSite(request, env)) return null;
+  const token = cookie(request, SESSION_COOKIE);
+  return token?.startsWith(SESSION_PREFIX) ? token : null;
+}
+
+function sessionCookie(env: Env, token: string, maxAgeMs: number): string {
+  // `SameSite=Strict`: the browser only sends it from snap2link.app, never from another site.
+  return `${SESSION_COOKIE}=${token}; Max-Age=${Math.floor(maxAgeMs / 1000)}; Path=/v1/; Secure; HttpOnly; SameSite=Strict`;
 }
 
 /** The guest behind a request, or the answer that refuses it. */
 async function requireGuest(request: Request, env: Env, now: number): Promise<string | Response> {
-  const token = bearer(request);
+  const token = bearer(request, env);
   if (!token) return error(401, "guest_required");
   const guestHash = await sha256(token);
   const status = await guestStatus(env.DB, guestHash, now);
@@ -170,7 +211,7 @@ async function requireAccount(
   env: Env,
   now: number,
 ): Promise<{ account: Account; tokenHash: string } | Response> {
-  const token = bearer(request);
+  const token = bearer(request, env);
   if (!token?.startsWith(SESSION_PREFIX)) return error(401, "session_required");
   const tokenHash = await sha256(token);
   const account = await sessionAccount(env.DB, tokenHash, now);
@@ -183,7 +224,7 @@ type Sender = Pick<NewCapture, "sender" | "quotas" | "lifetimeMs">;
 
 /** Who is uploading and what they may use, or the answer that refuses them. */
 async function uploadSender(request: Request, env: Env, now: number): Promise<Sender | Response> {
-  if (bearer(request)?.startsWith(SESSION_PREFIX)) {
+  if (bearer(request, env)?.startsWith(SESSION_PREFIX)) {
     const session = await requireAccount(request, env, now);
     if (session instanceof Response) return session;
     const { id, plan } = session.account;
@@ -253,7 +294,11 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
 
 type Verdict = "passed" | "failed" | "unavailable";
 
-async function verifyTurnstile(response: string, env: Env): Promise<Verdict> {
+async function verifyTurnstile(
+  response: string,
+  env: Env,
+  expected = { host: new URL(env.PUBLIC_URL).hostname, action: TURNSTILE_ACTION },
+): Promise<Verdict> {
   try {
     const answer = await fetch(SITEVERIFY_URL, {
       method: "POST",
@@ -273,8 +318,9 @@ async function verifyTurnstile(response: string, env: Env): Promise<Verdict> {
       return result["error-codes"]?.includes("internal-error") ? "unavailable" : "failed";
     }
     // A token solved on another site, or for another purpose, proves nothing here.
-    const host = new URL(env.PUBLIC_URL).hostname;
-    return result.hostname === host && result.action === TURNSTILE_ACTION ? "passed" : "failed";
+    return result.hostname === expected.host && result.action === expected.action
+      ? "passed"
+      : "failed";
   } catch {
     return "unavailable";
   }
@@ -315,15 +361,16 @@ async function handleGuest(request: Request, env: Env): Promise<Response> {
   );
 }
 
-/** A JSON object from a small request body, or null. */
+/** A JSON object from a small request body, or null. Reading stops past `maxBytes`. */
 async function loginBody(
   request: Request,
   maxBytes = MAX_LOGIN_REQUEST_BYTES,
 ): Promise<Record<string, unknown> | null> {
-  const body = await request.text();
-  if (body.length > maxBytes) return null;
+  if (Number(request.headers.get("Content-Length") ?? 0) > maxBytes || !request.body) return null;
+  const bytes = await readLimited(request.body, maxBytes);
+  if (!bytes) return null;
   try {
-    const value: unknown = JSON.parse(body);
+    const value: unknown = JSON.parse(new TextDecoder().decode(bytes));
     return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
   } catch {
     return null;
@@ -357,6 +404,16 @@ async function handleLoginCode(request: Request, env: Env): Promise<Response> {
 
   const body = await loginBody(request);
   if (!body) return error(400, "bad_request");
+  return sendCode(request, env, body, now);
+}
+
+/** Sends a login code to `body.email`, once whoever asked has been checked. */
+async function sendCode(
+  request: Request,
+  env: Env,
+  body: Record<string, unknown>,
+  now: number,
+): Promise<Response> {
   const email = normalizedEmail(body.email);
   if (!email) return error(400, "invalid_email");
 
@@ -392,6 +449,188 @@ async function handleLoginVerify(request: Request, env: Env): Promise<Response> 
   return signIn(id, email, env, now);
 }
 
+/* The account area on the website */
+
+/** Turnstile stands in front of every email, as the guest token does for the app. */
+async function handleWebLoginCode(request: Request, env: Env): Promise<Response> {
+  const body = await loginBody(request, MAX_GUEST_REQUEST_BYTES);
+  if (!body || typeof body.turnstile !== "string" || body.turnstile.length === 0) {
+    return error(400, "bad_request");
+  }
+  const verdict = await verifyTurnstile(body.turnstile, env, {
+    host: new URL(env.SITE_ORIGIN).hostname,
+    action: WEB_TURNSTILE_ACTION,
+  });
+  if (verdict === "unavailable") return error(503, "verification_unavailable");
+  if (verdict === "failed") return error(403, "verification_failed");
+  return sendCode(request, env, body, Date.now());
+}
+
+async function handleWebLoginVerify(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const body = await loginBody(request);
+  const email = normalizedEmail(body?.email);
+  if (!email || typeof body?.code !== "string") return error(400, "bad_request");
+
+  const id = await accountId(email, env);
+  if (!(await useLoginCode(env.DB, id, await codeHash(id, body.code, env), now))) {
+    return error(400, "invalid_code");
+  }
+  return openWebSession(id, email, env, now);
+}
+
+/** Signs in on the website: the token goes in the cookie, never in the answer. */
+async function openWebSession(id: string, email: string, env: Env, now: number): Promise<Response> {
+  const token = `${SESSION_PREFIX}${randomToken()}`;
+  const session = await openSession(env.DB, id, email, await sha256(token), now, "web");
+  if (!session) return error(403, "account_banned");
+  return Response.json(
+    { email: session.account.email, plan: session.account.plan },
+    { headers: { "Set-Cookie": sessionCookie(env, token, WEB_SESSION_LIFETIME_MS) } },
+  );
+}
+
+/**
+ * Google's button on the account page. Its token is made for the website's own
+ * client, so a token made for the app, or for another site, is refused.
+ */
+async function handleWebLoginGoogle(request: Request, env: Env): Promise<Response> {
+  if (!env.GOOGLE_WEB_CLIENT_ID) return error(503, "service_busy");
+  const now = Date.now();
+  const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
+  if (typeof body?.credential !== "string") return error(400, "bad_request");
+
+  const email = await googleEmail(request, env, body.credential, env.GOOGLE_WEB_CLIENT_ID, now);
+  if (email instanceof Response) return email;
+  return openWebSession(await accountId(email, env), email, env, now);
+}
+
+async function handleWebLogout(request: Request, env: Env): Promise<Response> {
+  const token = bearer(request, env);
+  if (token) await closeSession(env.DB, await sha256(token));
+  return new Response(null, {
+    status: 204,
+    headers: { "Set-Cookie": sessionCookie(env, "", 0) },
+  });
+}
+
+async function handleSessions(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const session = await requireAccount(request, env, now);
+  if (session instanceof Response) return session;
+  if (request.method === "DELETE") {
+    await closeOtherSessions(env.DB, session.account.id, session.tokenHash);
+    return new Response(null, { status: 204 });
+  }
+  const sessions = await listSessions(env.DB, session.account.id, session.tokenHash, now);
+  return Response.json(
+    sessions.map((row) => ({ ...row, created_at: new Date(row.created_at).toISOString() })),
+  );
+}
+
+async function handleSession(id: string, request: Request, env: Env): Promise<Response> {
+  const session = await requireAccount(request, env, Date.now());
+  if (session instanceof Response) return session;
+  return (await closeSessionById(env.DB, session.account.id, id))
+    ? new Response(null, { status: 204 })
+    : error(404, "not_found");
+}
+
+/** Codes for a new address can't sign in: they are bound to the account that asked. */
+const emailChangeCode = (accountId: string, code: string) => `change:${accountId}:${code}`;
+
+async function handleEmailCode(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const session = await requireAccount(request, env, now);
+  if (session instanceof Response) return session;
+  const body = await loginBody(request);
+  const email = normalizedEmail(body?.email);
+  if (!email) return error(400, "invalid_email");
+  if (email === session.account.email) return error(400, "same_email");
+
+  const id = await accountId(email, env);
+  const code = randomCode();
+  const block = await ownerKey(request, env.IP_SALT, now);
+  const hash = await codeHash(id, emailChangeCode(session.account.id, code), env);
+  const result = await createLoginCode(env.DB, id, hash, block, now);
+  if ("refused" in result) return error(result.refused === "daily_limit" ? 429 : 503, result.refused);
+  if (!(await sendLoginCode(env, email, code, body?.language))) {
+    await cancelLoginCode(env.DB, id, block, now);
+    return error(503, "mail_unavailable");
+  }
+  return new Response(null, { status: 202 });
+}
+
+async function handleEmailChange(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const session = await requireAccount(request, env, now);
+  if (session instanceof Response) return session;
+  const body = await loginBody(request);
+  const email = normalizedEmail(body?.email);
+  if (!email || typeof body?.code !== "string") return error(400, "bad_request");
+
+  const id = await accountId(email, env);
+  const hash = await codeHash(id, emailChangeCode(session.account.id, body.code), env);
+  if (!(await useLoginCode(env.DB, id, hash, now))) return error(400, "invalid_code");
+  if (!(await changeEmail(env.DB, session.account.id, id, email))) {
+    return error(409, "email_taken");
+  }
+  return new Response(null, { status: 204 });
+}
+
+async function handleExport(request: Request, env: Env): Promise<Response> {
+  const now = Date.now();
+  const session = await requireAccount(request, env, now);
+  if (session instanceof Response) return session;
+  const { id, email, plan } = session.account;
+  const profile = await accountProfile(env.DB, id);
+  const date = (time: number) => new Date(time).toISOString();
+  const [captures, sessions] = await Promise.all([
+    listCaptures(env.DB, { accountId: id }, now),
+    listSessions(env.DB, id, session.tokenHash, now),
+  ]);
+  const data = {
+    account: { email, name: profile.name, language: profile.language, plan, created_at: date(profile.createdAt) },
+    links: captures.map((capture) => ({
+      url: `${env.PUBLIC_URL}/${capture.id}`,
+      created_at: date(capture.created_at),
+      expires_at: date(capture.expires_at),
+      kept: capture.pinned === 1,
+    })),
+    sessions: sessions.map((row) => ({ kind: row.kind, created_at: date(row.created_at) })),
+  };
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="snap2link-account.json"',
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+/** Adds what a browser needs to let the account page read the answer. */
+function withCors(response: Response, env: Env): Response {
+  const answer = new Response(response.body, response);
+  answer.headers.set("Access-Control-Allow-Origin", env.SITE_ORIGIN);
+  answer.headers.set("Access-Control-Allow-Credentials", "true");
+  answer.headers.append("Vary", "Origin");
+  return answer;
+}
+
+function preflight(env: Env): Response {
+  return withCors(
+    new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+      },
+    }),
+    env,
+  );
+}
+
 /** Opens a session for an address that was just proved. */
 async function signIn(id: string, email: string, env: Env, now: number): Promise<Response> {
   const sessionToken = `${SESSION_PREFIX}${randomToken()}`;
@@ -418,15 +657,26 @@ async function handleLoginGoogle(request: Request, env: Env): Promise<Response> 
   const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
   if (typeof body?.id_token !== "string") return error(400, "bad_request");
 
+  const email = await googleEmail(request, env, body.id_token, env.GOOGLE_CLIENT_ID, now);
+  if (email instanceof Response) return email;
+  return signIn(await accountId(email, env), email, env, now);
+}
+
+/** The address a Google ID token made for `clientId` vouches for, or the answer that refuses it. */
+async function googleEmail(
+  request: Request,
+  env: Env,
+  idToken: string,
+  clientId: string,
+  now: number,
+): Promise<string | Response> {
   const block = await ownerKey(request, env.IP_SALT, now);
   if (!(await takeGoogleAttempt(env.DB, block, now))) return error(429, "daily_limit");
 
-  const result = await verifiedGoogleEmail(body.id_token, env.GOOGLE_CLIENT_ID, now);
+  const result = await verifiedGoogleEmail(idToken, clientId, now);
   if (result === "unavailable") return error(503, "service_busy");
   const email = result === "refused" ? null : normalizedEmail(result.email);
-  if (!email) return error(403, "google_refused");
-
-  return signIn(await accountId(email, env), email, env, now);
+  return email ?? error(403, "google_refused");
 }
 
 async function handleMe(request: Request, env: Env): Promise<Response> {
@@ -437,13 +687,33 @@ async function handleMe(request: Request, env: Env): Promise<Response> {
 
   if (request.method === "DELETE") {
     await deleteAccount(storage(env), id);
+    return new Response(null, {
+      status: 204,
+      headers: fromSite(request, env) ? { "Set-Cookie": sessionCookie(env, "", 0) } : {},
+    });
+  }
+
+  if (request.method === "PATCH") {
+    const body = await loginBody(request);
+    if (!body) return error(400, "bad_request");
+    const name = body.name === undefined ? undefined : body.name;
+    if (name !== undefined && (typeof name !== "string" || name.trim().length > MAX_NAME_LENGTH)) {
+      return error(400, "bad_request");
+    }
+    if (body.language !== undefined && !isLanguage(body.language)) return error(400, "bad_request");
+    await updateProfile(env.DB, id, {
+      name: typeof name === "string" ? name.trim() : undefined,
+      language: body.language as string | undefined,
+    });
     return new Response(null, { status: 204 });
   }
 
-  const usage = await accountUsage(env.DB, id, now);
+  const [usage, profile] = await Promise.all([accountUsage(env.DB, id, now), accountProfile(env.DB, id)]);
   const { slots, dailyCaptures } = PLANS[plan];
   return Response.json({
     email,
+    name: profile.name,
+    language: profile.language,
     plan,
     captures_today: usage.capturesToday,
     daily_captures: dailyCaptures,
@@ -615,7 +885,7 @@ async function handleDelete(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const token = bearer(request);
+  const token = bearer(request, env);
   if (!token) return error(401, "missing_token");
 
   let deleted: boolean;
@@ -639,7 +909,7 @@ async function handleHistory(request: Request, env: Env): Promise<Response> {
   const now = Date.now();
   let owner: Owner;
   let maxPins = 0;
-  if (bearer(request)?.startsWith(SESSION_PREFIX)) {
+  if (bearer(request, env)?.startsWith(SESSION_PREFIX)) {
     const session = await requireAccount(request, env, now);
     if (session instanceof Response) return session;
     owner = { accountId: session.account.id };
@@ -692,6 +962,19 @@ function home(env: Env): Response {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
+    if (!pathname.startsWith("/v1/") || !fromSite(request, env)) return route(request, env);
+    if (request.method === "OPTIONS") return preflight(env);
+    return withCors(await route(request, env), env);
+  },
+
+  async scheduled(_event: ScheduledController, env: Env): Promise<void> {
+    const removed = await purgeExpired(storage(env), Date.now());
+    console.log(`purged ${removed} expired captures`);
+  },
+} satisfies ExportedHandler<Env>;
+
+async function route(request: Request, env: Env): Promise<Response> {
+    const { pathname } = new URL(request.url);
     const { method } = request;
 
     if (pathname === "/mcp") {
@@ -724,9 +1007,50 @@ export default {
     }
 
     if (pathname === "/v1/me") {
-      return method === "GET" || method === "DELETE"
+      return method === "GET" || method === "DELETE" || method === "PATCH"
         ? handleMe(request, env)
         : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/me/email/code") {
+      return method === "POST" ? handleEmailCode(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/me/email") {
+      return method === "PUT" ? handleEmailChange(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/me/export") {
+      return method === "GET" ? handleExport(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/sessions") {
+      return method === "GET" || method === "DELETE"
+        ? handleSessions(request, env)
+        : error(405, "method_not_allowed");
+    }
+
+    const apiSession = API_SESSION_PATH.exec(pathname);
+    if (apiSession) {
+      return method === "DELETE"
+        ? handleSession(apiSession[1], request, env)
+        : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/web/login/code") {
+      return method === "POST" ? handleWebLoginCode(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/web/login/verify") {
+      return method === "POST" ? handleWebLoginVerify(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/web/login/google") {
+      return method === "POST" ? handleWebLoginGoogle(request, env) : error(405, "method_not_allowed");
+    }
+
+    if (pathname === "/v1/web/logout") {
+      return method === "POST" ? handleWebLogout(request, env) : error(405, "method_not_allowed");
     }
 
     if (pathname === "/guest" || pathname === "/guest/done") {
@@ -767,10 +1091,4 @@ export default {
     }
     if (pathname === "/") return home(env);
     return error(404, "not_found");
-  },
-
-  async scheduled(_event: ScheduledController, env: Env): Promise<void> {
-    const removed = await purgeExpired(storage(env), Date.now());
-    console.log(`purged ${removed} expired captures`);
-  },
-} satisfies ExportedHandler<Env>;
+}

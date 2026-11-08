@@ -14,6 +14,7 @@ export default defineConfig(async () => {
             IP_SALT: "test-salt",
             TURNSTILE_SECRET: "test-secret",
             RESEND_API_KEY: "test-key",
+            GOOGLE_WEB_CLIENT_ID: "web-client.apps.googleusercontent.com",
           },
         },
       }),

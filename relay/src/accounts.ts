@@ -6,6 +6,7 @@ import {
   LOGIN_CODE_ATTEMPTS,
   LOGIN_CODE_LIFETIME_MS,
   SESSION_LIFETIME_MS,
+  WEB_SESSION_LIFETIME_MS,
   type Plan,
 } from "./limits";
 import {
@@ -24,6 +25,14 @@ export interface Account {
   id: string;
   email: string;
   plan: Plan;
+}
+
+/** Where a session was opened: the app keeps it a year, the website a month. */
+export type SessionKind = "app" | "web";
+
+function publicId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export const accountQuotaKey = (accountId: string) => `account:${accountId}`;
@@ -119,6 +128,7 @@ export async function openSession(
   email: string,
   tokenHash: string,
   now: number,
+  kind: SessionKind = "app",
 ): Promise<{ account: Account; expiresAt: number } | null> {
   const account = await db
     .prepare(
@@ -130,12 +140,13 @@ export async function openSession(
     .first<Account & { banned: number }>();
   if (!account || account.banned) return null;
 
-  const expiresAt = now + SESSION_LIFETIME_MS;
+  const expiresAt = now + (kind === "web" ? WEB_SESSION_LIFETIME_MS : SESSION_LIFETIME_MS);
   await db
     .prepare(
-      "INSERT INTO sessions (token_hash, account_id, created_at, expires_at) VALUES (?1, ?2, ?3, ?4)",
+      `INSERT INTO sessions (token_hash, account_id, created_at, expires_at, kind, public_id)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
     )
-    .bind(tokenHash, accountId, now, expiresAt)
+    .bind(tokenHash, accountId, now, expiresAt, kind, publicId())
     .run();
   return { account: { id: account.id, email: account.email, plan: account.plan }, expiresAt };
 }
@@ -187,6 +198,107 @@ export async function accountUsage(
     capturesToday: today.results[0]?.value ?? 0,
     slotsUsed: live.results[0]?.value ?? 0,
   };
+}
+
+export interface Profile {
+  name: string;
+  language: string | null;
+  createdAt: number;
+}
+
+export async function accountProfile(db: D1Database, accountId: string): Promise<Profile> {
+  const row = await db
+    .prepare("SELECT name, language, created_at FROM accounts WHERE id = ?1")
+    .bind(accountId)
+    .first<{ name: string; language: string | null; created_at: number }>();
+  return { name: row?.name ?? "", language: row?.language ?? null, createdAt: row?.created_at ?? 0 };
+}
+
+export async function updateProfile(
+  db: D1Database,
+  accountId: string,
+  changes: { name?: string; language?: string },
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE accounts SET name = coalesce(?2, name), language = coalesce(?3, language)
+       WHERE id = ?1`,
+    )
+    .bind(accountId, changes.name ?? null, changes.language ?? null)
+    .run();
+}
+
+export interface SessionInfo {
+  id: string;
+  kind: SessionKind;
+  created_at: number;
+  current: boolean;
+}
+
+/** The live sessions of an account, newest first. Tokens never leave the database. */
+export async function listSessions(
+  db: D1Database,
+  accountId: string,
+  currentHash: string,
+  now: number,
+): Promise<SessionInfo[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT public_id AS id, kind, created_at, token_hash = ?3 AS current FROM sessions
+       WHERE account_id = ?1 AND expires_at > ?2 ORDER BY created_at DESC`,
+    )
+    .bind(accountId, now, currentHash)
+    .all<{ id: string; kind: SessionKind; created_at: number; current: number }>();
+  return results.map((row) => ({ ...row, current: row.current === 1 }));
+}
+
+/** True when the session existed and belonged to the account. */
+export async function closeSessionById(
+  db: D1Database,
+  accountId: string,
+  id: string,
+): Promise<boolean> {
+  const { meta } = await db
+    .prepare("DELETE FROM sessions WHERE public_id = ?1 AND account_id = ?2")
+    .bind(id, accountId)
+    .run();
+  return meta.changes > 0;
+}
+
+export async function closeOtherSessions(
+  db: D1Database,
+  accountId: string,
+  currentHash: string,
+): Promise<void> {
+  await db
+    .prepare("DELETE FROM sessions WHERE account_id = ?1 AND token_hash != ?2")
+    .bind(accountId, currentHash)
+    .run();
+}
+
+/**
+ * Moves an account to a new address. Its id is a keyed hash of the address, so
+ * every row that names the account moves with it. False when the new address
+ * already has an account.
+ */
+export async function changeEmail(
+  db: D1Database,
+  oldId: string,
+  newId: string,
+  email: string,
+): Promise<boolean> {
+  const taken = await db.prepare("SELECT 1 FROM accounts WHERE id = ?1").bind(newId).first();
+  if (taken) return false;
+  await db.batch([
+    db.prepare("UPDATE accounts SET id = ?2, email = ?3 WHERE id = ?1").bind(oldId, newId, email),
+    db.prepare("UPDATE sessions SET account_id = ?2 WHERE account_id = ?1").bind(oldId, newId),
+    db.prepare("UPDATE captures SET account_id = ?2 WHERE account_id = ?1").bind(oldId, newId),
+    db
+      .prepare("UPDATE OR IGNORE usage SET key = ?2 WHERE key = ?1")
+      .bind(accountQuotaKey(oldId), accountQuotaKey(newId)),
+    db.prepare("DELETE FROM usage WHERE key = ?1").bind(accountQuotaKey(oldId)),
+  ]);
+  return true;
 }
 
 /** Removes an account, its sessions and every capture it still has. */

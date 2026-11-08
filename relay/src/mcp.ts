@@ -89,7 +89,7 @@ function nextHop(response: Response, from: string): string {
 }
 
 /** The whole stream, or null past `maxBytes`, whatever its sender declared. */
-async function readLimited(body: ReadableStream<Uint8Array>, maxBytes: number) {
+export async function readLimited(body: ReadableStream<Uint8Array>, maxBytes: number) {
   const chunks: Uint8Array[] = [];
   let total = 0;
   const reader = body.getReader();

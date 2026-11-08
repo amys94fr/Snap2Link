@@ -114,6 +114,10 @@ const EMAILS: Record<string, CodeEmail> = {
   },
 };
 
+/** True for a language the emails exist in, which are the app's. */
+export const isLanguage = (language: unknown): language is string =>
+  typeof language === "string" && Object.hasOwn(EMAILS, language);
+
 /** The email in a language the relay knows, or in English. */
 export function codeEmail(code: string, language: unknown): { subject: string; text: string } {
   const known = typeof language === "string" && Object.hasOwn(EMAILS, language);

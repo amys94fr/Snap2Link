@@ -149,6 +149,17 @@ Needs the guest token too. The body is `{"id_token": "…"}`, a Google ID token 
 | 429 | `daily_limit` | This address tried 20 Google sign-ins today |
 | 503 | `service_busy` | Google's keys can't be reached, try again later |
 
+### The account area on the website
+
+`snap2link.app/account/` uses the same routes with a session cookie instead of the `Authorization` header. The relay only reads the cookie, `HttpOnly` and `SameSite=Strict`, when the request comes from `SITE_ORIGIN`, and only answers that origin's CORS requests.
+
+- `POST /v1/web/login/code` with `{ email, turnstile, language }`: Turnstile made for the site, with the `web_login` action.
+- `POST /v1/web/login/verify` with `{ email, code }`: sets the cookie for 30 days.
+- `POST /v1/web/logout`: closes the session and clears the cookie.
+- `PATCH /v1/me` with `{ name?, language? }`, `GET /v1/me/export`.
+- `GET /v1/sessions`, `DELETE /v1/sessions` (every other session), `DELETE /v1/sessions/{id}`.
+- `POST /v1/me/email/code` with `{ email }`, then `PUT /v1/me/email` with `{ email, code }`. The code only changes the address of the account that asked: it can't sign in. The account moves to the new address with its sessions and links.
+
 ### `GET /v1/me`
 
 Needs `Authorization: Bearer <session_token>`. Returns 401 `session_required` when the session is over.
