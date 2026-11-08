@@ -189,7 +189,7 @@ Snap2Link only requests the minimum scopes:
 - 🔜 **History pane** — last *N* screenshots with thumbnails and quick re-share
 - 🔜 **More clouds** — Dropbox, OneDrive, S3-compatible
 - 🔜 **More locales** — French, Spanish, German, Portuguese …
-- 🔜 **Signed Windows installers** through SignPath Foundation
+- 🔜 **Signed Windows installers**
 - 🔜 **macOS notarisation**, then a Homebrew tap
 - 🔜 **Scoop** package
 
@@ -239,7 +239,7 @@ src-tauri/                 Rust backend
 
 ## Code signing policy
 
-Windows releases are being set up for free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/). Until the first signed release, installers are unsigned.
+Windows installers are not code-signed yet. SignPath Foundation, which signs open source projects for free, asks for more public visibility than Snap2Link has today, so the project will apply again later. The release workflow is ready to sign through SignPath as soon as it's enabled.
 
 - Committers and reviewers: [amys94fr](https://github.com/amys94fr)
 - Approvers: [amys94fr](https://github.com/amys94fr)
