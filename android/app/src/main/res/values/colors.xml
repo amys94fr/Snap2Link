@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The peach of the icon tile, behind its edges. -->
+    <color name="ic_launcher_background">#FED9A1</color>
+    <color name="window_background">#F8FAFC</color>
+</resources>

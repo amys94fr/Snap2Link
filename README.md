@@ -233,6 +233,7 @@ pnpm install
 pnpm test                            # frontend tests (Vitest)
 cd src-tauri && cargo test --lib     # app backend tests (Rust)
 cd relay && pnpm test                # Snap2Link hosting tests (Cloudflare Worker)
+cd android && ./gradlew testDebugUnitTest   # Android app tests (Kotlin)
 ```
 
 CI ([`test.yml`](.github/workflows/test.yml)) runs on every push and PR — tests must stay green for a merge.
@@ -257,6 +258,7 @@ src-tauri/                 Rust backend (Tauri v2)
 
 relay/                     Snap2Link hosting: Cloudflare Worker (D1, R2) at i.snap2link.app
 integrations/              Claude Code plugin, local version, and opencode setup
+android/                   Android app (Kotlin, Jetpack Compose): share an image, get its link
 ```
 
 ## Code signing policy
