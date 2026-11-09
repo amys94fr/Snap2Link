@@ -5,8 +5,8 @@
 <h1 align="center">📸 Snap2Link</h1>
 
 <p align="center">
-  <strong>Paste screenshots into Claude Code, Cursor, or any terminal AI — in one keystroke.</strong><br/>
-  Hotkey → drag a region → public share link lands in your clipboard. Done.
+  <strong>Paste screenshots into Claude Code, Cursor, or any terminal AI, in one keystroke.</strong><br/>
+  Shortcut, drag a region, and a public share link lands in your clipboard. Done.
 </p>
 
 <p align="center">
@@ -30,34 +30,48 @@
 
 ## Why Snap2Link?
 
-You're working with Claude Code, Cursor, or ChatGPT in a terminal — maybe on a remote VPS, maybe locally — and you need to show the model a UI bug, a design mockup, an error screen. The usual workflow is painful: screenshot, save, open the browser, upload to Imgur or Drive, copy the link, paste it. Every single time.
+You're working with Claude Code, Cursor, or ChatGPT in a terminal, maybe on a remote VPS, maybe locally, and you need to show the model a UI bug, a design mockup, an error screen. The usual workflow is painful: screenshot, save, open the browser, upload to Imgur or Drive, copy the link, paste it. Every single time.
 
-**Snap2Link collapses that whole sequence into one keystroke.** Hit your hotkey, drag a region, and a public link is already in your clipboard, ready to paste straight into your AI prompt. Uploads go to **your own Google Drive** with the minimum scope possible — no third-party server in the middle, no account to create, no monthly fee.
+**Snap2Link collapses that whole sequence into one keystroke.** Press your shortcut, drag a region, and a public link is already in your clipboard, ready to paste straight into your AI prompt.
+
+You choose where captures go:
+
+- **Snap2Link hosting** (default): nothing to set up and no account needed. Links expire on their own after 24 hours. A free account, with an email code or Google, keeps them for 48 hours, gives 20 captures a day and 6 links at once, and lets you keep the ones that matter.
+- **Your own Google Drive**: captures stay in your Drive, with access limited to the files Snap2Link creates, and old ones are cleaned up after 30 days by default.
+
+No telemetry, no monthly fee.
+
+### Screenshots without the clutter
+
+Developers, support teams and designers receive screenshots all day from clients and colleagues. Each one lands in the phone's gallery, the Downloads folder or the chat, and stays there long after the bug is fixed. A Snap2Link capture arrives as a link instead: the receiver opens it in the browser, on a phone or a computer, and nothing is saved on their device. The same link works on every device, since the capture lives in the cloud, and it expires on its own. Only the sender needs Snap2Link.
 
 ## ✨ Features
 
 |  |  |
 | --- | --- |
 | 🤖 **Built for AI workflows** | Paste screenshots into Claude Code, Cursor, ChatGPT, Aider, or any tool that accepts an image URL |
-| 🖱️ **Drag-to-capture overlay** | Fullscreen, semi-transparent, live size readout, ESC to cancel |
-| ⚡ **Instant share link** | Upload → make public → clipboard, all in the background, < 1 s on broadband |
-| ⌨️ **Global hotkeys** | Default `Ctrl + Print Screen`, up to 3 shortcuts, each with its own capture mode and next step |
-| 🌍 **20 languages** | Follows your system language, with right-to-left support |
-| 🖥️ **Cross-platform** | Windows, macOS, and Linux — single codebase, native everywhere |
-| 🗂️ **Auto-cleanup on Drive** | Deletes screenshots older than *N* days (default 30) — your Drive stays tidy |
-| 🚀 **Built-in auto-updater** | Signed updates pulled from GitHub Releases — Settings → Check for Updates |
-| 🪟 **Start with your OS** | Toggle from Settings — always one keystroke away |
-| 🔒 **No third-party server** | OAuth straight to your Drive. Your screenshots, your account, no middleman |
-| 🌍 **i18n-ready** | English bundled; add a locale by translating a single JSON file |
+| 🔌 **Reads links over SSH** | The Snap2Link MCP server lets Claude Code and opencode see the image itself, even on a remote machine |
+| 🖱️ **Region, screen or window** | Drag a region with a live size readout, take the screen under the mouse, or pick a window. `R` / `F` / `W` switch, `Esc` cancels |
+| ⌨️ **Up to 3 shortcuts** | Default `Ctrl + Print Screen`. Each shortcut has its own capture mode and next step: ask, share at once, or annotate |
+| ✏️ **Annotator** | Pen, rectangle, circle, arrow, text and blur before sharing |
+| ⚡ **Instant share link** | Upload, make public, copy, all in the background, under a second on broadband |
+| 🗂️ **History** | Every link of your host with its thumbnail and time left: copy, delete, view full size, or keep it so a new capture or the cleanup leaves it alone |
+| 👤 **Online account** | With a Snap2Link account, [snap2link.app/account](https://snap2link.app/account/) shows your links, devices and profile from any browser |
+| ☁️ **Your choice of host** | Snap2Link hosting with or without an account, or your own Google Drive with the `drive.file` scope |
+| 🌍 **20 languages** | Follows your system language, with right-to-left layouts for Arabic, Hebrew and Persian |
+| 🖥️ **Cross-platform** | Windows, macOS and Linux from a single codebase, native everywhere |
+| 🚀 **Built-in auto-updater** | Signed updates pulled from GitHub Releases: Settings, then Check for updates |
+| 🪟 **Start with your OS** | Toggle it in Settings, so a capture is always one keystroke away |
 
 ## 🚀 Quick Start
 
 ```bash
 # 1 · Install (see Installation section for your OS)
 
-# 2 · Launch → wizard → "Connect Google Drive" → grant access in your browser
+# 2 · Launch: captures go to Snap2Link hosting, nothing to set up
+#     (or pick Google Drive in the wizard and grant access in your browser)
 
-# 3 · Press the hotkey → drag a region → paste anywhere
+# 3 · Press the shortcut, drag a region, paste anywhere
 ```
 
 That's it. Three steps, zero configuration.
@@ -152,16 +166,17 @@ See [integrations/claude-code](integrations/claude-code) for details. To run eve
 
 ## 💡 Use Cases
 
-- **AI prompts** — paste the link directly into Claude Code, Cursor, ChatGPT, or Aider when you need visual context
-- **Bug reports** — capture the broken UI, paste the link in Jira / GitHub Issues
-- **Design feedback** — share mockup snippets in Slack / Discord / Notion in seconds
-- **Documentation** — drop image links straight into READMEs, blog posts, support tickets
-- **Remote support** — guide a colleague through their screen without launching a screen-share session
-- **Meeting notes** — snap a slide, link it next to your notes, move on with the meeting
+- **AI prompts**: paste the link directly into Claude Code, Cursor, ChatGPT, or Aider when you need visual context
+- **Client feedback without the clutter**: ask clients to send screenshots as Snap2Link links, and read them on any device without filling your phone or your Downloads folder
+- **Bug reports**: capture the broken UI, paste the link in Jira or GitHub Issues
+- **Design feedback**: share mockup snippets in Slack, Discord or Notion in seconds
+- **Documentation**: drop image links straight into READMEs, blog posts, support tickets
+- **Remote support**: guide a colleague through their screen without launching a screen-share session
+- **Meeting notes**: snap a slide, link it next to your notes, move on with the meeting
 
 ## 🔧 Configuration (Google OAuth)
 
-**End users have nothing to configure.** The first launch opens a browser tab on Google's consent page; pick your account; you're done.
+**End users have nothing to configure.** Snap2Link hosting works out of the box. If you choose Google Drive, the app opens Google's consent page in your browser; pick your account and you're done.
 
 **For developers / forks** wanting to ship under their own OAuth credentials:
 
@@ -180,17 +195,20 @@ Snap2Link only requests the minimum scopes:
 
 ## 🛣️ Roadmap
 
-- ✅ Region capture · OAuth Drive · clipboard · auto-cleanup · hotkey · tray
-- ✅ Auto-updater (signed releases via GitHub)
-- ✅ winget distribution
-- ✅ **Cross-platform** — Windows, macOS, Linux
-- ✅ **In-app annotations** before upload — pen, rectangle, circle, arrow, text, blur (per-shot Edit / Save prompt)
-- ✅ **Full-screen and window-bound capture modes** alongside region selection: switch with `R` / `F` / `W` from the overlay
-- 🔜 **History pane** — last *N* screenshots with thumbnails and quick re-share
-- 🔜 **More clouds** — Dropbox, OneDrive, S3-compatible
-- 🔜 **More locales** — French, Spanish, German, Portuguese …
+- ✅ Region capture · clipboard · tray · auto-updater · winget
+- ✅ **Cross-platform**: Windows, macOS, Linux
+- ✅ **In-app annotations** before upload: pen, rectangle, circle, arrow, text, blur
+- ✅ **Full-screen and window capture** alongside region selection
+- ✅ **Up to 3 shortcuts**, each with its own mode and next step
+- ✅ **Snap2Link hosting**, with or without a free account
+- ✅ **20 languages**, right-to-left included
+- ✅ **History page** with kept links, and an **online account** at snap2link.app
+- ✅ **MCP server and Claude Code plugin** to read links over SSH
+- 🔜 **Google Drive links on the online account**
+- 🔜 **Paid plans** with longer-lived links
+- 🔜 **More clouds**: Dropbox, OneDrive, S3-compatible
 - 🔜 **Signed Windows installers**
-- 🔜 **macOS notarisation**, then a Homebrew tap
+- 🔜 **macOS notarisation**, then a Homebrew cask
 - 🔜 **Scoop** package
 
 Got an idea? [Open an issue](https://github.com/amys94fr/Snap2Link/issues/new) — I read every one.
@@ -212,8 +230,9 @@ PRs welcome. Quick start for contributors:
 git clone https://github.com/amys94fr/Snap2Link
 cd Snap2Link
 pnpm install
-pnpm test                            # 77 frontend tests (Vitest)
-cd src-tauri && cargo test --lib     # 24 backend tests
+pnpm test                            # frontend tests (Vitest)
+cd src-tauri && cargo test --lib     # app backend tests (Rust)
+cd relay && pnpm test                # Snap2Link hosting tests (Cloudflare Worker)
 ```
 
 CI ([`test.yml`](.github/workflows/test.yml)) runs on every push and PR — tests must stay green for a merge.
@@ -223,18 +242,21 @@ The full guide (bug reports, feature proposals, coding style, PR checklist) is i
 ### Project layout
 
 ```
-src/                       React + TypeScript frontend
-  windows/                   SetupWizard · Settings · About · Overlay · UploaderToast
-  components/                HotkeyRecorder · RetentionControl · UpdateChecker
-  i18n/                      i18next + locales/en.json
-  store/                     Zustand global state
-  lib/keyMap.ts              KeyboardEvent ↔ Tauri shortcut format
+src/                       React + TypeScript interface
+  windows/                   SetupWizard · Settings (and settings/ pages) · Overlay · Annotator · Toasts · About
+  components/                AnnotatorCanvas · HotkeyRecorder · RetentionControl · UpdateChecker
+  i18n/                      i18next + 20 locales
+  store/                     Zustand state
+  lib/                       Config helpers · KeyboardEvent ↔ Tauri shortcut format
 
-src-tauri/                 Rust backend
-  src/commands/              auth · config · drive · screenshot · updater
-  src/tray.rs                System tray icon + menu
+src-tauri/                 Rust backend (Tauri v2)
+  src/commands/              account · auth · config · drive · guest · history · relay · screenshot · updater · upload
   src/hotkey.rs              Global shortcut registration
-  icons/                     App icons (all sizes, generated by `cargo tauri icon`)
+  src/tray.rs                System tray icon and menu
+  src/toast.rs               "Link copied" message
+
+relay/                     Snap2Link hosting: Cloudflare Worker (D1, R2) at i.snap2link.app
+integrations/              Claude Code plugin, local version, and opencode setup
 ```
 
 ## Code signing policy
@@ -250,4 +272,4 @@ Only installers built by this repository's GitHub Actions from its own source ar
 
 [MIT](LICENSE) © 2025 [Steven Abittan](https://github.com/amys94fr).
 
-Built with [Tauri v2](https://v2.tauri.app/), [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), and [Vitest](https://vitest.dev/).
+Built with [Tauri v2](https://v2.tauri.app/), [Rust](https://www.rust-lang.org/), [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [Cloudflare Workers](https://workers.cloudflare.com/) and [Vitest](https://vitest.dev/).
