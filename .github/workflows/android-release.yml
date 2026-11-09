@@ -82,7 +82,7 @@ jobs:
 
       - name: Unit tests
         working-directory: android
-        run: ./gradlew --no-daemon :app:testReleaseUnitTest
+        run: ./gradlew --no-daemon :app:testDebugUnitTest
 
       - name: Signed APK
         working-directory: android
