@@ -47,7 +47,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.DisposableEffect
 import com.snap2link.app.R
+import com.snap2link.app.drive.PlayDriveAuth
 import com.snap2link.app.relay.Link
 import com.snap2link.app.ui.Thumbnail
 import com.snap2link.app.ui.copyLink
@@ -57,7 +61,16 @@ import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(modifier: Modifier = Modifier, model: HistoryViewModel = viewModel()) {
+fun HistoryScreen(
+    modifier: Modifier = Modifier,
+    onOpenSettings: () -> Unit = {},
+    model: HistoryViewModel = viewModel(),
+) {
+    val activity = LocalActivity.current as? ComponentActivity
+    DisposableEffect(activity) {
+        model.driveAuth = activity?.let { PlayDriveAuth(it) }
+        onDispose { model.driveAuth = null }
+    }
     // Comes back up to date after a capture sent from the share sheet.
     LifecycleResumeEffect(Unit) {
         model.load()
@@ -74,6 +87,14 @@ fun HistoryScreen(modifier: Modifier = Modifier, model: HistoryViewModel = viewM
             ) {
                 Text(stringResource(R.string.history_error_load), textAlign = TextAlign.Center)
                 Button(onClick = { model.load() }) { Text(stringResource(R.string.history_retry)) }
+            }
+            HistoryState.DriveNeeded -> Column(
+                Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(stringResource(R.string.history_drive_needed), textAlign = TextAlign.Center)
+                Button(onClick = onOpenSettings) { Text(stringResource(R.string.settings_hosting_connect)) }
             }
             is HistoryState.Loaded -> PullToRefreshBox(
                 isRefreshing = model.refreshing,
@@ -93,7 +114,14 @@ fun HistoryScreen(modifier: Modifier = Modifier, model: HistoryViewModel = viewM
                                 style = MaterialTheme.typography.headlineMedium,
                                 modifier = Modifier.semantics { heading() },
                             )
-                            if (state.canKeep) {
+                            if (state.drive) {
+                                Text(
+                                    stringResource(R.string.history_keep_hint_drive),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            } else if (state.canKeep) {
                                 val kept = state.links.count { it.pinned }
                                 Text(
                                     stringResource(R.string.history_kept_count, kept.toString(), state.maxPins.toString()),
@@ -161,7 +189,7 @@ private fun LinkRow(link: Link, canKeep: Boolean, onKeep: () -> Unit, onDelete: 
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Thumbnail(
-                url = "${link.url}.jpg",
+                url = link.thumbnail ?: "${link.url}.jpg",
                 contentDescription = stringResource(R.string.history_thumbnail, date),
                 modifier = Modifier
                     .size(72.dp)

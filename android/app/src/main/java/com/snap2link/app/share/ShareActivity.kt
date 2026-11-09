@@ -1,6 +1,7 @@
 package com.snap2link.app.share
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -57,6 +58,8 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import com.snap2link.app.MainActivity
 import com.snap2link.app.R
+import com.snap2link.app.drive.PlayDriveAuth
+import com.snap2link.app.ui.AppLanguage
 import com.snap2link.app.ui.GuestCheckDialog
 import com.snap2link.app.ui.Snap2LinkTheme
 import com.snap2link.app.ui.Success
@@ -67,9 +70,14 @@ import kotlinx.coroutines.delay
 class ShareActivity : ComponentActivity() {
     private val model: ShareViewModel by viewModels()
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        model.driveAuth = PlayDriveAuth(this)
         model.start(sharedImage(intent))
         setContent {
             Snap2LinkTheme {
@@ -87,6 +95,12 @@ class ShareActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        // The model outlives a rotation; this activity doesn't.
+        model.driveAuth = null
+        super.onDestroy()
     }
 
     private fun sharedImage(intent: Intent): Uri? {

@@ -30,9 +30,18 @@ fun accountMessage(code: String): Int = when (code) {
     "service_busy", "verification_unavailable" -> R.string.account_error_busy
     "mail_unavailable" -> R.string.account_error_mail
     "account_banned" -> R.string.account_error_banned
+    "google_refused" -> R.string.account_error_google
     "guest_banned" -> R.string.error_banned
     "verification_failed" -> R.string.error_check_failed
     "unreachable" -> R.string.uploader_error_unreachable
+    else -> R.string.error_generic
+}
+
+/** What went wrong with Google Drive, in words. */
+fun driveMessage(code: String): Int = when (code) {
+    com.snap2link.app.drive.PlayDriveAuth.NOT_CONNECTED,
+    com.snap2link.app.drive.PlayDriveAuth.CANCELLED,
+    -> R.string.uploader_error_drive_not_connected
     else -> R.string.error_generic
 }
 

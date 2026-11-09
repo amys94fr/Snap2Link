@@ -47,10 +47,10 @@ const json = <T>(part: string): T => JSON.parse(new TextDecoder().decode(decoded
 
 export type GoogleResult = { email: string } | "refused" | "unavailable";
 
-/** The address Google vouches for, when this token was made for `clientId`. */
+/** The address Google vouches for, when this token was made for one of `clientIds`. */
 export async function verifiedGoogleEmail(
   token: string,
-  clientId: string,
+  clientIds: readonly string[],
   now: number,
 ): Promise<GoogleResult> {
   const parts = token.split(".");
@@ -90,7 +90,7 @@ export async function verifiedGoogleEmail(
     claims.exp > seconds &&
     claims.iat <= seconds + CLOCK_SKEW_S &&
     claims.iat >= seconds - MAX_TOKEN_AGE_S;
-  const ours = claims.aud === clientId && ISSUERS.includes(String(claims.iss));
+  const ours = clientIds.includes(String(claims.aud)) && ISSUERS.includes(String(claims.iss));
   if (!fresh || !ours) return "refused";
 
   if (claims.email_verified !== true || typeof claims.email !== "string") return "refused";

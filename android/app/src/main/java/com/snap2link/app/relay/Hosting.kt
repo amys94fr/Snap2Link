@@ -61,6 +61,12 @@ class Hosting(private val client: RelayClient, private val store: TokenStore) {
         store.email = session.email
     }
 
+    suspend fun signInWithGoogle(idToken: String) {
+        val session = asGuest { client.signInWithGoogle(it, idToken) }
+        store.session = session.token
+        store.email = session.email
+    }
+
     suspend fun account(): AccountStatus? {
         val session = store.session ?: return null
         return withSession { client.account(session) }

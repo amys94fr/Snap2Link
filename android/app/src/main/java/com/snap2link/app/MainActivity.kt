@@ -1,5 +1,6 @@
 package com.snap2link.app
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -20,10 +21,15 @@ import androidx.compose.ui.res.stringResource
 import com.snap2link.app.account.AccountScreen
 import com.snap2link.app.history.HistoryScreen
 import com.snap2link.app.home.HomeScreen
+import com.snap2link.app.ui.AppLanguage
 import com.snap2link.app.ui.Snap2LinkTheme
 
 class MainActivity : ComponentActivity() {
     private var tab by mutableStateOf(TAB_SEND)
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -47,7 +53,7 @@ class MainActivity : ComponentActivity() {
                 ) { padding ->
                     val modifier = Modifier.padding(padding)
                     when (tab) {
-                        TAB_HISTORY -> HistoryScreen(modifier)
+                        TAB_HISTORY -> HistoryScreen(modifier, onOpenSettings = { tab = TAB_ACCOUNT })
                         TAB_ACCOUNT -> AccountScreen(modifier)
                         else -> HomeScreen(modifier, onSignUp = { tab = TAB_ACCOUNT })
                     }
@@ -77,7 +83,7 @@ class MainActivity : ComponentActivity() {
         private val TABS = listOf(
             Triple(TAB_SEND, R.string.tab_send, R.drawable.ic_send),
             Triple(TAB_HISTORY, R.string.tab_history, R.drawable.ic_history),
-            Triple(TAB_ACCOUNT, R.string.tab_account, R.drawable.ic_user),
+            Triple(TAB_ACCOUNT, R.string.settings_heading, R.drawable.ic_settings),
         )
         private val TAB_IDS = TABS.map { it.first }.toSet()
     }

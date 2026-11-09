@@ -11,8 +11,8 @@ android {
         applicationId = "com.snap2link.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     // The release key lives in the CI's secrets, never in the repository.
@@ -35,6 +35,13 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
+    // The language can be picked in the app: a Play bundle must keep them all.
+    bundle {
+        language {
+            enableSplit = false
         }
     }
 
@@ -64,6 +71,13 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.coroutines.android)
+    // Sign in with Google, through Android's Credential Manager.
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services)
+    implementation(libs.googleid)
+    // Google Drive hosting: the drive.file permission, asked through Play services.
+    implementation(libs.play.services.auth)
+    implementation(libs.coroutines.play.services)
 
     testImplementation(libs.junit)
     testImplementation(libs.json)

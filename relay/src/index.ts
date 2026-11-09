@@ -68,7 +68,7 @@ export interface Env {
   MAIL_FROM: string;
   /** Sends the login codes. */
   RESEND_API_KEY: string;
-  /** Google ID tokens must be made for this client: the app's. */
+  /** Google ID tokens for the desktop app must be made for this client. */
   GOOGLE_CLIENT_ID: string;
   /** The website whose account area may use the session cookie. */
   SITE_ORIGIN: string;
@@ -500,7 +500,7 @@ async function handleWebLoginGoogle(request: Request, env: Env): Promise<Respons
   const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
   if (typeof body?.credential !== "string") return error(400, "bad_request");
 
-  const email = await googleEmail(request, env, body.credential, env.GOOGLE_WEB_CLIENT_ID, now);
+  const email = await googleEmail(request, env, body.credential, [env.GOOGLE_WEB_CLIENT_ID], now);
   if (email instanceof Response) return email;
   return openWebSession(await accountId(email, env), email, env, now);
 }
@@ -657,23 +657,26 @@ async function handleLoginGoogle(request: Request, env: Env): Promise<Response> 
   const body = await loginBody(request, MAX_GOOGLE_REQUEST_BYTES);
   if (typeof body?.id_token !== "string") return error(400, "bad_request");
 
-  const email = await googleEmail(request, env, body.id_token, env.GOOGLE_CLIENT_ID, now);
+  // The desktop app gets its token for its own client. Android's Credential
+  // Manager gets it for the project's Web client, the website's.
+  const clients = [env.GOOGLE_CLIENT_ID, env.GOOGLE_WEB_CLIENT_ID].filter(Boolean);
+  const email = await googleEmail(request, env, body.id_token, clients, now);
   if (email instanceof Response) return email;
   return signIn(await accountId(email, env), email, env, now);
 }
 
-/** The address a Google ID token made for `clientId` vouches for, or the answer that refuses it. */
+/** The address a Google ID token made for one of `clientIds` vouches for, or the answer that refuses it. */
 async function googleEmail(
   request: Request,
   env: Env,
   idToken: string,
-  clientId: string,
+  clientIds: readonly string[],
   now: number,
 ): Promise<string | Response> {
   const block = await ownerKey(request, env.IP_SALT, now);
   if (!(await takeGoogleAttempt(env.DB, block, now))) return error(429, "daily_limit");
 
-  const result = await verifiedGoogleEmail(idToken, clientId, now);
+  const result = await verifiedGoogleEmail(idToken, clientIds, now);
   if (result === "unavailable") return error(503, "service_busy");
   const email = result === "refused" ? null : normalizedEmail(result.email);
   return email ?? error(403, "google_refused");
