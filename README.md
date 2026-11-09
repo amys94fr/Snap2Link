@@ -41,6 +41,10 @@ You choose where captures go:
 
 No telemetry, no monthly fee.
 
+### Screenshots without the clutter
+
+Developers, support teams and designers receive screenshots all day from clients and colleagues. Each one lands in the phone's gallery, the Downloads folder or the chat, and stays there long after the bug is fixed. A Snap2Link capture arrives as a link instead: the receiver opens it in the browser, on a phone or a computer, and nothing is saved on their device. The same link works on every device, since the capture lives in the cloud, and it expires on its own. Only the sender needs Snap2Link.
+
 ## ✨ Features
 
 |  |  |
@@ -162,12 +166,13 @@ See [integrations/claude-code](integrations/claude-code) for details. To run eve
 
 ## 💡 Use Cases
 
-- **AI prompts** — paste the link directly into Claude Code, Cursor, ChatGPT, or Aider when you need visual context
-- **Bug reports** — capture the broken UI, paste the link in Jira / GitHub Issues
-- **Design feedback** — share mockup snippets in Slack / Discord / Notion in seconds
-- **Documentation** — drop image links straight into READMEs, blog posts, support tickets
-- **Remote support** — guide a colleague through their screen without launching a screen-share session
-- **Meeting notes** — snap a slide, link it next to your notes, move on with the meeting
+- **AI prompts**: paste the link directly into Claude Code, Cursor, ChatGPT, or Aider when you need visual context
+- **Client feedback without the clutter**: ask clients to send screenshots as Snap2Link links, and read them on any device without filling your phone or your Downloads folder
+- **Bug reports**: capture the broken UI, paste the link in Jira or GitHub Issues
+- **Design feedback**: share mockup snippets in Slack, Discord or Notion in seconds
+- **Documentation**: drop image links straight into READMEs, blog posts, support tickets
+- **Remote support**: guide a colleague through their screen without launching a screen-share session
+- **Meeting notes**: snap a slide, link it next to your notes, move on with the meeting
 
 ## 🔧 Configuration (Google OAuth)
 
