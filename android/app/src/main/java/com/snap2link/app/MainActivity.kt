@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                 ) { padding ->
                     val modifier = Modifier.padding(padding)
                     when (tab) {
-                        TAB_HISTORY -> HistoryScreen(modifier)
+                        TAB_HISTORY -> HistoryScreen(modifier, onOpenSettings = { tab = TAB_ACCOUNT })
                         TAB_ACCOUNT -> AccountScreen(modifier)
                         else -> HomeScreen(modifier, onSignUp = { tab = TAB_ACCOUNT })
                     }
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
         private val TABS = listOf(
             Triple(TAB_SEND, R.string.tab_send, R.drawable.ic_send),
             Triple(TAB_HISTORY, R.string.tab_history, R.drawable.ic_history),
-            Triple(TAB_ACCOUNT, R.string.tab_account, R.drawable.ic_user),
+            Triple(TAB_ACCOUNT, R.string.settings_heading, R.drawable.ic_settings),
         )
         private val TAB_IDS = TABS.map { it.first }.toSet()
     }

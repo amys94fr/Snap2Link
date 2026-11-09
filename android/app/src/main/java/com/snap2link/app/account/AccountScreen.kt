@@ -61,6 +61,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.snap2link.app.Host
 import com.snap2link.app.R
 import com.snap2link.app.ui.GuestCheckDialog
 
@@ -82,17 +83,28 @@ fun AccountScreen(modifier: Modifier = Modifier, model: AccountViewModel = viewM
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                stringResource(R.string.tab_account),
+                stringResource(R.string.settings_heading),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.semantics { heading() },
             )
-            if (model.signedIn) SignedIn(model) else SignIn(model)
-            model.error?.let {
+            HostChoice(model.host, model::choose)
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            if (model.host == Host.DRIVE) {
+                DriveSettings(model)
+            } else {
                 Text(
-                    stringResource(it),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    stringResource(R.string.tab_account),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.semantics { heading() },
                 )
+                if (model.signedIn) SignedIn(model) else SignIn(model)
+                model.error?.let {
+                    Text(
+                        stringResource(it),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                }
             }
             HorizontalDivider(Modifier.padding(top = 16.dp))
             LanguageRow()
@@ -104,7 +116,7 @@ fun AccountScreen(modifier: Modifier = Modifier, model: AccountViewModel = viewM
 
 @Composable
 private fun SignIn(model: AccountViewModel) {
-    Text(stringResource(R.string.account_free_title), style = MaterialTheme.typography.titleLarge)
+    Text(stringResource(R.string.account_free_title), style = MaterialTheme.typography.titleMedium)
     Text(stringResource(R.string.account_free_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
 
     val sentTo = model.sentTo

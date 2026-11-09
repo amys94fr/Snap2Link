@@ -219,6 +219,8 @@ data class Link(
     /** `null` when the link doesn't expire. */
     val expiresAt: Instant?,
     val pinned: Boolean,
+    /** A small preview; Snap2Link hosting makes one at `<link>.jpg`. */
+    val thumbnail: String? = null,
 )
 
 data class Links(val captures: List<Link>, val maxPins: Int)

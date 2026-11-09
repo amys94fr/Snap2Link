@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.credentials)
     implementation(libs.credentials.play.services)
     implementation(libs.googleid)
+    // Google Drive hosting: the drive.file permission, asked through Play services.
+    implementation(libs.play.services.auth)
+    implementation(libs.coroutines.play.services)
 
     testImplementation(libs.junit)
     testImplementation(libs.json)

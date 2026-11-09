@@ -37,6 +37,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.snap2link.app.R
+import com.snap2link.app.Host
+import com.snap2link.app.drive
+import com.snap2link.app.host
 import com.snap2link.app.hosting
 import com.snap2link.app.share.ShareActivity
 
@@ -81,15 +84,25 @@ fun HomeScreen(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
 
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    val email = hosting.email
-                    Text(
-                        if (email != null) stringResource(R.string.home_account_limits, email)
-                        else stringResource(R.string.home_guest_limits),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    if (email == null) {
-                        TextButton(onClick = onSignUp, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                            Text(stringResource(R.string.account_free_title))
+                    if (context.host == Host.DRIVE) {
+                        // Drive has no Snap2Link limit: the card says where captures go.
+                        Text(stringResource(R.string.settings_hosting_drive_card), style = MaterialTheme.typography.bodyMedium)
+                        if (!context.drive.connected) {
+                            TextButton(onClick = onSignUp, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                                Text(stringResource(R.string.settings_hosting_connect))
+                            }
+                        }
+                    } else {
+                        val email = hosting.email
+                        Text(
+                            if (email != null) stringResource(R.string.home_account_limits, email)
+                            else stringResource(R.string.home_guest_limits),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        if (email == null) {
+                            TextButton(onClick = onSignUp, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                                Text(stringResource(R.string.account_free_title))
+                            }
                         }
                     }
                 }

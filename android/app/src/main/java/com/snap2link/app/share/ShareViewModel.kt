@@ -10,13 +10,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.snap2link.app.Host
 import com.snap2link.app.R
+import com.snap2link.app.drive
+import com.snap2link.app.drive.DriveAuth
+import com.snap2link.app.drive.DriveException
+import com.snap2link.app.host
 import com.snap2link.app.hosting
 import com.snap2link.app.image.Png
 import com.snap2link.app.relay.GuestCheck
 import com.snap2link.app.relay.RelayClient
 import com.snap2link.app.relay.RelayException
 import com.snap2link.app.ui.copyLink
+import com.snap2link.app.ui.driveMessage
 import com.snap2link.app.ui.uploadMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,6 +44,10 @@ sealed interface ShareState {
 
 class ShareViewModel(application: Application) : AndroidViewModel(application) {
     private val hosting = application.hosting
+    private val drive = application.drive
+
+    /** Set by the activity: Drive's consent screen needs one to show. */
+    var driveAuth: DriveAuth? = null
     private var png: ByteArray? = null
     private var source: Uri? = null
 
@@ -104,6 +114,7 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun send() {
         val bytes = png ?: return
         state = ShareState.Sending
+        if (getApplication<Application>().host == Host.DRIVE) return sendToDrive(bytes)
         state = try {
             val created = hosting.upload(bytes)
             copyLink(getApplication(), created.url)
@@ -116,6 +127,24 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
                     limit = !hosting.signedIn,
                 )
                 else -> ShareState.Failed(uploadMessage(e.code, hosting.signedIn))
+            }
+        }
+    }
+
+    private suspend fun sendToDrive(bytes: ByteArray) {
+        val auth = driveAuth ?: return
+        state = try {
+            val link = drive.upload(auth, bytes)
+            copyLink(getApplication(), link.url)
+            ShareState.Done(link.url, galleryItem = galleryItem(source))
+        } catch (e: DriveException) {
+            ShareState.Failed(driveMessage(e.code))
+        }
+        // Old captures leave the Drive, as on the desktop; a failure waits for next time.
+        viewModelScope.launch {
+            try {
+                drive.cleanupIfDue(auth)
+            } catch (_: DriveException) {
             }
         }
     }

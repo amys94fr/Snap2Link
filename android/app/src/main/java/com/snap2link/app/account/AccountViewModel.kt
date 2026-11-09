@@ -8,7 +8,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.snap2link.app.Host
 import com.snap2link.app.R
+import com.snap2link.app.drive
+import com.snap2link.app.drive.DriveAuth
+import com.snap2link.app.drive.DriveClient
+import com.snap2link.app.drive.DriveException
+import com.snap2link.app.drive.PlayDriveAuth
+import com.snap2link.app.host
+import com.snap2link.app.ui.driveMessage
 import com.snap2link.app.hosting
 import com.snap2link.app.relay.AccountStatus
 import com.snap2link.app.relay.GuestCheck
@@ -23,6 +31,25 @@ import java.util.Locale
 
 class AccountViewModel(application: Application) : AndroidViewModel(application) {
     private val hosting = application.hosting
+    private val drive = application.drive
+
+    /** Where captures go; each host shows only its own options. */
+    var host by mutableStateOf(application.host)
+        private set
+
+    var driveEmail by mutableStateOf(drive.email)
+        private set
+    var driveBusy by mutableStateOf(false)
+        private set
+
+    @get:StringRes
+    var driveError by mutableStateOf<Int?>(null)
+        private set
+    var autoDelete by mutableStateOf(drive.autoDelete)
+        private set
+    var retentionDays by mutableIntStateOf(drive.retentionDays)
+        private set
+    val driveFolder: String? get() = drive.folder
 
     var signedIn by mutableStateOf(hosting.signedIn)
         private set
@@ -58,6 +85,44 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
         private set
 
     private var countdown: Job? = null
+
+    fun choose(choice: Host) {
+        getApplication<Application>().host = choice
+        host = choice
+    }
+
+    fun connectDrive(auth: DriveAuth, switching: Boolean = false) = driveAttempt {
+        if (switching) drive.disconnect(auth)
+        drive.connect(auth)
+    }
+
+    fun disconnectDrive(auth: DriveAuth) = driveAttempt { drive.disconnect(auth) }
+
+    fun setRetention(enabled: Boolean, days: Int) {
+        drive.setRetention(enabled, days)
+        autoDelete = drive.autoDelete
+        retentionDays = drive.retentionDays
+    }
+
+    private fun driveAttempt(action: suspend () -> Unit) {
+        driveBusy = true
+        driveError = null
+        viewModelScope.launch {
+            try {
+                action()
+            } catch (e: DriveException) {
+                // Closing Google's screen isn't an error worth a message.
+                driveError = when (e.code) {
+                    PlayDriveAuth.CANCELLED -> null
+                    DriveClient.FAILED -> R.string.account_error_google
+                    else -> driveMessage(e.code)
+                }
+            } finally {
+                driveEmail = drive.email
+                driveBusy = false
+            }
+        }
+    }
 
     fun refresh() {
         signedIn = hosting.signedIn

@@ -3,9 +3,17 @@ package com.snap2link.app.relay
 import com.sun.net.httpserver.HttpServer
 import java.net.InetSocketAddress
 
-/** A local stand-in for the relay: answers queued in order, requests recorded. */
+/** A local stand-in for the relay or Drive: answers queued in order, requests recorded. */
 class FakeRelay : AutoCloseable {
-    data class Request(val method: String, val path: String, val authorization: String?, val contentType: String?, val body: ByteArray)
+    data class Request(
+        val method: String,
+        val path: String,
+        val authorization: String?,
+        val contentType: String?,
+        val body: ByteArray,
+        val query: String? = null,
+        val methodOverride: String? = null,
+    )
 
     private class Answer(val status: Int, val body: String)
 
@@ -20,6 +28,8 @@ class FakeRelay : AutoCloseable {
                 exchange.requestHeaders.getFirst("Authorization"),
                 exchange.requestHeaders.getFirst("Content-Type"),
                 exchange.requestBody.readBytes(),
+                exchange.requestURI.query,
+                exchange.requestHeaders.getFirst("X-HTTP-Method-Override"),
             )
             val answer = synchronized(answers) { answers.removeFirstOrNull() } ?: Answer(500, "")
             val bytes = answer.body.toByteArray()

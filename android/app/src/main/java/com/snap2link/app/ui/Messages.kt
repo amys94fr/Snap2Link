@@ -37,6 +37,14 @@ fun accountMessage(code: String): Int = when (code) {
     else -> R.string.error_generic
 }
 
+/** What went wrong with Google Drive, in words. */
+fun driveMessage(code: String): Int = when (code) {
+    com.snap2link.app.drive.PlayDriveAuth.NOT_CONNECTED,
+    com.snap2link.app.drive.PlayDriveAuth.CANCELLED,
+    -> R.string.uploader_error_drive_not_connected
+    else -> R.string.error_generic
+}
+
 /** "in 23 hours", "in 40 minutes", in the phone's language. */
 fun timeLeft(until: Instant, now: Instant = Instant.now()): String {
     val left = Duration.between(now, until).coerceAtLeast(Duration.ZERO)

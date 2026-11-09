@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import com.snap2link.app.MainActivity
 import com.snap2link.app.R
+import com.snap2link.app.drive.PlayDriveAuth
 import com.snap2link.app.ui.AppLanguage
 import com.snap2link.app.ui.GuestCheckDialog
 import com.snap2link.app.ui.Snap2LinkTheme
@@ -76,6 +77,7 @@ class ShareActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        model.driveAuth = PlayDriveAuth(this)
         model.start(sharedImage(intent))
         setContent {
             Snap2LinkTheme {
@@ -93,6 +95,12 @@ class ShareActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        // The model outlives a rotation; this activity doesn't.
+        model.driveAuth = null
+        super.onDestroy()
     }
 
     private fun sharedImage(intent: Intent): Uri? {
