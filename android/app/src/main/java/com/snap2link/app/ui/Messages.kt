@@ -30,6 +30,7 @@ fun accountMessage(code: String): Int = when (code) {
     "service_busy", "verification_unavailable" -> R.string.account_error_busy
     "mail_unavailable" -> R.string.account_error_mail
     "account_banned" -> R.string.account_error_banned
+    "google_refused" -> R.string.account_error_google
     "guest_banned" -> R.string.error_banned
     "verification_failed" -> R.string.error_check_failed
     "unreachable" -> R.string.uploader_error_unreachable

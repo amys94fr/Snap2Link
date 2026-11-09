@@ -81,5 +81,11 @@
   "check.hint": "Só é preciso uma vez. Depois, o Snap2Link lembra deste celular por 90 dias.",
   "error.banned": "Este celular não pode mais usar a hospedagem do Snap2Link.",
   "error.generic": "Algo deu errado. Tente de novo.",
-  "error.check_failed": "A verificação de segurança falhou. Tente de novo."
+  "error.check_failed": "A verificação de segurança falhou. Tente de novo.",
+  "account.google": "Continuar com o Google",
+  "account.or_email": "Ou receba um código por e-mail",
+  "account.error.google": "O login com o Google não foi concluído. Tente novamente.",
+  "settings.general.language": "Idioma",
+  "settings.general.language_hint": "Por padrão, o idioma do seu sistema. Inglês se ele não estiver disponível.",
+  "settings.general.language_auto": "Automático"
 }

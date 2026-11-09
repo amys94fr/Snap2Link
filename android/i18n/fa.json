@@ -81,5 +81,11 @@
   "check.hint": "فقط یک بار لازم است. پس از آن Snap2Link این گوشی را تا 90 روز به خاطر می‌سپارد.",
   "error.banned": "این گوشی دیگر نمی‌تواند از میزبانی Snap2Link استفاده کند.",
   "error.generic": "مشکلی پیش آمد. دوباره امتحان کنید.",
-  "error.check_failed": "بررسی امنیتی ناموفق بود. دوباره امتحان کنید."
+  "error.check_failed": "بررسی امنیتی ناموفق بود. دوباره امتحان کنید.",
+  "account.google": "ادامه با Google",
+  "account.or_email": "یا دریافت کد از طریق ایمیل",
+  "account.error.google": "ورود با Google کامل نشد. دوباره تلاش کنید.",
+  "settings.general.language": "زبان",
+  "settings.general.language_hint": "به‌طور پیش‌فرض، زبان سیستم شما. اگر در دسترس نباشد، انگلیسی.",
+  "settings.general.language_auto": "خودکار"
 }

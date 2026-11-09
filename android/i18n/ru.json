@@ -81,5 +81,11 @@
   "check.hint": "Нужно только один раз. Затем Snap2Link запоминает этот телефон на 90 дней.",
   "error.banned": "Этот телефон больше не может использовать хостинг Snap2Link.",
   "error.generic": "Что-то пошло не так. Попробуйте ещё раз.",
-  "error.check_failed": "Проверка безопасности не пройдена. Попробуйте ещё раз."
+  "error.check_failed": "Проверка безопасности не пройдена. Попробуйте ещё раз.",
+  "account.google": "Продолжить с Google",
+  "account.or_email": "Или получите код по почте",
+  "account.error.google": "Вход через Google не завершён. Попробуйте ещё раз.",
+  "settings.general.language": "Язык",
+  "settings.general.language_hint": "По умолчанию язык системы. Если он недоступен, английский.",
+  "settings.general.language_auto": "Автоматически"
 }

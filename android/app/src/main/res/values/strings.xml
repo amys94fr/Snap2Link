@@ -85,4 +85,10 @@
     <string name="error_banned">This phone can no longer use Snap2Link hosting.</string>
     <string name="error_generic">Something went wrong. Try again.</string>
     <string name="error_check_failed">The security check failed. Try again.</string>
+    <string name="account_google">Continue with Google</string>
+    <string name="account_or_email">Or get a code by email</string>
+    <string name="account_error_google">Google sign-in didn\'t finish. Try again.</string>
+    <string name="settings_general_language">Language</string>
+    <string name="settings_general_language_hint">By default, your system\'s language. English if it isn\'t available.</string>
+    <string name="settings_general_language_auto">Automatic</string>
 </resources>

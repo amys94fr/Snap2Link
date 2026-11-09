@@ -81,5 +81,11 @@
   "check.hint": "한 번만 필요합니다. 이후 Snap2Link가 90일 동안 이 휴대전화를 기억합니다.",
   "error.banned": "이 휴대전화는 더 이상 Snap2Link 호스팅을 사용할 수 없습니다.",
   "error.generic": "문제가 발생했습니다. 다시 시도하세요.",
-  "error.check_failed": "보안 확인에 실패했습니다. 다시 시도하세요."
+  "error.check_failed": "보안 확인에 실패했습니다. 다시 시도하세요.",
+  "account.google": "Google로 계속하기",
+  "account.or_email": "또는 이메일로 코드 받기",
+  "account.error.google": "Google 로그인이 완료되지 않았습니다. 다시 시도하세요.",
+  "settings.general.language": "언어",
+  "settings.general.language_hint": "기본적으로 시스템 언어를 사용합니다. 지원되지 않으면 영어로 표시됩니다.",
+  "settings.general.language_auto": "자동"
 }

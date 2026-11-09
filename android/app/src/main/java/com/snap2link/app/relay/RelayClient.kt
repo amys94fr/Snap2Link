@@ -37,6 +37,12 @@ class RelayClient(base: String = DEFAULT_BASE) {
         return parse(body) { Session(it.getString("session_token"), it.getString("email")) }
     }
 
+    /** Turns a Google ID token into a session, creating the account the first time. */
+    suspend fun signInWithGoogle(guest: String, idToken: String): Session {
+        val body = call("POST", "/v1/login/google", guest, JSONObject().put("id_token", idToken))
+        return parse(body) { Session(it.getString("session_token"), it.getString("email")) }
+    }
+
     suspend fun account(session: String): AccountStatus {
         val body = call("GET", "/v1/me", session)
         return parse(body) {

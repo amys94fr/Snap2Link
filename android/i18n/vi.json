@@ -81,5 +81,11 @@
   "check.hint": "Chỉ cần một lần. Sau đó Snap2Link sẽ nhớ điện thoại này trong 90 ngày.",
   "error.banned": "Điện thoại này không thể dùng dịch vụ lưu trữ Snap2Link nữa.",
   "error.generic": "Đã xảy ra lỗi. Hãy thử lại.",
-  "error.check_failed": "Kiểm tra bảo mật không thành công. Hãy thử lại."
+  "error.check_failed": "Kiểm tra bảo mật không thành công. Hãy thử lại.",
+  "account.google": "Tiếp tục với Google",
+  "account.or_email": "Hoặc nhận mã qua email",
+  "account.error.google": "Đăng nhập bằng Google chưa hoàn tất. Hãy thử lại.",
+  "settings.general.language": "Ngôn ngữ",
+  "settings.general.language_hint": "Mặc định dùng ngôn ngữ hệ thống. Dùng tiếng Anh nếu không có sẵn.",
+  "settings.general.language_auto": "Tự động"
 }

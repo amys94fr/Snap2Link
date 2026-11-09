@@ -84,4 +84,10 @@
     <string name="error_banned">این گوشی دیگر نمی‌تواند از میزبانی Snap2Link استفاده کند.</string>
     <string name="error_generic">مشکلی پیش آمد. دوباره امتحان کنید.</string>
     <string name="error_check_failed">بررسی امنیتی ناموفق بود. دوباره امتحان کنید.</string>
+    <string name="account_google">ادامه با Google</string>
+    <string name="account_or_email">یا دریافت کد از طریق ایمیل</string>
+    <string name="account_error_google">ورود با Google کامل نشد. دوباره تلاش کنید.</string>
+    <string name="settings_general_language">زبان</string>
+    <string name="settings_general_language_hint">به‌طور پیش‌فرض، زبان سیستم شما. اگر در دسترس نباشد، انگلیسی.</string>
+    <string name="settings_general_language_auto">خودکار</string>
 </resources>

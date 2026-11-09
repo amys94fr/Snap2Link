@@ -81,5 +81,11 @@
   "check.hint": "Serve una volta sola. Poi Snap2Link ricorda questo telefono per 90 giorni.",
   "error.banned": "Questo telefono non può più usare l’hosting di Snap2Link.",
   "error.generic": "Qualcosa è andato storto. Riprova.",
-  "error.check_failed": "Il controllo di sicurezza non è riuscito. Riprova."
+  "error.check_failed": "Il controllo di sicurezza non è riuscito. Riprova.",
+  "account.google": "Continua con Google",
+  "account.or_email": "Oppure ricevi un codice via email",
+  "account.error.google": "L'accesso con Google non è stato completato. Riprova.",
+  "settings.general.language": "Lingua",
+  "settings.general.language_hint": "Per impostazione predefinita, la lingua del sistema. Inglese se non è disponibile.",
+  "settings.general.language_auto": "Automatica"
 }

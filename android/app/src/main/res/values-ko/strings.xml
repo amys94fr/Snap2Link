@@ -84,4 +84,10 @@
     <string name="error_banned">이 휴대전화는 더 이상 Snap2Link 호스팅을 사용할 수 없습니다.</string>
     <string name="error_generic">문제가 발생했습니다. 다시 시도하세요.</string>
     <string name="error_check_failed">보안 확인에 실패했습니다. 다시 시도하세요.</string>
+    <string name="account_google">Google로 계속하기</string>
+    <string name="account_or_email">또는 이메일로 코드 받기</string>
+    <string name="account_error_google">Google 로그인이 완료되지 않았습니다. 다시 시도하세요.</string>
+    <string name="settings_general_language">언어</string>
+    <string name="settings_general_language_hint">기본적으로 시스템 언어를 사용합니다. 지원되지 않으면 영어로 표시됩니다.</string>
+    <string name="settings_general_language_auto">자동</string>
 </resources>

@@ -84,4 +84,10 @@
     <string name="error_banned">这部手机已无法再使用 Snap2Link 托管服务。</string>
     <string name="error_generic">出了点问题，请重试。</string>
     <string name="error_check_failed">安全检查未通过，请重试。</string>
+    <string name="account_google">使用 Google 继续</string>
+    <string name="account_or_email">或通过邮箱获取验证码</string>
+    <string name="account_error_google">Google 登录未完成，请重试。</string>
+    <string name="settings_general_language">语言</string>
+    <string name="settings_general_language_hint">默认使用系统语言，不可用时使用英语。</string>
+    <string name="settings_general_language_auto">自动</string>
 </resources>

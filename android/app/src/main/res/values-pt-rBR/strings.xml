@@ -84,4 +84,10 @@
     <string name="error_banned">Este celular não pode mais usar a hospedagem do Snap2Link.</string>
     <string name="error_generic">Algo deu errado. Tente de novo.</string>
     <string name="error_check_failed">A verificação de segurança falhou. Tente de novo.</string>
+    <string name="account_google">Continuar com o Google</string>
+    <string name="account_or_email">Ou receba um código por e-mail</string>
+    <string name="account_error_google">O login com o Google não foi concluído. Tente novamente.</string>
+    <string name="settings_general_language">Idioma</string>
+    <string name="settings_general_language_hint">Por padrão, o idioma do seu sistema. Inglês se ele não estiver disponível.</string>
+    <string name="settings_general_language_auto">Automático</string>
 </resources>

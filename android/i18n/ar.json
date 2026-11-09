@@ -81,5 +81,11 @@
   "check.hint": "مطلوب مرة واحدة فقط. بعدها يتذكر Snap2Link هذا الهاتف لمدة 90 يومًا.",
   "error.banned": "لم يعد بإمكان هذا الهاتف استخدام استضافة Snap2Link.",
   "error.generic": "حدث خطأ ما. حاول مرة أخرى.",
-  "error.check_failed": "فشل التحقق الأمني. حاول مرة أخرى."
+  "error.check_failed": "فشل التحقق الأمني. حاول مرة أخرى.",
+  "account.google": "المتابعة باستخدام Google",
+  "account.or_email": "أو احصل على رمز عبر البريد الإلكتروني",
+  "account.error.google": "لم يكتمل تسجيل الدخول عبر Google. حاول مرة أخرى.",
+  "settings.general.language": "اللغة",
+  "settings.general.language_hint": "افتراضيًا، لغة نظامك. الإنجليزية إذا لم تكن متوفرة.",
+  "settings.general.language_auto": "تلقائي"
 }

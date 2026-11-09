@@ -84,4 +84,10 @@
     <string name="error_banned">Dieses Telefon kann das Snap2Link-Hosting nicht mehr nutzen.</string>
     <string name="error_generic">Etwas ist schiefgelaufen. Versuchen Sie es erneut.</string>
     <string name="error_check_failed">Die Sicherheitsprüfung ist fehlgeschlagen. Versuchen Sie es erneut.</string>
+    <string name="account_google">Weiter mit Google</string>
+    <string name="account_or_email">Oder Code per E-Mail erhalten</string>
+    <string name="account_error_google">Die Google-Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut.</string>
+    <string name="settings_general_language">Sprache</string>
+    <string name="settings_general_language_hint">Standardmäßig die Sprache Ihres Systems. Englisch, falls sie nicht verfügbar ist.</string>
+    <string name="settings_general_language_auto">Automatisch</string>
 </resources>

@@ -84,4 +84,10 @@
     <string name="error_banned">لم يعد بإمكان هذا الهاتف استخدام استضافة Snap2Link.</string>
     <string name="error_generic">حدث خطأ ما. حاول مرة أخرى.</string>
     <string name="error_check_failed">فشل التحقق الأمني. حاول مرة أخرى.</string>
+    <string name="account_google">المتابعة باستخدام Google</string>
+    <string name="account_or_email">أو احصل على رمز عبر البريد الإلكتروني</string>
+    <string name="account_error_google">لم يكتمل تسجيل الدخول عبر Google. حاول مرة أخرى.</string>
+    <string name="settings_general_language">اللغة</string>
+    <string name="settings_general_language_hint">افتراضيًا، لغة نظامك. الإنجليزية إذا لم تكن متوفرة.</string>
+    <string name="settings_general_language_auto">تلقائي</string>
 </resources>

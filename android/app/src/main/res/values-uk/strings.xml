@@ -84,4 +84,10 @@
     <string name="error_banned">Цей телефон більше не може користуватися хостингом Snap2Link.</string>
     <string name="error_generic">Щось пішло не так. Спробуйте ще раз.</string>
     <string name="error_check_failed">Перевірку безпеки не пройдено. Спробуйте ще раз.</string>
+    <string name="account_google">Продовжити з Google</string>
+    <string name="account_or_email">Або отримайте код поштою</string>
+    <string name="account_error_google">Вхід через Google не завершено. Спробуйте ще раз.</string>
+    <string name="settings_general_language">Мова</string>
+    <string name="settings_general_language_hint">Типово мова системи. Якщо вона недоступна, англійська.</string>
+    <string name="settings_general_language_auto">Автоматично</string>
 </resources>

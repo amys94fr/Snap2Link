@@ -6,10 +6,15 @@ import android.content.Context
 import com.snap2link.app.relay.Hosting
 import com.snap2link.app.relay.RelayClient
 import com.snap2link.app.relay.TokenStore
+import com.snap2link.app.ui.AppLanguage
 
 class Snap2LinkApp : Application() {
     val client by lazy { RelayClient() }
     val hosting by lazy { Hosting(client, PreferenceTokens(this)) }
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(AppLanguage.wrap(base))
+    }
 }
 
 val Context.hosting: Hosting get() = (applicationContext as Snap2LinkApp).hosting

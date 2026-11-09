@@ -84,4 +84,10 @@
     <string name="error_banned">यह फ़ोन अब Snap2Link होस्टिंग का उपयोग नहीं कर सकता।</string>
     <string name="error_generic">कुछ गड़बड़ हो गई। फिर से कोशिश करें।</string>
     <string name="error_check_failed">सुरक्षा जाँच विफल रही। फिर से कोशिश करें।</string>
+    <string name="account_google">Google से जारी रखें</string>
+    <string name="account_or_email">या ईमेल से कोड पाएँ</string>
+    <string name="account_error_google">Google साइन-इन पूरा नहीं हुआ। फिर से कोशिश करें।</string>
+    <string name="settings_general_language">भाषा</string>
+    <string name="settings_general_language_hint">डिफ़ॉल्ट रूप से आपके सिस्टम की भाषा। अगर वह उपलब्ध न हो, तो अंग्रेज़ी।</string>
+    <string name="settings_general_language_auto">ऑटोमैटिक</string>
 </resources>

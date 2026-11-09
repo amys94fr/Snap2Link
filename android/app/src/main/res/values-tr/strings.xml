@@ -84,4 +84,10 @@
     <string name="error_banned">Bu telefon artık Snap2Link barındırma hizmetini kullanamaz.</string>
     <string name="error_generic">Bir sorun oluştu. Tekrar deneyin.</string>
     <string name="error_check_failed">Güvenlik kontrolü başarısız oldu. Tekrar deneyin.</string>
+    <string name="account_google">Google ile devam et</string>
+    <string name="account_or_email">Ya da e-postayla kod alın</string>
+    <string name="account_error_google">Google ile giriş tamamlanmadı. Yeniden deneyin.</string>
+    <string name="settings_general_language">Dil</string>
+    <string name="settings_general_language_hint">Varsayılan olarak sisteminizin dili. Kullanılamıyorsa İngilizce.</string>
+    <string name="settings_general_language_auto">Otomatik</string>
 </resources>

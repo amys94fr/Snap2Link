@@ -125,6 +125,10 @@ describe("signing in with Google", () => {
     expect(await count("sessions")).toBe(2);
   });
 
+  it("accepts a token made for the Web client, as Android's Credential Manager gets", async () => {
+    expect((await login(await token(claims({ aud: env.GOOGLE_WEB_CLIENT_ID })))).status).toBe(200);
+  });
+
   it("accepts Google's short issuer too", async () => {
     expect((await login(await token(claims({ iss: "accounts.google.com" })))).status).toBe(200);
   });

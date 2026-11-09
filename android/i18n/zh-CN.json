@@ -81,5 +81,11 @@
   "check.hint": "只需一次。之后 Snap2Link 会在 90 天内记住这部手机。",
   "error.banned": "这部手机已无法再使用 Snap2Link 托管服务。",
   "error.generic": "出了点问题，请重试。",
-  "error.check_failed": "安全检查未通过，请重试。"
+  "error.check_failed": "安全检查未通过，请重试。",
+  "account.google": "使用 Google 继续",
+  "account.or_email": "或通过邮箱获取验证码",
+  "account.error.google": "Google 登录未完成，请重试。",
+  "settings.general.language": "语言",
+  "settings.general.language_hint": "默认使用系统语言，不可用时使用英语。",
+  "settings.general.language_auto": "自动"
 }

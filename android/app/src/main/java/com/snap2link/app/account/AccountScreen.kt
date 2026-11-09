@@ -1,7 +1,18 @@
 package com.snap2link.app.account
 
 import androidx.core.net.toUri
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.semantics.Role
+import com.snap2link.app.ui.AppLanguage
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -82,6 +94,8 @@ fun AccountScreen(modifier: Modifier = Modifier, model: AccountViewModel = viewM
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
             }
+            HorizontalDivider(Modifier.padding(top = 16.dp))
+            LanguageRow()
         }
     }
 
@@ -95,6 +109,30 @@ private fun SignIn(model: AccountViewModel) {
 
     val sentTo = model.sentTo
     if (sentTo == null) {
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+        OutlinedButton(
+            onClick = {
+                model.startGoogle()
+                scope.launch { model.onGoogle(GoogleSignIn.idToken(context)) }
+            },
+            enabled = !model.busy,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        ) {
+            if (model.google) {
+                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(painterResource(R.drawable.ic_google), contentDescription = null, tint = Color.Unspecified)
+            }
+            Spacer(Modifier.size(10.dp))
+            Text(stringResource(R.string.account_google))
+        }
+        Text(
+            stringResource(R.string.account_or_email),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp),
+        )
         OutlinedTextField(
             value = model.email,
             onValueChange = { model.email = it },
@@ -105,8 +143,8 @@ private fun SignIn(model: AccountViewModel) {
             modifier = Modifier.fillMaxWidth(),
         )
         BusyButton(
-            label = stringResource(if (model.busy) R.string.account_sending else R.string.account_send_code),
-            busy = model.busy,
+            label = stringResource(if (model.busy && !model.google) R.string.account_sending else R.string.account_send_code),
+            busy = model.busy && !model.google,
             enabled = model.email.isNotBlank(),
             onClick = model::sendCode,
         )
@@ -245,4 +283,71 @@ private fun BusyButton(label: String, busy: Boolean, enabled: Boolean, onClick: 
         }
         Text(label)
     }
+}
+
+@Composable
+private fun LanguageRow() {
+    val context = LocalContext.current
+    var picking by remember { mutableStateOf(false) }
+    val current = AppLanguage.current(context)
+    val currentName = AppLanguage.CHOICES.firstOrNull { it.first == current }?.second
+        ?: stringResource(R.string.settings_general_language_auto)
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clickable(role = Role.Button) { picking = true },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Icon(painterResource(R.drawable.ic_language), contentDescription = null)
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.settings_general_language), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.settings_general_language_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text(currentName, color = MaterialTheme.colorScheme.primary)
+    }
+
+    if (picking) {
+        val choices = listOf<Pair<String?, String>>(null to stringResource(R.string.settings_general_language_auto)) +
+            AppLanguage.CHOICES
+        AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(stringResource(R.string.settings_general_language)) },
+            text = {
+                Column(Modifier.selectableGroup().verticalScroll(rememberScrollState())) {
+                    choices.forEach { (code, name) ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
+                                .selectable(
+                                    selected = code == current,
+                                    role = Role.RadioButton,
+                                    onClick = {
+                                        picking = false
+                                        if (code != current) context.activity()?.let { AppLanguage.set(it, code) }
+                                    },
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = code == current, onClick = null)
+                            Spacer(Modifier.size(12.dp))
+                            Text(name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { picking = false }) { Text(stringResource(R.string.share_close)) }
+            },
+        )
+    }
+}
+
+private tailrec fun Context.activity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.activity()
+    else -> null
 }

@@ -81,5 +81,11 @@
   "check.hint": "Nur einmal nötig. Danach merkt sich Snap2Link dieses Telefon 90 Tage lang.",
   "error.banned": "Dieses Telefon kann das Snap2Link-Hosting nicht mehr nutzen.",
   "error.generic": "Etwas ist schiefgelaufen. Versuchen Sie es erneut.",
-  "error.check_failed": "Die Sicherheitsprüfung ist fehlgeschlagen. Versuchen Sie es erneut."
+  "error.check_failed": "Die Sicherheitsprüfung ist fehlgeschlagen. Versuchen Sie es erneut.",
+  "account.google": "Weiter mit Google",
+  "account.or_email": "Oder Code per E-Mail erhalten",
+  "account.error.google": "Die Google-Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut.",
+  "settings.general.language": "Sprache",
+  "settings.general.language_hint": "Standardmäßig die Sprache Ihres Systems. Englisch, falls sie nicht verfügbar ist.",
+  "settings.general.language_auto": "Automatisch"
 }

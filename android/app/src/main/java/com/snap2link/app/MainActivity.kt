@@ -1,5 +1,6 @@
 package com.snap2link.app
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -20,10 +21,15 @@ import androidx.compose.ui.res.stringResource
 import com.snap2link.app.account.AccountScreen
 import com.snap2link.app.history.HistoryScreen
 import com.snap2link.app.home.HomeScreen
+import com.snap2link.app.ui.AppLanguage
 import com.snap2link.app.ui.Snap2LinkTheme
 
 class MainActivity : ComponentActivity() {
     private var tab by mutableStateOf(TAB_SEND)
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()

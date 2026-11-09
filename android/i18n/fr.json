@@ -81,5 +81,11 @@
   "check.hint": "Une seule fois : Snap2Link se souvient ensuite de ce téléphone pendant 90 jours.",
   "error.banned": "Ce téléphone ne peut plus utiliser l’hébergement Snap2Link.",
   "error.generic": "Quelque chose n’a pas marché. Réessayez.",
-  "error.check_failed": "La vérification de sécurité a échoué. Réessayez."
+  "error.check_failed": "La vérification de sécurité a échoué. Réessayez.",
+  "account.google": "Continuer avec Google",
+  "account.or_email": "Ou recevez un code par e-mail",
+  "account.error.google": "La connexion Google n’a pas abouti. Réessayez.",
+  "settings.general.language": "Langue",
+  "settings.general.language_hint": "Par défaut, la langue de votre système. L’anglais si elle n’est pas disponible.",
+  "settings.general.language_auto": "Automatique"
 }

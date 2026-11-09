@@ -84,4 +84,10 @@
     <string name="error_banned">Điện thoại này không thể dùng dịch vụ lưu trữ Snap2Link nữa.</string>
     <string name="error_generic">Đã xảy ra lỗi. Hãy thử lại.</string>
     <string name="error_check_failed">Kiểm tra bảo mật không thành công. Hãy thử lại.</string>
+    <string name="account_google">Tiếp tục với Google</string>
+    <string name="account_or_email">Hoặc nhận mã qua email</string>
+    <string name="account_error_google">Đăng nhập bằng Google chưa hoàn tất. Hãy thử lại.</string>
+    <string name="settings_general_language">Ngôn ngữ</string>
+    <string name="settings_general_language_hint">Mặc định dùng ngôn ngữ hệ thống. Dùng tiếng Anh nếu không có sẵn.</string>
+    <string name="settings_general_language_auto">Tự động</string>
 </resources>

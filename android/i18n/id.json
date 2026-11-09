@@ -81,5 +81,11 @@
   "check.hint": "Hanya perlu sekali. Setelah itu Snap2Link mengingat ponsel ini selama 90 hari.",
   "error.banned": "Ponsel ini tidak dapat lagi menggunakan hosting Snap2Link.",
   "error.generic": "Terjadi kesalahan. Coba lagi.",
-  "error.check_failed": "Pemeriksaan keamanan gagal. Coba lagi."
+  "error.check_failed": "Pemeriksaan keamanan gagal. Coba lagi.",
+  "account.google": "Lanjutkan dengan Google",
+  "account.or_email": "Atau dapatkan kode lewat email",
+  "account.error.google": "Masuk dengan Google tidak selesai. Coba lagi.",
+  "settings.general.language": "Bahasa",
+  "settings.general.language_hint": "Secara default, bahasa sistem Anda. Bahasa Inggris jika tidak tersedia.",
+  "settings.general.language_auto": "Otomatis"
 }

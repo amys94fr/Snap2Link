@@ -81,5 +81,11 @@
   "check.hint": "सिर्फ़ एक बार ज़रूरी है। इसके बाद Snap2Link इस फ़ोन को 90 दिनों तक याद रखता है।",
   "error.banned": "यह फ़ोन अब Snap2Link होस्टिंग का उपयोग नहीं कर सकता।",
   "error.generic": "कुछ गड़बड़ हो गई। फिर से कोशिश करें।",
-  "error.check_failed": "सुरक्षा जाँच विफल रही। फिर से कोशिश करें।"
+  "error.check_failed": "सुरक्षा जाँच विफल रही। फिर से कोशिश करें।",
+  "account.google": "Google से जारी रखें",
+  "account.or_email": "या ईमेल से कोड पाएँ",
+  "account.error.google": "Google साइन-इन पूरा नहीं हुआ। फिर से कोशिश करें।",
+  "settings.general.language": "भाषा",
+  "settings.general.language_hint": "डिफ़ॉल्ट रूप से आपके सिस्टम की भाषा। अगर वह उपलब्ध न हो, तो अंग्रेज़ी।",
+  "settings.general.language_auto": "ऑटोमैटिक"
 }

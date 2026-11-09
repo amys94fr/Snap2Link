@@ -81,5 +81,11 @@
   "check.hint": "Needed once. Snap2Link then remembers this phone for 90 days.",
   "error.banned": "This phone can no longer use Snap2Link hosting.",
   "error.generic": "Something went wrong. Try again.",
-  "error.check_failed": "The security check failed. Try again."
+  "error.check_failed": "The security check failed. Try again.",
+  "account.google": "Continue with Google",
+  "account.or_email": "Or get a code by email",
+  "account.error.google": "Google sign-in didn't finish. Try again.",
+  "settings.general.language": "Language",
+  "settings.general.language_hint": "By default, your system's language. English if it isn't available.",
+  "settings.general.language_auto": "Automatic"
 }

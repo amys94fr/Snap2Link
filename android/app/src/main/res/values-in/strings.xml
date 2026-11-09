@@ -84,4 +84,10 @@
     <string name="error_banned">Ponsel ini tidak dapat lagi menggunakan hosting Snap2Link.</string>
     <string name="error_generic">Terjadi kesalahan. Coba lagi.</string>
     <string name="error_check_failed">Pemeriksaan keamanan gagal. Coba lagi.</string>
+    <string name="account_google">Lanjutkan dengan Google</string>
+    <string name="account_or_email">Atau dapatkan kode lewat email</string>
+    <string name="account_error_google">Masuk dengan Google tidak selesai. Coba lagi.</string>
+    <string name="settings_general_language">Bahasa</string>
+    <string name="settings_general_language_hint">Secara default, bahasa sistem Anda. Bahasa Inggris jika tidak tersedia.</string>
+    <string name="settings_general_language_auto">Otomatis</string>
 </resources>

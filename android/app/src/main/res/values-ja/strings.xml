@@ -84,4 +84,10 @@
     <string name="error_banned">このスマートフォンでは Snap2Link のホスティングを利用できなくなりました。</string>
     <string name="error_generic">問題が発生しました。もう一度お試しください。</string>
     <string name="error_check_failed">セキュリティチェックに失敗しました。もう一度お試しください。</string>
+    <string name="account_google">Google で続行</string>
+    <string name="account_or_email">またはメールでコードを受け取る</string>
+    <string name="account_error_google">Google でのサインインが完了しませんでした。もう一度お試しください。</string>
+    <string name="settings_general_language">言語</string>
+    <string name="settings_general_language_hint">既定ではシステムの言語を使用します。対応していない場合は英語で表示します。</string>
+    <string name="settings_general_language_auto">自動</string>
 </resources>

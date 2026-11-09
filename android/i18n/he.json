@@ -81,5 +81,11 @@
   "check.hint": "נדרש פעם אחת בלבד. אחר כך Snap2Link זוכר את הטלפון הזה למשך 90 יום.",
   "error.banned": "הטלפון הזה כבר לא יכול להשתמש בשירות האירוח של Snap2Link.",
   "error.generic": "משהו השתבש. כדאי לנסות שוב.",
-  "error.check_failed": "בדיקת האבטחה נכשלה. כדאי לנסות שוב."
+  "error.check_failed": "בדיקת האבטחה נכשלה. כדאי לנסות שוב.",
+  "account.google": "המשך עם Google",
+  "account.or_email": "או קבלת קוד באימייל",
+  "account.error.google": "הכניסה עם Google לא הושלמה. אפשר לנסות שוב.",
+  "settings.general.language": "שפה",
+  "settings.general.language_hint": "כברירת מחדל, שפת המערכת. אנגלית אם היא לא זמינה.",
+  "settings.general.language_auto": "אוטומטית"
 }

@@ -81,5 +81,11 @@
   "check.hint": "必要なのは 1 回だけです。その後 90 日間、Snap2Link がこのスマートフォンを記憶します。",
   "error.banned": "このスマートフォンでは Snap2Link のホスティングを利用できなくなりました。",
   "error.generic": "問題が発生しました。もう一度お試しください。",
-  "error.check_failed": "セキュリティチェックに失敗しました。もう一度お試しください。"
+  "error.check_failed": "セキュリティチェックに失敗しました。もう一度お試しください。",
+  "account.google": "Google で続行",
+  "account.or_email": "またはメールでコードを受け取る",
+  "account.error.google": "Google でのサインインが完了しませんでした。もう一度お試しください。",
+  "settings.general.language": "言語",
+  "settings.general.language_hint": "既定ではシステムの言語を使用します。対応していない場合は英語で表示します。",
+  "settings.general.language_auto": "自動"
 }

@@ -84,4 +84,10 @@
     <string name="error_banned">הטלפון הזה כבר לא יכול להשתמש בשירות האירוח של Snap2Link.</string>
     <string name="error_generic">משהו השתבש. כדאי לנסות שוב.</string>
     <string name="error_check_failed">בדיקת האבטחה נכשלה. כדאי לנסות שוב.</string>
+    <string name="account_google">המשך עם Google</string>
+    <string name="account_or_email">או קבלת קוד באימייל</string>
+    <string name="account_error_google">הכניסה עם Google לא הושלמה. אפשר לנסות שוב.</string>
+    <string name="settings_general_language">שפה</string>
+    <string name="settings_general_language_hint">כברירת מחדל, שפת המערכת. אנגלית אם היא לא זמינה.</string>
+    <string name="settings_general_language_auto">אוטומטית</string>
 </resources>

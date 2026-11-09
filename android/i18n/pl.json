@@ -81,5 +81,11 @@
   "check.hint": "Potrzebne tylko raz. Potem Snap2Link pamięta ten telefon przez 90 dni.",
   "error.banned": "Ten telefon nie może już korzystać z hostingu Snap2Link.",
   "error.generic": "Coś poszło nie tak. Spróbuj ponownie.",
-  "error.check_failed": "Kontrola bezpieczeństwa nie powiodła się. Spróbuj ponownie."
+  "error.check_failed": "Kontrola bezpieczeństwa nie powiodła się. Spróbuj ponownie.",
+  "account.google": "Kontynuuj z Google",
+  "account.or_email": "Lub otrzymaj kod e-mailem",
+  "account.error.google": "Logowanie przez Google nie zostało ukończone. Spróbuj ponownie.",
+  "settings.general.language": "Język",
+  "settings.general.language_hint": "Domyślnie język systemu. Jeśli jest niedostępny, angielski.",
+  "settings.general.language_auto": "Automatycznie"
 }
