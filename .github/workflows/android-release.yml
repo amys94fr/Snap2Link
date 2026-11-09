@@ -1,0 +1,139 @@
+name: Android release
+
+# An android-v* tag builds the APK, signs it with the release key and
+# publishes it on a GitHub release of its own. That release is never marked
+# "latest": the desktop updater and the site read the latest release.
+
+on:
+  push:
+    tags:
+      - "android-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release, e.g. android-v0.1.0"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, sign and publish the APK
+    runs-on: ubuntu-latest
+    # Holds the keystore secrets; only android-v* tags can deploy to it.
+    environment: android-release
+    permissions:
+      contents: write
+    steps:
+      # Validates the tag once; later steps read it from this step's
+      # outputs, never from raw event data.
+      - id: v
+        shell: bash
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$INPUT_TAG"
+          else
+            if [ "$REF_TYPE" != "tag" ]; then
+              echo "::error::Release must run from a tag"; exit 1
+            fi
+            TAG="$REF_NAME"
+          fi
+          if ! [[ "$TAG" =~ ^android-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag must look like android-v1.2.3"; exit 1
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#android-v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ steps.v.outputs.tag }}
+          persist-credentials: false
+
+      - name: The tag matches versionName
+        shell: bash
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          NAME=$(sed -nE 's/^\s*versionName = "([^"]+)".*/\1/p' android/app/build.gradle.kts)
+          if [ "$NAME" != "$VERSION" ]; then
+            echo "::error::versionName is $NAME, the tag says $VERSION"; exit 1
+          fi
+
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          # A release builds from scratch, not from a PR's cache.
+          cache-disabled: true
+
+      - name: Unit tests
+        working-directory: android
+        run: ./gradlew --no-daemon :app:testReleaseUnitTest
+
+      - name: Signed APK
+        working-directory: android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/release.p12"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
+          ./gradlew --no-daemon :app:assembleRelease
+
+      # Refuses an APK signed by any other key than the release one.
+      - name: Check the signature
+        shell: bash
+        env:
+          EXPECTED: a5e58a76cacaf5eee08900c077cf49935a1fb7fdd6d74b6660dd01b89735c816
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          "$APKSIGNER" verify --print-certs "$APK" | tee "$RUNNER_TEMP/certs.txt"
+          grep -q "certificate SHA-256 digest: $EXPECTED" "$RUNNER_TEMP/certs.txt"
+          mkdir -p dist
+          cp "$APK" "dist/Snap2Link_${VERSION}_android.apk"
+          (cd dist && sha256sum "Snap2Link_${VERSION}_android.apk" > "Snap2Link_${VERSION}_android.apk.sha256")
+
+      - name: Publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/notes.md" <<EOF
+          The Snap2Link app for Android (8.0 and later).
+
+          Share an image to Snap2Link from the gallery, or any app's Share menu, and its link is copied. The History and Account tabs work as on the desktop.
+
+          Install: open \`Snap2Link_${VERSION}_android.apk\` on your phone and allow the install when Android asks. The app isn't on the Play Store yet.
+
+          Signing certificate SHA-256: \`a5:e5:8a:76:ca:ca:f5:ee:e0:89:00:c0:77:cf:49:93:5a:1f:b7:fd:d6:d7:4b:66:60:dd:01:b8:97:35:c8:16\`
+          EOF
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Snap2Link for Android ${VERSION}" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --verify-tag \
+            --latest=false
