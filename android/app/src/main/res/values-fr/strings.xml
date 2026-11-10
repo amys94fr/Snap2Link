@@ -26,7 +26,7 @@
     <string name="history_kept_count" formatted="true">%1$s liens gardés sur %2$s</string>
     <string name="history_keep_hint_relay">Une nouvelle capture ne remplace pas un lien gardé, qui se termine quand même à l\'heure prévue.</string>
     <string name="history_error_load">Impossible de charger vos liens. Vérifiez votre connexion et réessayez.</string>
-    <string name="history_error_action">Ça n\'a pas marché. Réessaie.</string>
+    <string name="history_error_action">Ça n’a pas marché. Réessayez.</string>
     <string name="history_error_pin_limit">Vous avez gardé autant de liens que votre plan le permet.</string>
     <string name="history_retry">Réessayer</string>
     <string name="account_free_title">Compte gratuit</string>

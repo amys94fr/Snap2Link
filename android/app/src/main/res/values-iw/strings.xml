@@ -27,7 +27,7 @@
     <string name="history_keep_hint_relay">צילום חדש לא מחליף קישור שמור, אבל הוא עדיין מסתיים בזמן.</string>
     <string name="history_error_load">לא ניתן לטעון את הקישורים. יש לבדוק את החיבור ולנסות שוב.</string>
     <string name="history_error_action">זה לא הצליח. כדאי לנסות שוב.</string>
-    <string name="history_error_pin_limit">שמרת את מספר הקישורים המרבי שהתוכנית שלך מאפשרת.</string>
+    <string name="history_error_pin_limit">נשמר המספר המרבי של קישורים שהתוכנית שלך מאפשרת.</string>
     <string name="history_retry">ניסיון חוזר</string>
     <string name="account_free_title">חשבון חינמי</string>
     <string name="account_free_hint">20 צילומים ביום ו-6 קישורים בו-זמנית, עד 48 שעות. צריך רק כתובת אימייל.</string>
@@ -44,7 +44,7 @@
     <string name="account_plan_free">תוכנית חינמית</string>
     <string name="account_captures_today">צילומים היום</string>
     <string name="account_active_links">קישורים פעילים</string>
-    <string name="account_active_links_hint">כשכולם בשימוש, צילום חדש מסיים את הקישור הישן ביותר שלא שמרת.</string>
+    <string name="account_active_links_hint">כשכולם בשימוש, צילום חדש מסיים את הקישור הישן ביותר שלא נשמר.</string>
     <string name="account_online_title">החשבון שלך באינטרנט</string>
     <string name="account_online_hint">הקישורים, המכשירים והפרופיל שלך, מכל דפדפן.</string>
     <string name="account_online_open">פתיחה</string>

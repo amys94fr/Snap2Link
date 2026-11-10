@@ -13,7 +13,7 @@
     <string name="uploader_limit_subtitle">Ücretsiz hesap günde 20 görüntü sağlar.</string>
     <string name="uploader_limit_action">Kaydol</string>
     <string name="guest_window_title">Hızlı güvenlik denetimi</string>
-    <string name="history_empty">Henüz bağlantı yok. Bir sonraki ekran görüntün burada görünecek.</string>
+    <string name="history_empty">Henüz bağlantı yok. Bir sonraki ekran görüntünüz burada görünecek.</string>
     <string name="history_copy">Bağlantıyı kopyala</string>
     <string name="history_copied">Kopyalandı</string>
     <string name="history_keep">Sakla</string>
@@ -25,9 +25,9 @@
     <string name="history_thumbnail">%1$s tarihli görüntü</string>
     <string name="history_kept_count" formatted="true">%2$s bağlantıdan %1$s tanesi saklandı</string>
     <string name="history_keep_hint_relay">Yeni bir görüntü saklanan bağlantının yerini almaz, ancak bağlantı yine de zamanında sona erer.</string>
-    <string name="history_error_load">Bağlantıların yüklenemedi. Bağlantını kontrol edip yeniden dene.</string>
-    <string name="history_error_action">Olmadı. Yeniden dene.</string>
-    <string name="history_error_pin_limit">Planının izin verdiği kadar bağlantı sakladın.</string>
+    <string name="history_error_load">Bağlantılarınız yüklenemedi. İnternet bağlantınızı kontrol edip yeniden deneyin.</string>
+    <string name="history_error_action">Olmadı. Yeniden deneyin.</string>
+    <string name="history_error_pin_limit">Planınızın izin verdiği kadar bağlantı sakladınız.</string>
     <string name="history_retry">Yeniden dene</string>
     <string name="account_free_title">Ücretsiz hesap</string>
     <string name="account_free_hint">Günde 20 görüntü ve aynı anda 6 bağlantı, 48 saate kadar. Yalnızca e-posta adresiniz yeterli.</string>
@@ -44,9 +44,9 @@
     <string name="account_plan_free">Ücretsiz plan</string>
     <string name="account_captures_today">Bugünkü görüntüler</string>
     <string name="account_active_links">Etkin bağlantılar</string>
-    <string name="account_active_links_hint">Hepsi kullanımdayken yeni bir görüntü, saklamadığın en eski bağlantıyı sonlandırır.</string>
-    <string name="account_online_title">Çevrimiçi hesabın</string>
-    <string name="account_online_hint">Bağlantıların, cihazların ve profilin, her tarayıcıdan.</string>
+    <string name="account_active_links_hint">Hepsi kullanımdayken yeni bir görüntü, saklamadığınız en eski bağlantıyı sonlandırır.</string>
+    <string name="account_online_title">Çevrimiçi hesabınız</string>
+    <string name="account_online_hint">Bağlantılarınız, cihazlarınız ve profiliniz, her tarayıcıdan.</string>
     <string name="account_online_open">Aç</string>
     <string name="account_sign_out">Çıkış yap</string>
     <string name="account_delete_title">Bu hesabı sil</string>
@@ -118,7 +118,7 @@
     <string name="settings_save">Kaydet</string>
     <string name="settings_delete_saved">Görüntüler %1$s gün sonra silinir</string>
     <string name="settings_switch_account">Hesap değiştir</string>
-    <string name="history_drive_needed">Görüntülerini burada görmek için Google Drive\'ı bağla.</string>
+    <string name="history_drive_needed">Görüntülerinizi burada görmek için Google Drive\'ı bağlayın.</string>
     <string name="history_keep_hint_drive">Otomatik temizlik saklanan görüntülere dokunmaz.</string>
     <string name="uploader_error_drive_not_connected">Google Drive bağlı değil. Ayarlardan bağlayın.</string>
     <string name="detect_title">Ekran görüntüleri</string>

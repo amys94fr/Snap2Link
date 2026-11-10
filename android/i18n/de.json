@@ -24,7 +24,7 @@
   "history.kept_count": "{kept} von {max} Links behalten",
   "history.keep_hint_relay": "Eine neue Aufnahme ersetzt keinen behaltenen Link, er endet aber trotzdem pünktlich.",
   "history.error.load": "Ihre Links konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
-  "history.error.action": "Das hat nicht geklappt. Versuche es erneut.",
+  "history.error.action": "Das hat nicht geklappt. Versuchen Sie es erneut.",
   "history.error.pin_limit": "Sie haben so viele Links behalten, wie Ihr Tarif erlaubt.",
   "history.retry": "Erneut versuchen",
   "account.free_title": "Kostenloses Konto",

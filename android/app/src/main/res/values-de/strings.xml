@@ -26,7 +26,7 @@
     <string name="history_kept_count" formatted="true">%1$s von %2$s Links behalten</string>
     <string name="history_keep_hint_relay">Eine neue Aufnahme ersetzt keinen behaltenen Link, er endet aber trotzdem pünktlich.</string>
     <string name="history_error_load">Ihre Links konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
-    <string name="history_error_action">Das hat nicht geklappt. Versuche es erneut.</string>
+    <string name="history_error_action">Das hat nicht geklappt. Versuchen Sie es erneut.</string>
     <string name="history_error_pin_limit">Sie haben so viele Links behalten, wie Ihr Tarif erlaubt.</string>
     <string name="history_retry">Erneut versuchen</string>
     <string name="account_free_title">Kostenloses Konto</string>
