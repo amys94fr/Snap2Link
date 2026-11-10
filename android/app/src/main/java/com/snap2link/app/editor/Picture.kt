@@ -333,3 +333,28 @@ fun Shape.recolored(color: Int): Shape = when (this) {
     is Shape.Text -> copy(color = color)
     is Shape.Blur -> this
 }
+
+/**
+ * The thickness a mark was drawn with: its line, its text size or how much
+ * it blurs. A text resized by hand gets the nearest one.
+ */
+fun Shape.stroke(sizes: Sizes): Stroke {
+    val (value, of) = when (this) {
+        is Shape.Pen -> width to sizes::line
+        is Shape.Rectangle -> width to sizes::line
+        is Shape.Circle -> width to sizes::line
+        is Shape.Arrow -> width to sizes::line
+        is Shape.Text -> size to sizes::text
+        is Shape.Blur -> cell to sizes::blur
+    }
+    return Stroke.entries.minBy { abs(of(it) - value) }
+}
+
+fun Shape.restroked(stroke: Stroke, sizes: Sizes): Shape = when (this) {
+    is Shape.Pen -> copy(width = sizes.line(stroke))
+    is Shape.Rectangle -> copy(width = sizes.line(stroke))
+    is Shape.Circle -> copy(width = sizes.line(stroke))
+    is Shape.Arrow -> copy(width = sizes.line(stroke))
+    is Shape.Text -> copy(size = sizes.text(stroke))
+    is Shape.Blur -> copy(cell = sizes.blur(stroke))
+}

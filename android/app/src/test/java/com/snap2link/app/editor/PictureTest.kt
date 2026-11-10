@@ -207,4 +207,22 @@ class PictureTest {
         assertNull(blur.color)
         assertSame(blur, blur.recolored(blue))
     }
+
+    @Test
+    fun aMarkTakesANewThickness() {
+        val sizes = Sizes(1080, 2400)
+        val arrow = Shape.Arrow(Pt(0f, 0f), Pt(10f, 10f), red, sizes.line(Stroke.MEDIUM))
+        assertEquals(Stroke.MEDIUM, arrow.stroke(sizes))
+        assertEquals(sizes.line(Stroke.THICK), (arrow.restroked(Stroke.THICK, sizes) as Shape.Arrow).width)
+        val blur = Shape.Blur(Box(0f, 0f, 10f, 10f), sizes.blur(Stroke.THIN))
+        assertEquals(sizes.blur(Stroke.THICK), (blur.restroked(Stroke.THICK, sizes) as Shape.Blur).cell)
+    }
+
+    @Test
+    fun aTextResizedByHandHasTheNearestThickness() {
+        val sizes = Sizes(1080, 2400)
+        val text = Shape.Text(Pt(0f, 0f), "Here", red, sizes.text(Stroke.THICK) * 0.95f)
+        assertEquals(Stroke.THICK, text.stroke(sizes))
+        assertEquals(sizes.text(Stroke.THIN), (text.restroked(Stroke.THIN, sizes) as Shape.Text).size)
+    }
 }

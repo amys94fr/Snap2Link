@@ -126,6 +126,12 @@ fun EditorScreen(
                     },
                     onCancel = onCancel,
                     onSend = onSend,
+                    onDelete = chosen?.let { index ->
+                        {
+                            onEdit(edits.then(edits.now.copy(shapes = edits.now.shapes.filterIndexed { i, _ -> i != index })))
+                            selected = null
+                        }
+                    },
                 )
                 Board(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -159,11 +165,14 @@ fun EditorScreen(
                         // The next marks take the same colour.
                         colorIndex = index
                     },
-                    onDelete = {
-                        chosen?.let { index ->
-                            onEdit(edits.then(edits.now.copy(shapes = edits.now.shapes.filterIndexed { i, _ -> i != index })))
+                    selectedStroke = chosen?.let { edits.now.shapes[it].stroke(sizes) },
+                    onRestroke = { next ->
+                        chosen?.let { i ->
+                            val shapes = edits.now.shapes.mapIndexed { j, shape -> if (j == i) shape.restroked(next, sizes) else shape }
+                            onEdit(edits.then(edits.now.copy(shapes = shapes)))
                         }
-                        selected = null
+                        // The next marks take the same thickness.
+                        stroke = next
                     },
                 )
                 Tools(
@@ -189,7 +198,13 @@ fun EditorScreen(
 }
 
 @Composable
-private fun TopBar(edits: Edits, onHistory: (Edits) -> Unit, onCancel: () -> Unit, onSend: () -> Unit) {
+private fun TopBar(
+    edits: Edits,
+    onHistory: (Edits) -> Unit,
+    onCancel: () -> Unit,
+    onSend: () -> Unit,
+    onDelete: (() -> Unit)?,
+) {
     Row(
         Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -198,6 +213,12 @@ private fun TopBar(edits: Edits, onHistory: (Edits) -> Unit, onCancel: () -> Uni
             Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.share_close))
         }
         Spacer(Modifier.weight(1f))
+        // Only while a shape is selected: the row under the image keeps its room for colours and thickness.
+        if (onDelete != null) {
+            IconButton(onClick = onDelete) {
+                Icon(painterResource(R.drawable.ic_trash), contentDescription = stringResource(R.string.editor_delete_shape))
+            }
+        }
         IconButton(onClick = { onHistory(edits.undo()) }, enabled = edits.canUndo) {
             Icon(painterResource(R.drawable.ic_undo), contentDescription = stringResource(R.string.annotator_undo))
         }
@@ -475,7 +496,8 @@ private fun Options(
     onResetCrop: () -> Unit,
     selectedShape: Shape?,
     onRecolor: (Int) -> Unit,
-    onDelete: () -> Unit,
+    selectedStroke: Stroke?,
+    onRestroke: (Stroke) -> Unit,
 ) {
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp),
@@ -494,9 +516,9 @@ private fun Options(
             return@Row
         }
         if (tool == Tool.SELECT) {
-            // With a shape selected, its colours take the hint's place; a blur has none.
+            // With a shape selected, its colours and thickness take the hint's place; a blur has no colour.
             val current = selectedShape?.color
-            if (selectedShape == null) {
+            if (selectedShape == null || selectedStroke == null) {
                 Text(
                     stringResource(R.string.editor_select_hint),
                     style = MaterialTheme.typography.bodyMedium,
@@ -505,18 +527,20 @@ private fun Options(
                 )
             } else {
                 Row(
-                    Modifier.weight(1f).horizontalScroll(rememberScrollState()).selectableGroup(),
+                    Modifier.weight(1f).horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
                 ) {
                     if (current != null) {
-                        Palette.forEachIndexed { index, value ->
-                            Swatch(Color(value), stringResource(ColorNames[index]), selected = value == current) { onRecolor(index) }
+                        Row(Modifier.selectableGroup()) {
+                            Palette.forEachIndexed { index, value ->
+                                Swatch(Color(value), stringResource(ColorNames[index]), selected = value == current) { onRecolor(index) }
+                            }
                         }
+                        Spacer(Modifier.width(12.dp))
                     }
+                    StrokeButton(selectedStroke, onRestroke)
                 }
-            }
-            IconButton(onClick = onDelete, enabled = selectedShape != null) {
-                Icon(painterResource(R.drawable.ic_trash), contentDescription = stringResource(R.string.editor_delete_shape))
             }
             return@Row
         }
