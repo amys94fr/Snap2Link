@@ -94,9 +94,15 @@ winget install amys94fr.Snap2Link
 
 Download the universal `.dmg` from the [Releases page](https://github.com/amys94fr/Snap2Link/releases/latest), open it, and drag Snap2Link into Applications. A single binary runs natively on both Apple Silicon and Intel.
 
-The app is **not yet notarised**, so the first launch needs a manual override: right-click the app in Finder → *Open* → *Open* in the dialog. Subsequent launches behave normally.
+The app is **not yet notarised**, so macOS blocks the first launch. To allow it:
 
-The first capture will prompt for **Screen Recording permission** in System Preferences → Security & Privacy → Screen Recording. Grant it and re-launch.
+1. Open Snap2Link from Applications once, then close the warning (choose *Done*, not *Move to Trash*).
+2. Open *System Settings → Privacy & Security*, scroll down to *Security* and click **Open Anyway** next to Snap2Link. The button shows for about an hour after the blocked launch.
+3. Confirm with *Open*, and enter your password if asked. Later launches behave normally.
+
+On macOS 14 Sonoma and earlier, Control-click (or right-click) the app in Finder and choose *Open* instead. macOS 15 Sequoia removed that shortcut.
+
+The first capture asks for **Screen Recording permission**: *System Settings → Privacy & Security → Screen & System Audio Recording* (*Screen Recording* on macOS 13 and 14, *System Preferences → Security & Privacy* on macOS 12). Turn on Snap2Link and re-launch it.
 
 ### Linux
 
