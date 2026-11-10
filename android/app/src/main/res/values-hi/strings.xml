@@ -172,4 +172,6 @@
     <string name="editor_size_large">बड़ा</string>
     <string name="editor_text_edit_title">टेक्स्ट बदलें</string>
     <string name="editor_text_save">सेव करें</string>
+    <string name="editor_swipe_tip">सुझाव: पिछला बदलाव हटाने के लिए दो उँगलियों से बाईं ओर, और उसे दोबारा करने के लिए दाईं ओर स्वाइप करें।</string>
+    <string name="editor_tip_ok">समझ गए</string>
 </resources>

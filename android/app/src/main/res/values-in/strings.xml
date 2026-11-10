@@ -172,4 +172,6 @@
     <string name="editor_size_large">Besar</string>
     <string name="editor_text_edit_title">Edit teks</string>
     <string name="editor_text_save">Simpan</string>
+    <string name="editor_swipe_tip">Tips: geser dua jari ke kiri untuk mengurungkan, ke kanan untuk mengulangi.</string>
+    <string name="editor_tip_ok">Mengerti</string>
 </resources>

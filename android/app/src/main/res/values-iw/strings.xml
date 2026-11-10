@@ -172,4 +172,6 @@
     <string name="editor_size_large">גדול</string>
     <string name="editor_text_edit_title">עריכת הטקסט</string>
     <string name="editor_text_save">שמירה</string>
+    <string name="editor_swipe_tip">טיפ: מחליקים בשתי אצבעות ימינה כדי לבטל, ושמאלה כדי לבצע שוב.</string>
+    <string name="editor_tip_ok">הבנתי</string>
 </resources>

@@ -169,5 +169,7 @@
   "editor.size.medium": "Medium",
   "editor.size.large": "Large",
   "editor.text_edit_title": "Edit text",
-  "editor.text_save": "Save"
+  "editor.text_save": "Save",
+  "editor.swipe_tip": "Tip: swipe two fingers left to undo, right to redo.",
+  "editor.tip_ok": "Got it"
 }

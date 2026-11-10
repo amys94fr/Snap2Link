@@ -172,4 +172,6 @@
     <string name="editor_size_large">Duży</string>
     <string name="editor_text_edit_title">Edytuj tekst</string>
     <string name="editor_text_save">Zapisz</string>
+    <string name="editor_swipe_tip">Wskazówka: przesuń dwoma palcami w lewo, aby cofnąć, i w prawo, aby ponowić.</string>
+    <string name="editor_tip_ok">Rozumiem</string>
 </resources>

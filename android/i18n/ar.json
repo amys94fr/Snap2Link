@@ -169,5 +169,7 @@
   "editor.size.medium": "متوسط",
   "editor.size.large": "كبير",
   "editor.text_edit_title": "تعديل النص",
-  "editor.text_save": "حفظ"
+  "editor.text_save": "حفظ",
+  "editor.swipe_tip": "نصيحة: اسحب بإصبعين إلى اليمين للتراجع، وإلى اليسار للإعادة.",
+  "editor.tip_ok": "حسنًا"
 }

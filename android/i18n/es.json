@@ -169,5 +169,7 @@
   "editor.size.medium": "Mediano",
   "editor.size.large": "Grande",
   "editor.text_edit_title": "Editar texto",
-  "editor.text_save": "Guardar"
+  "editor.text_save": "Guardar",
+  "editor.swipe_tip": "Consejo: desliza dos dedos a la izquierda para deshacer y a la derecha para rehacer.",
+  "editor.tip_ok": "Entendido"
 }

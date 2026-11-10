@@ -172,4 +172,6 @@
     <string name="editor_size_large">Groß</string>
     <string name="editor_text_edit_title">Text bearbeiten</string>
     <string name="editor_text_save">Speichern</string>
+    <string name="editor_swipe_tip">Tipp: Wischen Sie mit zwei Fingern nach links, um etwas rückgängig zu machen, und nach rechts, um es wiederherzustellen.</string>
+    <string name="editor_tip_ok">Verstanden</string>
 </resources>

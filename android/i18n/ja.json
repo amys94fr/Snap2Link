@@ -169,5 +169,7 @@
   "editor.size.medium": "中",
   "editor.size.large": "大",
   "editor.text_edit_title": "テキストを編集",
-  "editor.text_save": "保存"
+  "editor.text_save": "保存",
+  "editor.swipe_tip": "ヒント：2本指で左にスワイプすると元に戻し、右にスワイプするとやり直します。",
+  "editor.tip_ok": "OK"
 }

@@ -169,5 +169,7 @@
   "editor.size.medium": "Orta",
   "editor.size.large": "Büyük",
   "editor.text_edit_title": "Metni düzenle",
-  "editor.text_save": "Kaydet"
+  "editor.text_save": "Kaydet",
+  "editor.swipe_tip": "İpucu: geri almak için iki parmağınızı sola, yinelemek için sağa kaydırın.",
+  "editor.tip_ok": "Anladım"
 }

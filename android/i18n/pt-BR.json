@@ -169,5 +169,7 @@
   "editor.size.medium": "Médio",
   "editor.size.large": "Grande",
   "editor.text_edit_title": "Editar texto",
-  "editor.text_save": "Salvar"
+  "editor.text_save": "Salvar",
+  "editor.swipe_tip": "Dica: deslize dois dedos para a esquerda para desfazer e para a direita para refazer.",
+  "editor.tip_ok": "Entendi"
 }

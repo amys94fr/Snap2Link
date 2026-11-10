@@ -172,4 +172,6 @@
     <string name="editor_size_large">Grande</string>
     <string name="editor_text_edit_title">Modifica testo</string>
     <string name="editor_text_save">Salva</string>
+    <string name="editor_swipe_tip">Suggerimento: scorri con due dita verso sinistra per annullare, verso destra per ripetere.</string>
+    <string name="editor_tip_ok">Ho capito</string>
 </resources>

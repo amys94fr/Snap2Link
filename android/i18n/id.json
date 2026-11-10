@@ -169,5 +169,7 @@
   "editor.size.medium": "Sedang",
   "editor.size.large": "Besar",
   "editor.text_edit_title": "Edit teks",
-  "editor.text_save": "Simpan"
+  "editor.text_save": "Simpan",
+  "editor.swipe_tip": "Tips: geser dua jari ke kiri untuk mengurungkan, ke kanan untuk mengulangi.",
+  "editor.tip_ok": "Mengerti"
 }

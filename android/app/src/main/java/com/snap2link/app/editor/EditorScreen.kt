@@ -1,6 +1,12 @@
 package com.snap2link.app.editor
 
 import android.app.Activity
+import androidx.core.content.edit
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.widthIn
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
@@ -111,6 +117,10 @@ fun EditorScreen(
     val chosen = selected?.takeIf { tool == Tool.SELECT && it in edits.now.shapes.indices }
 
     // Light status bar icons on the dark editor, and back as they were when it closes.
+    // The two-finger swipe can't be seen: a tip says so the first time, and never again.
+    val context = LocalContext.current
+    var tip by remember { mutableStateOf(!SwipeTip.seen(context)) }
+    LaunchedEffect(Unit) { if (tip) SwipeTip.markSeen(context) }
     val view = LocalView.current
     DisposableEffect(view) {
         val window = (view.context as? Activity)?.window
@@ -144,28 +154,32 @@ fun EditorScreen(
                         }
                     },
                 )
-                Board(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    renderer = renderer,
-                    edits = edits,
-                    tool = tool,
-                    color = color,
-                    stroke = stroke,
-                    sizes = sizes,
-                    onEdit = onEdit,
-                    onText = { writing = Writing.New(it) },
-                    onEditText = { index, text -> writing = Writing.Existing(index, text) },
-                    selected = chosen,
-                    onSelect = { selected = it },
-                    onUndo = {
-                        selected = null
-                        onEdit(edits.undo())
-                    },
-                    onRedo = {
-                        selected = null
-                        onEdit(edits.redo())
-                    },
-                )
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    Board(
+                        modifier = Modifier.fillMaxSize(),
+                        renderer = renderer,
+                        edits = edits,
+                        tool = tool,
+                        color = color,
+                        stroke = stroke,
+                        sizes = sizes,
+                        onEdit = onEdit,
+                        onText = { writing = Writing.New(it) },
+                        onEditText = { index, text -> writing = Writing.Existing(index, text) },
+                        selected = chosen,
+                        onSelect = { selected = it },
+                        onUndo = {
+                            selected = null
+                            onEdit(edits.undo())
+                        },
+                        onRedo = {
+                            selected = null
+                            onEdit(edits.redo())
+                        },
+                        onSwipe = { tip = false },
+                    )
+                    if (tip) SwipeTipBanner(Modifier.align(Alignment.BottomCenter), onDismiss = { tip = false })
+                }
                 Options(
                     tool = tool,
                     colorIndex = colorIndex,
@@ -281,6 +295,7 @@ private fun Board(
     onSelect: (Int?) -> Unit,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
+    onSwipe: () -> Unit,
 ) {
     val picture = edits.now
     val full = remember(renderer) { Box.of(renderer.source.width, renderer.source.height) }
@@ -310,6 +325,7 @@ private fun Board(
     val latestOnSelect by rememberUpdatedState(onSelect)
     val latestOnUndo by rememberUpdatedState(onUndo)
     val latestOnRedo by rememberUpdatedState(onRedo)
+    val latestOnSwipe by rememberUpdatedState(onSwipe)
     val swipe = with(density) { 48.dp.toPx() }
     // Undo goes back, which is to the right in a right-to-left language, as the arrows show.
     val rightToLeft = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -345,6 +361,7 @@ private fun Board(
                             if (!done && abs(dx) > swipe && abs(dx) > abs(y - startY) * 1.5f) {
                                 done = true
                                 if ((dx < 0) != rightToLeft) latestOnUndo() else latestOnRedo()
+                                latestOnSwipe()
                             }
                         }
                         // Once two fingers touched, the rest of the gesture is theirs, even when one lifts first.
@@ -803,4 +820,42 @@ private fun TextDialog(initial: String, editing: Boolean, onDismiss: () -> Unit,
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.annotator_cancel)) }
         },
     )
+}
+
+/** Whether the two-finger tip was shown, kept on the phone. */
+private object SwipeTip {
+    private const val PREFS = "editor"
+    private const val KEY = "swipe_tip_seen"
+
+    fun seen(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY, false)
+
+    fun markSeen(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit { putBoolean(KEY, true) }
+    }
+}
+
+@Composable
+private fun SwipeTipBanner(modifier: Modifier, onDismiss: () -> Unit) {
+    Surface(
+        modifier = modifier.padding(12.dp).widthIn(max = 520.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        shadowElevation = 6.dp,
+    ) {
+        Row(
+            Modifier
+                .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.editor_swipe_tip),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp),
+            )
+            TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.editor_tip_ok))
+            }
+        }
+    }
 }

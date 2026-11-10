@@ -169,5 +169,7 @@
   "editor.size.medium": "Середній",
   "editor.size.large": "Великий",
   "editor.text_edit_title": "Змінити текст",
-  "editor.text_save": "Зберегти"
+  "editor.text_save": "Зберегти",
+  "editor.swipe_tip": "Порада: проведіть двома пальцями ліворуч, щоб скасувати, і праворуч, щоб повторити.",
+  "editor.tip_ok": "Зрозуміло"
 }

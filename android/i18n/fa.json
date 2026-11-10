@@ -169,5 +169,7 @@
   "editor.size.medium": "متوسط",
   "editor.size.large": "بزرگ",
   "editor.text_edit_title": "ویرایش متن",
-  "editor.text_save": "ذخیره"
+  "editor.text_save": "ذخیره",
+  "editor.swipe_tip": "نکته: برای واگرد با دو انگشت به راست بکشید و برای ازنو به چپ.",
+  "editor.tip_ok": "متوجه شدم"
 }

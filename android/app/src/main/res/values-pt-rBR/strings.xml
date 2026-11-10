@@ -172,4 +172,6 @@
     <string name="editor_size_large">Grande</string>
     <string name="editor_text_edit_title">Editar texto</string>
     <string name="editor_text_save">Salvar</string>
+    <string name="editor_swipe_tip">Dica: deslize dois dedos para a esquerda para desfazer e para a direita para refazer.</string>
+    <string name="editor_tip_ok">Entendi</string>
 </resources>

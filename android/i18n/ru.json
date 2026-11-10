@@ -169,5 +169,7 @@
   "editor.size.medium": "Средний",
   "editor.size.large": "Большой",
   "editor.text_edit_title": "Изменить текст",
-  "editor.text_save": "Сохранить"
+  "editor.text_save": "Сохранить",
+  "editor.swipe_tip": "Совет: проведите двумя пальцами влево, чтобы отменить, и вправо, чтобы повторить.",
+  "editor.tip_ok": "Понятно"
 }

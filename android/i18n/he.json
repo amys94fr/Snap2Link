@@ -169,5 +169,7 @@
   "editor.size.medium": "בינוני",
   "editor.size.large": "גדול",
   "editor.text_edit_title": "עריכת הטקסט",
-  "editor.text_save": "שמירה"
+  "editor.text_save": "שמירה",
+  "editor.swipe_tip": "טיפ: מחליקים בשתי אצבעות ימינה כדי לבטל, ושמאלה כדי לבצע שוב.",
+  "editor.tip_ok": "הבנתי"
 }

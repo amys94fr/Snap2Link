@@ -169,5 +169,7 @@
   "editor.size.medium": "Medio",
   "editor.size.large": "Grande",
   "editor.text_edit_title": "Modifica testo",
-  "editor.text_save": "Salva"
+  "editor.text_save": "Salva",
+  "editor.swipe_tip": "Suggerimento: scorri con due dita verso sinistra per annullare, verso destra per ripetere.",
+  "editor.tip_ok": "Ho capito"
 }
