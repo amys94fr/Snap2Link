@@ -11,8 +11,8 @@ android {
         applicationId = "com.snap2link.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4
-        versionName = "0.4.0"
+        versionCode = 5
+        versionName = "0.4.1"
     }
 
     // The release key lives in the CI's secrets, never in the repository.
