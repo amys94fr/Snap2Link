@@ -7,6 +7,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
@@ -62,9 +64,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke as DrawStroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -75,6 +79,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.sp
@@ -83,6 +88,7 @@ import androidx.core.graphics.withClip
 import androidx.core.view.WindowCompat
 import com.snap2link.app.R
 import com.snap2link.app.ui.Snap2LinkTheme
+import kotlin.math.abs
 import kotlin.math.hypot
 
 /** Crop and mark up a screenshot before it is sent, as the desktop annotator does. */
@@ -151,6 +157,14 @@ fun EditorScreen(
                     onEditText = { index, text -> writing = Writing.Existing(index, text) },
                     selected = chosen,
                     onSelect = { selected = it },
+                    onUndo = {
+                        selected = null
+                        onEdit(edits.undo())
+                    },
+                    onRedo = {
+                        selected = null
+                        onEdit(edits.redo())
+                    },
                 )
                 Options(
                     tool = tool,
@@ -265,6 +279,8 @@ private fun Board(
     onEditText: (index: Int, text: String) -> Unit,
     selected: Int?,
     onSelect: (Int?) -> Unit,
+    onUndo: () -> Unit,
+    onRedo: () -> Unit,
 ) {
     val picture = edits.now
     val full = remember(renderer) { Box.of(renderer.source.width, renderer.source.height) }
@@ -292,6 +308,11 @@ private fun Board(
     val latestOnText by rememberUpdatedState(onText)
     val latestOnEditText by rememberUpdatedState(onEditText)
     val latestOnSelect by rememberUpdatedState(onSelect)
+    val latestOnUndo by rememberUpdatedState(onUndo)
+    val latestOnRedo by rememberUpdatedState(onRedo)
+    val swipe = with(density) { 48.dp.toPx() }
+    // Undo goes back, which is to the right in a right-to-left language, as the arrows show.
+    val rightToLeft = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     val description = stringResource(R.string.editor_board)
     Canvas(
@@ -299,6 +320,38 @@ private fun Board(
             .clipToBounds()
             .onSizeChanged { area = it }
             .semantics { contentDescription = description }
+            // Two fingers swiped sideways undo or redo. This runs before the other gestures and
+            // takes the events from them, so a mark begun by the first finger is dropped.
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    var twoFingers = false
+                    var startX = 0f
+                    var startY = 0f
+                    var done = false
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        val down = event.changes.filter { it.pressed }
+                        if (down.isEmpty()) break
+                        if (down.size >= 2) {
+                            val x = down.map { it.position.x }.average().toFloat()
+                            val y = down.map { it.position.y }.average().toFloat()
+                            if (!twoFingers) {
+                                twoFingers = true
+                                startX = x
+                                startY = y
+                            }
+                            val dx = x - startX
+                            if (!done && abs(dx) > swipe && abs(dx) > abs(y - startY) * 1.5f) {
+                                done = true
+                                if ((dx < 0) != rightToLeft) latestOnUndo() else latestOnRedo()
+                            }
+                        }
+                        // Once two fingers touched, the rest of the gesture is theirs, even when one lifts first.
+                        if (twoFingers) event.changes.forEach { it.consume() }
+                    }
+                }
+            }
             .pointerInput(tool) {
                 detectTapGestures { offset ->
                     val f = latestFit ?: return@detectTapGestures
