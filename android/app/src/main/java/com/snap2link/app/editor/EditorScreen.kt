@@ -184,11 +184,17 @@ fun EditorScreen(
                     tool = tool,
                     colorIndex = colorIndex,
                     stroke = stroke,
-                    canResetCrop = edits.now.crop != Box.of(renderer.source.width, renderer.source.height),
+                    canResetCrop = edits.now.crop != Box.of(renderer.width(edits.now.turns), renderer.height(edits.now.turns)),
                     onColor = { colorIndex = it },
                     onStroke = { stroke = it },
+                    onRotate = {
+                        val turns = edits.now.turns
+                        selected = null
+                        onEdit(edits.then(edits.now.turned(renderer.width(turns), renderer.height(turns), renderer::textBox)))
+                    },
                     onResetCrop = {
-                        onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.source.width, renderer.source.height))))
+                        val turns = edits.now.turns
+                        onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.width(turns), renderer.height(turns)))))
                     },
                     selectedShape = chosen?.let { edits.now.shapes[it] },
                     onRecolor = { index ->
@@ -298,7 +304,7 @@ private fun Board(
     onSwipe: () -> Unit,
 ) {
     val picture = edits.now
-    val full = remember(renderer) { Box.of(renderer.source.width, renderer.source.height) }
+    val full = Box.of(renderer.width(picture.turns), renderer.height(picture.turns))
     val density = LocalDensity.current
     val margin = with(density) { 20.dp.toPx() }
     val reach = with(density) { 28.dp.toPx() }
@@ -312,9 +318,9 @@ private fun Board(
     // While cropping the whole image shows; otherwise only what is kept.
     val shown = if (tool == Tool.CROP) full else picture.crop
 
-    // Two fingers zoom in. Going in or out of cropping shows another area: the view starts over.
+    // Two fingers zoom in. Going in or out of cropping, or turning the image, shows another area: the view starts over.
     var zoom by remember { mutableStateOf(Zoom()) }
-    LaunchedEffect(tool == Tool.CROP) { zoom = Zoom() }
+    LaunchedEffect(tool == Tool.CROP, picture.turns) { zoom = Zoom() }
     val fit = if (area == IntSize.Zero) {
         null
     } else {
@@ -325,6 +331,7 @@ private fun Board(
 
     // Gestures outlive recompositions: they read the latest values through these.
     val latestFit by rememberUpdatedState(fit)
+    val latestFull by rememberUpdatedState(full)
     val latestEdits by rememberUpdatedState(edits)
     val latestColor by rememberUpdatedState(color)
     val latestStroke by rememberUpdatedState(stroke)
@@ -434,7 +441,7 @@ private fun Board(
             .pointerInput(tool) {
                 var start = Pt(0f, 0f)
                 var handle: Handle? = null
-                var startCrop = full
+                var startCrop = latestFull
                 var grip: Grip? = null
                 detectDragGestures(
                     onDragStart = { offset ->
@@ -469,7 +476,7 @@ private fun Board(
                         val p = f.toImage(change.position.x, change.position.y)
                         if (tool == Tool.CROP) {
                             val h = handle ?: return@detectDragGestures
-                            draftCrop = Crop.drag(startCrop, h, p.x - start.x, p.y - start.y, full, sizes.unit * 24)
+                            draftCrop = Crop.drag(startCrop, h, p.x - start.x, p.y - start.y, latestFull, sizes.unit * 24)
                         } else if (tool == Tool.SELECT) {
                             val (index, _) = moving ?: return@detectDragGestures
                             val original = latestEdits.now.shapes[index]
@@ -525,8 +532,8 @@ private fun Board(
                 translate(f.offsetX, f.offsetY)
                 scale(f.scale, f.scale)
                 translate(-shown.left, -shown.top)
-                renderer.draw(this, shapes)
-                draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it) }
+                renderer.draw(this, shapes, picture.turns)
+                draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it, picture.turns) }
             }
         }
         // Blurring on every move would be slow: a dashed frame stands in while drawing, as on the desktop.
@@ -628,6 +635,7 @@ private fun Options(
     canResetCrop: Boolean,
     onColor: (Int) -> Unit,
     onStroke: (Stroke) -> Unit,
+    onRotate: () -> Unit,
     onResetCrop: () -> Unit,
     selectedShape: Shape?,
     onRecolor: (Int) -> Unit,
@@ -645,6 +653,9 @@ private fun Options(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
+            IconButton(onClick = onRotate) {
+                Icon(painterResource(R.drawable.ic_rotate), contentDescription = stringResource(R.string.editor_rotate))
+            }
             TextButton(onClick = onResetCrop, enabled = canResetCrop, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.editor_crop_reset))
             }

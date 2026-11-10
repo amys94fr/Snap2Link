@@ -2,6 +2,7 @@ package com.snap2link.app.editor
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
@@ -33,15 +34,30 @@ class Renderer(val source: Bitmap) {
         strokeJoin = Paint.Join.ROUND
     }
 
-    /** Blurred pieces, made once per shape: blurring on every frame would be slow. */
-    private val blurred = HashMap<Shape.Blur, Bitmap>()
+    /** Blurred pieces, made once per shape and turn: blurring on every frame would be slow. */
+    private val blurred = HashMap<Pair<Int, Shape.Blur>, Bitmap>()
 
-    fun draw(canvas: Canvas, shapes: List<Shape>) {
-        canvas.drawBitmap(source, 0f, 0f, image)
-        shapes.forEach { draw(canvas, it) }
+    /** The screenshot turned a quarter to the right [turns] times, made once each. */
+    private val turned = HashMap<Int, Bitmap>()
+
+    fun image(turns: Int): Bitmap {
+        val t = turns.mod(4)
+        if (t == 0) return source
+        return turned.getOrPut(t) {
+            Bitmap.createBitmap(source, 0, 0, source.width, source.height, Matrix().apply { postRotate(90f * t) }, true)
+        }
     }
 
-    fun draw(canvas: Canvas, shape: Shape) {
+    fun width(turns: Int) = if (turns % 2 == 0) source.width else source.height
+
+    fun height(turns: Int) = if (turns % 2 == 0) source.height else source.width
+
+    fun draw(canvas: Canvas, shapes: List<Shape>, turns: Int) {
+        canvas.drawBitmap(image(turns), 0f, 0f, image)
+        shapes.forEach { draw(canvas, it, turns) }
+    }
+
+    fun draw(canvas: Canvas, shape: Shape, turns: Int) {
         when (shape) {
             is Shape.Pen -> {
                 if (shape.points.isEmpty()) return
@@ -77,7 +93,7 @@ class Renderer(val source: Bitmap) {
                 canvas.drawText(shape.text, shape.at.x, baseline, text)
             }
             is Shape.Blur -> {
-                val piece = blurred.getOrPut(shape) { blur(shape) }
+                val piece = blurred.getOrPut(turns to shape) { blur(shape, image(turns)) }
                 canvas.drawBitmap(piece, null, shape.box.rect(), image)
             }
         }
@@ -121,7 +137,7 @@ class Renderer(val source: Bitmap) {
      * doubled back to its size: each step averages its neighbours, which
      * gives a soft blur with no blocks.
      */
-    private fun blur(shape: Shape.Blur): Bitmap {
+    private fun blur(shape: Shape.Blur, source: Bitmap): Bitmap {
         val left = shape.box.left.roundToInt().coerceIn(0, source.width - 1)
         val top = shape.box.top.roundToInt().coerceIn(0, source.height - 1)
         val width = shape.box.width.roundToInt().coerceIn(1, source.width - left)
@@ -140,6 +156,7 @@ class Renderer(val source: Bitmap) {
 
     /** The image to send: the marks drawn on it, then the crop applied. */
     fun export(picture: Picture): Bitmap {
+        val source = image(picture.turns)
         val left = picture.crop.left.roundToInt().coerceIn(0, source.width - 1)
         val top = picture.crop.top.roundToInt().coerceIn(0, source.height - 1)
         val width = picture.crop.width.roundToInt().coerceIn(1, source.width - left)
@@ -147,7 +164,7 @@ class Renderer(val source: Bitmap) {
         val out = createBitmap(width, height)
         Canvas(out).apply {
             translate(-left.toFloat(), -top.toFloat())
-            draw(this, picture.shapes)
+            draw(this, picture.shapes, picture.turns)
         }
         return out
     }

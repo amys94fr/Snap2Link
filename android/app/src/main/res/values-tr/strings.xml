@@ -174,4 +174,5 @@
     <string name="editor_text_save">Kaydet</string>
     <string name="editor_swipe_tip">İpucu: geri almak için iki parmağınızı sola, yinelemek için sağa kaydırın. Yakınlaştırmak için parmaklarınızı açın.</string>
     <string name="editor_tip_ok">Anladım</string>
+    <string name="editor_rotate">Sağa döndür</string>
 </resources>

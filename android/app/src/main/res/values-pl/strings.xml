@@ -174,4 +174,5 @@
     <string name="editor_text_save">Zapisz</string>
     <string name="editor_swipe_tip">Wskazówka: przesuń dwoma palcami w lewo, aby cofnąć, i w prawo, aby ponowić. Rozsuń je, aby powiększyć.</string>
     <string name="editor_tip_ok">Rozumiem</string>
+    <string name="editor_rotate">Obróć w prawo</string>
 </resources>

@@ -171,5 +171,6 @@
   "editor.text_edit_title": "Text bearbeiten",
   "editor.text_save": "Speichern",
   "editor.swipe_tip": "Tipp: Wischen Sie mit zwei Fingern nach links, um etwas rückgängig zu machen, und nach rechts, um es wiederherzustellen. Spreizen Sie sie, um zu zoomen.",
-  "editor.tip_ok": "Verstanden"
+  "editor.tip_ok": "Verstanden",
+  "editor.rotate": "Nach rechts drehen"
 }

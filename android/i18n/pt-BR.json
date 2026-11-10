@@ -171,5 +171,6 @@
   "editor.text_edit_title": "Editar texto",
   "editor.text_save": "Salvar",
   "editor.swipe_tip": "Dica: deslize dois dedos para a esquerda para desfazer e para a direita para refazer. Afaste-os para ampliar.",
-  "editor.tip_ok": "Entendi"
+  "editor.tip_ok": "Entendi",
+  "editor.rotate": "Girar para a direita"
 }

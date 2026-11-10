@@ -171,5 +171,6 @@
   "editor.text_edit_title": "Modifier le texte",
   "editor.text_save": "Enregistrer",
   "editor.swipe_tip": "Astuce : glissez deux doigts vers la gauche pour annuler, vers la droite pour rétablir. Écartez-les pour zoomer.",
-  "editor.tip_ok": "Compris"
+  "editor.tip_ok": "Compris",
+  "editor.rotate": "Faire pivoter vers la droite"
 }

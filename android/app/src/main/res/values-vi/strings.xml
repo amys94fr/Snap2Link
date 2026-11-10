@@ -174,4 +174,5 @@
     <string name="editor_text_save">Lưu</string>
     <string name="editor_swipe_tip">Mẹo: vuốt hai ngón sang trái để hoàn tác, sang phải để làm lại. Tách hai ngón ra để phóng to.</string>
     <string name="editor_tip_ok">Đã hiểu</string>
+    <string name="editor_rotate">Xoay sang phải</string>
 </resources>

@@ -171,5 +171,6 @@
   "editor.text_edit_title": "Modifica testo",
   "editor.text_save": "Salva",
   "editor.swipe_tip": "Suggerimento: scorri con due dita verso sinistra per annullare, verso destra per ripetere. Allargale per ingrandire.",
-  "editor.tip_ok": "Ho capito"
+  "editor.tip_ok": "Ho capito",
+  "editor.rotate": "Ruota a destra"
 }

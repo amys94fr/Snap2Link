@@ -171,5 +171,6 @@
   "editor.text_edit_title": "تعديل النص",
   "editor.text_save": "حفظ",
   "editor.swipe_tip": "نصيحة: اسحب بإصبعين إلى اليمين للتراجع، وإلى اليسار للإعادة. باعد بينهما للتكبير.",
-  "editor.tip_ok": "حسنًا"
+  "editor.tip_ok": "حسنًا",
+  "editor.rotate": "تدوير لليمين"
 }

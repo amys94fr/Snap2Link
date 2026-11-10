@@ -171,5 +171,6 @@
   "editor.text_edit_title": "Edit text",
   "editor.text_save": "Save",
   "editor.swipe_tip": "Tip: swipe two fingers left to undo, right to redo. Spread them to zoom in.",
-  "editor.tip_ok": "Got it"
+  "editor.tip_ok": "Got it",
+  "editor.rotate": "Rotate right"
 }

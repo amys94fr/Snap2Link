@@ -174,4 +174,5 @@
     <string name="editor_text_save">Salva</string>
     <string name="editor_swipe_tip">Suggerimento: scorri con due dita verso sinistra per annullare, verso destra per ripetere. Allargale per ingrandire.</string>
     <string name="editor_tip_ok">Ho capito</string>
+    <string name="editor_rotate">Ruota a destra</string>
 </resources>

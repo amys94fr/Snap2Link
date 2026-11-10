@@ -171,5 +171,6 @@
   "editor.text_edit_title": "עריכת הטקסט",
   "editor.text_save": "שמירה",
   "editor.swipe_tip": "טיפ: מחליקים בשתי אצבעות ימינה כדי לבטל, ושמאלה כדי לבצע שוב. מרחיקים אותן זו מזו כדי להגדיל.",
-  "editor.tip_ok": "הבנתי"
+  "editor.tip_ok": "הבנתי",
+  "editor.rotate": "סיבוב ימינה"
 }

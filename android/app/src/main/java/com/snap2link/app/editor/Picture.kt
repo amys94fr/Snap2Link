@@ -75,8 +75,38 @@ class Sizes(width: Int, height: Int) {
     val smallest get() = unit * 4f
 }
 
-/** What is sent: the marks, and the part of the image to keep. */
-data class Picture(val shapes: List<Shape>, val crop: Box) {
+/**
+ * What is sent: the marks, the part of the image to keep, and how many
+ * quarter turns to the right the image took. Marks and crop are in the
+ * pixels of the turned image.
+ */
+data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0) {
+    /**
+     * A quarter turn to the right of an image now [width] x [height]: the
+     * marks and the crop turn with it. A text turns around its middle but
+     * stays level, so that it can still be read.
+     */
+    fun turned(width: Int, height: Int, textBox: (Shape.Text) -> Box): Picture {
+        val h = height.toFloat()
+        fun turn(p: Pt) = Pt(h - p.y, p.x)
+        fun turn(b: Box) = Box.of(turn(Pt(b.left, b.top)), turn(Pt(b.right, b.bottom)))
+        val shapes = shapes.map { shape ->
+            when (shape) {
+                is Shape.Pen -> shape.copy(points = shape.points.map(::turn))
+                is Shape.Rectangle -> shape.copy(box = turn(shape.box))
+                is Shape.Circle -> shape.copy(box = turn(shape.box))
+                is Shape.Arrow -> shape.copy(from = turn(shape.from), to = turn(shape.to))
+                is Shape.Blur -> shape.copy(box = turn(shape.box))
+                is Shape.Text -> {
+                    val box = textBox(shape)
+                    val middle = turn(Pt((box.left + box.right) / 2, (box.top + box.bottom) / 2))
+                    shape.copy(at = Pt(middle.x - box.width / 2, middle.y - box.height / 2))
+                }
+            }
+        }
+        return Picture(shapes, turn(crop), (turns + 1) % 4)
+    }
+
     companion object {
         fun blank(width: Int, height: Int) = Picture(emptyList(), Box.of(width, height))
     }

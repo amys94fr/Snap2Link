@@ -174,4 +174,5 @@
     <string name="editor_text_save">حفظ</string>
     <string name="editor_swipe_tip">نصيحة: اسحب بإصبعين إلى اليمين للتراجع، وإلى اليسار للإعادة. باعد بينهما للتكبير.</string>
     <string name="editor_tip_ok">حسنًا</string>
+    <string name="editor_rotate">تدوير لليمين</string>
 </resources>

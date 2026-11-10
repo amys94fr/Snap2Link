@@ -260,4 +260,47 @@ class PictureTest {
         assertEquals(500f, zoom.panX)
         assertEquals(8f, Zoom(6f).pinched(4f, 500f, 500f, 0f, 0f, 1000f, 1000f).scale)
     }
+
+    @Test
+    fun aQuarterTurnTurnsTheMarksAndTheCrop() {
+        val picture = Picture(
+            listOf(
+                Shape.Rectangle(Box(100f, 200f, 300f, 250f), red, 12f),
+                Shape.Arrow(Pt(0f, 0f), Pt(100f, 0f), red, 12f),
+            ),
+            crop = Box(0f, 0f, 1080f, 1200f),
+        )
+        val turned = picture.turned(1080, 2400, noText)
+        assertEquals(1, turned.turns)
+        assertEquals(Box(2150f, 100f, 2200f, 300f), (turned.shapes[0] as Shape.Rectangle).box)
+        assertEquals(Pt(2400f, 0f), (turned.shapes[1] as Shape.Arrow).from)
+        assertEquals(Pt(2400f, 100f), (turned.shapes[1] as Shape.Arrow).to)
+        assertEquals(Box(1200f, 0f, 2400f, 1080f), turned.crop)
+    }
+
+    @Test
+    fun fourQuarterTurnsGiveTheSamePicture() {
+        val text = Shape.Text(Pt(40f, 60f), "Here", red, 40f)
+        val picture = Picture(
+            listOf(Shape.Pen(listOf(Pt(1f, 2f), Pt(30f, 40f)), red, 12f), text, Shape.Blur(Box(5f, 5f, 50f, 80f), 6f)),
+            crop = Box(10f, 20f, 900f, 2000f),
+        )
+        var turned = picture
+        var width = 1080
+        var height = 2400
+        repeat(4) {
+            turned = turned.turned(width, height, noText)
+            width = height.also { height = width }
+        }
+        assertEquals(picture, turned)
+    }
+
+    @Test
+    fun aTurnedTextStaysLevelAroundItsMiddle() {
+        val text = Shape.Text(Pt(0f, 0f), "Here", red, 40f)
+        // The test's text box is 100 x 40: its middle (50, 20) goes to (2380, 50).
+        val turned = Picture(listOf(text), Box.of(1080, 2400)).turned(1080, 2400, noText).shapes[0] as Shape.Text
+        assertEquals(Pt(2330f, 30f), turned.at)
+        assertEquals(40f, turned.size)
+    }
 }

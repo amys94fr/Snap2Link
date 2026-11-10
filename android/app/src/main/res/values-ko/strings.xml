@@ -174,4 +174,5 @@
     <string name="editor_text_save">저장</string>
     <string name="editor_swipe_tip">팁: 두 손가락으로 왼쪽으로 밀면 실행 취소, 오른쪽으로 밀면 다시 실행됩니다. 두 손가락을 벌리면 확대됩니다.</string>
     <string name="editor_tip_ok">확인</string>
+    <string name="editor_rotate">오른쪽으로 회전</string>
 </resources>

@@ -171,5 +171,6 @@
   "editor.text_edit_title": "Sửa văn bản",
   "editor.text_save": "Lưu",
   "editor.swipe_tip": "Mẹo: vuốt hai ngón sang trái để hoàn tác, sang phải để làm lại. Tách hai ngón ra để phóng to.",
-  "editor.tip_ok": "Đã hiểu"
+  "editor.tip_ok": "Đã hiểu",
+  "editor.rotate": "Xoay sang phải"
 }
