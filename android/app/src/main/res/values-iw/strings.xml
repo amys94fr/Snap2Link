@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">היפוך אנכי</string>
     <string name="editor_tilt">סיבוב חופשי</string>
     <string name="editor_tilt_reset">ישר</string>
+    <string name="editor_ratio">יחס גובה-רוחב</string>
+    <string name="editor_ratio_free">חופשי</string>
+    <string name="editor_ratio_original">מקורי</string>
 </resources>

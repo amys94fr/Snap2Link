@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">लंबवत रूप से पलटें</string>
     <string name="editor_tilt">मुक्त घुमाव</string>
     <string name="editor_tilt_reset">सीधा</string>
+    <string name="editor_ratio">अनुपात</string>
+    <string name="editor_ratio_free">मुक्त</string>
+    <string name="editor_ratio_original">मूल</string>
 </resources>

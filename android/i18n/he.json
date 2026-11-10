@@ -177,5 +177,8 @@
   "editor.flip": "היפוך אופקי",
   "editor.flip_vertical": "היפוך אנכי",
   "editor.tilt": "סיבוב חופשי",
-  "editor.tilt_reset": "ישר"
+  "editor.tilt_reset": "ישר",
+  "editor.ratio": "יחס גובה-רוחב",
+  "editor.ratio_free": "חופשי",
+  "editor.ratio_original": "מקורי"
 }

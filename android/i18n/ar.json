@@ -177,5 +177,8 @@
   "editor.flip": "قلب أفقي",
   "editor.flip_vertical": "قلب عمودي",
   "editor.tilt": "تدوير حر",
-  "editor.tilt_reset": "مستقيم"
+  "editor.tilt_reset": "مستقيم",
+  "editor.ratio": "الأبعاد",
+  "editor.ratio_free": "حر",
+  "editor.ratio_original": "الأصلية"
 }

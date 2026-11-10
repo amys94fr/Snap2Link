@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">上下反転</string>
     <string name="editor_tilt">自由回転</string>
     <string name="editor_tilt_reset">まっすぐ</string>
+    <string name="editor_ratio">縦横比</string>
+    <string name="editor_ratio_free">自由</string>
+    <string name="editor_ratio_original">元の比率</string>
 </resources>

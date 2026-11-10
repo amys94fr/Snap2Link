@@ -177,5 +177,8 @@
   "editor.flip": "Horizontal spiegeln",
   "editor.flip_vertical": "Vertikal spiegeln",
   "editor.tilt": "Freie Drehung",
-  "editor.tilt_reset": "Gerade"
+  "editor.tilt_reset": "Gerade",
+  "editor.ratio": "Seitenverhältnis",
+  "editor.ratio_free": "Frei",
+  "editor.ratio_original": "Original"
 }

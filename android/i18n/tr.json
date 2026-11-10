@@ -177,5 +177,8 @@
   "editor.flip": "Yatay çevir",
   "editor.flip_vertical": "Dikey çevir",
   "editor.tilt": "Serbest döndürme",
-  "editor.tilt_reset": "Düz"
+  "editor.tilt_reset": "Düz",
+  "editor.ratio": "En boy oranı",
+  "editor.ratio_free": "Serbest",
+  "editor.ratio_original": "Orijinal"
 }

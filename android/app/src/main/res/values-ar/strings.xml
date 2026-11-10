@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">قلب عمودي</string>
     <string name="editor_tilt">تدوير حر</string>
     <string name="editor_tilt_reset">مستقيم</string>
+    <string name="editor_ratio">الأبعاد</string>
+    <string name="editor_ratio_free">حر</string>
+    <string name="editor_ratio_original">الأصلية</string>
 </resources>

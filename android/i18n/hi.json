@@ -177,5 +177,8 @@
   "editor.flip": "क्षैतिज रूप से पलटें",
   "editor.flip_vertical": "लंबवत रूप से पलटें",
   "editor.tilt": "मुक्त घुमाव",
-  "editor.tilt_reset": "सीधा"
+  "editor.tilt_reset": "सीधा",
+  "editor.ratio": "अनुपात",
+  "editor.ratio_free": "मुक्त",
+  "editor.ratio_original": "मूल"
 }

@@ -292,6 +292,75 @@ object Crop {
         }
         return Box(left, top, right, bottom)
     }
+
+    /**
+     * The largest frame [ratio] wide for 1 high inside [bounds], centred where
+     * [around] is centred, moved inside [bounds] if it has to.
+     */
+    fun withRatio(ratio: Float, around: Box, bounds: Box): Box {
+        val (w, h) = if (bounds.width / bounds.height > ratio) {
+            bounds.height * ratio to bounds.height
+        } else {
+            bounds.width to bounds.width / ratio
+        }
+        val x = ((around.left + around.right) / 2 - w / 2).coerceIn(bounds.left, bounds.right - w)
+        val y = ((around.top + around.bottom) / 2 - h / 2).coerceIn(bounds.top, bounds.bottom - h)
+        return Box(x, y, x + w, y + h)
+    }
+
+    /**
+     * [drag] keeping the frame [ratio] wide for 1 high. A corner pulls from
+     * the opposite one; an edge pulls from the opposite edge, the frame
+     * staying centred the other way. Never out of [bounds].
+     */
+    fun drag(start: Box, handle: Handle, dx: Float, dy: Float, bounds: Box, smallest: Float, ratio: Float): Box {
+        if (handle == Handle.MOVE) return drag(start, handle, dx, dy, bounds, smallest)
+        val free = drag(start, handle, dx, dy, bounds, smallest)
+        val left = handle in setOf(Handle.LEFT, Handle.TOP_LEFT, Handle.BOTTOM_LEFT)
+        val up = handle in setOf(Handle.TOP, Handle.TOP_LEFT, Handle.TOP_RIGHT)
+        return when (handle) {
+            Handle.LEFT, Handle.RIGHT -> {
+                val middle = (start.top + start.bottom) / 2
+                val room = 2 * min(middle - bounds.top, bounds.bottom - middle)
+                val height = min(free.width / ratio, room)
+                val width = height * ratio
+                val x = if (left) start.right - width else start.left
+                Box(x, middle - height / 2, x + width, middle + height / 2)
+            }
+            Handle.TOP, Handle.BOTTOM -> {
+                val middle = (start.left + start.right) / 2
+                val room = 2 * min(middle - bounds.left, bounds.right - middle)
+                val width = min(free.height * ratio, room)
+                val height = width / ratio
+                val y = if (up) start.bottom - height else start.top
+                Box(middle - width / 2, y, middle + width / 2, y + height)
+            }
+            else -> {
+                // The corner opposite the finger stays; the side that moved most leads.
+                val anchorX = if (left) start.right else start.left
+                val anchorY = if (up) start.bottom else start.top
+                var width = max(free.width, free.height * ratio)
+                var height = width / ratio
+                val roomX = if (left) anchorX - bounds.left else bounds.right - anchorX
+                val roomY = if (up) anchorY - bounds.top else bounds.bottom - anchorY
+                val shrink = min(1f, min(roomX / width, roomY / height))
+                width *= shrink
+                height *= shrink
+                val x = if (left) anchorX - width else anchorX
+                val y = if (up) anchorY - height else anchorY
+                Box(x, y, x + width, y + height)
+            }
+        }
+    }
+}
+
+/** Fixed proportions for the crop, width for 1 of height. Free and the image's own come beside them. */
+enum class Ratio(val value: Float, val label: String) {
+    SQUARE(1f, "1:1"),
+    FOUR_THREE(4f / 3f, "4:3"),
+    THREE_FOUR(3f / 4f, "3:4"),
+    WIDE(16f / 9f, "16:9"),
+    TALL(9f / 16f, "9:16"),
 }
 
 /** How [source] fits a view of [width] x [height], centred, with [margin] around it. */

@@ -177,5 +177,8 @@
   "editor.flip": "Lật ngang",
   "editor.flip_vertical": "Lật dọc",
   "editor.tilt": "Xoay tự do",
-  "editor.tilt_reset": "Thẳng"
+  "editor.tilt_reset": "Thẳng",
+  "editor.ratio": "Tỷ lệ",
+  "editor.ratio_free": "Tự do",
+  "editor.ratio_original": "Gốc"
 }

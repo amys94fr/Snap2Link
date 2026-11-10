@@ -177,5 +177,8 @@
   "editor.flip": "Capovolgi orizzontalmente",
   "editor.flip_vertical": "Capovolgi verticalmente",
   "editor.tilt": "Rotazione libera",
-  "editor.tilt_reset": "Dritto"
+  "editor.tilt_reset": "Dritto",
+  "editor.ratio": "Proporzioni",
+  "editor.ratio_free": "Libere",
+  "editor.ratio_original": "Originali"
 }

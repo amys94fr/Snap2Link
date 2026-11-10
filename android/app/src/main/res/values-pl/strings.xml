@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Odbij w pionie</string>
     <string name="editor_tilt">Swobodny obrót</string>
     <string name="editor_tilt_reset">Prosto</string>
+    <string name="editor_ratio">Proporcje</string>
+    <string name="editor_ratio_free">Dowolne</string>
+    <string name="editor_ratio_original">Oryginalne</string>
 </resources>

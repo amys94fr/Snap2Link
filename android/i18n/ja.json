@@ -177,5 +177,8 @@
   "editor.flip": "左右反転",
   "editor.flip_vertical": "上下反転",
   "editor.tilt": "自由回転",
-  "editor.tilt_reset": "まっすぐ"
+  "editor.tilt_reset": "まっすぐ",
+  "editor.ratio": "縦横比",
+  "editor.ratio_free": "自由",
+  "editor.ratio_original": "元の比率"
 }

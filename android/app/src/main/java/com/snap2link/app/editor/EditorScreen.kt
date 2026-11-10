@@ -40,6 +40,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -116,9 +119,12 @@ fun EditorScreen(
     var writing by remember { mutableStateOf<Writing?>(null) }
     var selected by remember { mutableStateOf<Int?>(null) }
     var tilting by remember { mutableStateOf<Float?>(null) }
+    // "free", "original" or a Ratio's name.
+    var proportion by rememberSaveable { mutableStateOf(FREE) }
     val baseWidth = renderer.width(edits.now.turns).toFloat()
     val baseHeight = renderer.height(edits.now.turns).toFloat()
     val preview = tilting?.let { edits.now.angled(it, baseWidth, baseHeight, renderer::textBox) }
+    val ratio = ratioOf(proportion, baseWidth, baseHeight)
     val color = Palette[colorIndex]
     // An undo can remove the selected shape: the selection only holds while it points at one.
     val chosen = selected?.takeIf { tool == Tool.SELECT && it in edits.now.shapes.indices }
@@ -167,6 +173,7 @@ fun EditorScreen(
                         renderer = renderer,
                         edits = edits,
                         preview = preview,
+                        ratio = ratio,
                         tool = tool,
                         color = color,
                         stroke = stroke,
@@ -198,11 +205,13 @@ fun EditorScreen(
                     onRotateLeft = {
                         val (width, height) = renderer.shownSize(edits.now)
                         selected = null
+                        proportion = turnedProportion(proportion)
                         onEdit(edits.then(edits.now.turnedLeft(width, height, renderer::textBox)))
                     },
                     onRotate = {
                         val (width, height) = renderer.shownSize(edits.now)
                         selected = null
+                        proportion = turnedProportion(proportion)
                         onEdit(edits.then(edits.now.turned(width, height, renderer::textBox)))
                     },
                     onFlip = {
@@ -215,7 +224,16 @@ fun EditorScreen(
                         onEdit(edits.then(edits.now.flippedUpsideDown(width, height, renderer::textBox)))
                     },
                     onResetCrop = {
+                        proportion = FREE
                         onEdit(edits.then(edits.now.copy(crop = renderer.whole(edits.now))))
+                    },
+                    proportion = proportion,
+                    onProportion = { choice ->
+                        proportion = choice
+                        ratioOf(choice, baseWidth, baseHeight)?.let { value ->
+                            val crop = Crop.withRatio(value, edits.now.crop, renderer.whole(edits.now))
+                            onEdit(edits.then(edits.now.copy(crop = crop)))
+                        }
                     },
                     angle = tilting ?: edits.now.angle,
                     onTilt = { tilting = it },
@@ -325,6 +343,7 @@ private fun Board(
     renderer: Renderer,
     edits: Edits,
     preview: Picture?,
+    ratio: Float?,
     tool: Tool,
     color: Int,
     stroke: Stroke,
@@ -367,6 +386,7 @@ private fun Board(
     // Gestures outlive recompositions: they read the latest values through these.
     val latestFit by rememberUpdatedState(fit)
     val latestFull by rememberUpdatedState(full)
+    val latestRatio by rememberUpdatedState(ratio)
     val latestEdits by rememberUpdatedState(edits)
     val latestColor by rememberUpdatedState(color)
     val latestStroke by rememberUpdatedState(stroke)
@@ -511,7 +531,10 @@ private fun Board(
                         val p = f.toImage(change.position.x, change.position.y)
                         if (tool == Tool.CROP) {
                             val h = handle ?: return@detectDragGestures
-                            draftCrop = Crop.drag(startCrop, h, p.x - start.x, p.y - start.y, latestFull, sizes.unit * 24)
+                            val dx = p.x - start.x
+                            val dy = p.y - start.y
+                            draftCrop = latestRatio?.let { Crop.drag(startCrop, h, dx, dy, latestFull, sizes.unit * 24, it) }
+                                ?: Crop.drag(startCrop, h, dx, dy, latestFull, sizes.unit * 24)
                         } else if (tool == Tool.SELECT) {
                             val (index, _) = moving ?: return@detectDragGestures
                             val original = latestEdits.now.shapes[index]
@@ -677,6 +700,8 @@ private fun Options(
     onFlip: () -> Unit,
     onFlipVertical: () -> Unit,
     onResetCrop: () -> Unit,
+    proportion: String,
+    onProportion: (String) -> Unit,
     angle: Float,
     onTilt: (Float) -> Unit,
     onTiltDone: () -> Unit,
@@ -712,9 +737,7 @@ private fun Options(
                         Icon(painterResource(R.drawable.ic_flip_vertical), contentDescription = stringResource(R.string.editor_flip_vertical))
                     }
                     Spacer(Modifier.weight(1f))
-                    TextButton(onClick = onResetCrop, enabled = canResetCrop, modifier = Modifier.heightIn(min = 48.dp)) {
-                        Text(stringResource(R.string.editor_crop_reset))
-                    }
+                    ProportionMenu(proportion, onProportion, canResetCrop, onResetCrop)
                 }
                 TiltSlider(angle, onTilt, onTiltDone, onTiltReset)
             }
@@ -999,4 +1022,67 @@ private fun TiltSlider(angle: Float, onTilt: (Float) -> Unit, onDone: () -> Unit
 private fun formatDegrees(angle: Float): String {
     val whole = angle.roundToInt().toFloat() == angle
     return (if (whole) angle.roundToInt().toString() else String.format(java.util.Locale.getDefault(), "%.1f", angle)) + "\u00B0"
+}
+
+private const val FREE = "free"
+private const val ORIGINAL = "original"
+
+/** The crop's proportion for [choice], width for 1 of height, or null when it is free. */
+private fun ratioOf(choice: String, width: Float, height: Float): Float? = when (choice) {
+    FREE -> null
+    ORIGINAL -> width / height
+    else -> Ratio.entries.firstOrNull { it.name == choice }?.value
+}
+
+/** After a quarter turn the crop is the other way round: 4:3 becomes 3:4. */
+private fun turnedProportion(choice: String): String = when (choice) {
+    Ratio.FOUR_THREE.name -> Ratio.THREE_FOUR.name
+    Ratio.THREE_FOUR.name -> Ratio.FOUR_THREE.name
+    Ratio.WIDE.name -> Ratio.TALL.name
+    Ratio.TALL.name -> Ratio.WIDE.name
+    else -> choice
+}
+
+/** The crop's proportions: free, the image's own or a fixed one, and "Whole image" at the end. */
+@Composable
+private fun ProportionMenu(choice: String, onChoice: (String) -> Unit, canReset: Boolean, onReset: () -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val free = stringResource(R.string.editor_ratio_free)
+    val original = stringResource(R.string.editor_ratio_original)
+    val options = listOf(FREE to free, ORIGINAL to original) + Ratio.entries.map { it.name to it.label }
+    val current = options.firstOrNull { it.first == choice }?.second ?: free
+    val label = stringResource(R.string.editor_ratio) + ": " + current
+    Box {
+        TextButton(
+            onClick = { open = true },
+            modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = label },
+        ) {
+            Icon(painterResource(R.drawable.ic_ratio), contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(current)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            options.forEach { (key, name) ->
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = {
+                        open = false
+                        onChoice(key)
+                    },
+                    leadingIcon = {
+                        if (key == choice) Icon(painterResource(R.drawable.ic_check), contentDescription = null)
+                    },
+                )
+            }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.editor_crop_reset)) },
+                enabled = canReset,
+                onClick = {
+                    open = false
+                    onReset()
+                },
+            )
+        }
+    }
 }

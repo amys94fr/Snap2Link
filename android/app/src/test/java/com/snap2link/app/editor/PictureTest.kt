@@ -427,4 +427,34 @@ class PictureTest {
         assertEquals(Tilt.inner(1080f, 2400f, 15f), tilted.crop)
         assertEquals(Box.of(1080, 2400), tilted.angled(0f, 1080f, 2400f, noText).crop)
     }
+
+    @Test
+    fun aRatioGivesTheLargestFrameOfThatShape() {
+        val square = Crop.withRatio(1f, around = image, bounds = image)
+        assertEquals(Box(0f, 660f, 1080f, 1740f), square)
+        val wide = Crop.withRatio(16f / 9f, around = Box(0f, 0f, 1080f, 600f), bounds = image)
+        assertEquals(1080f, wide.width, 0.01f)
+        assertEquals(607.5f, wide.height, 0.01f)
+        assertEquals(0f, wide.top, 0.01f)
+    }
+
+    @Test
+    fun aCornerKeepsTheRatioAndTheOppositeCorner() {
+        val start = Box(100f, 100f, 500f, 400f)
+        val crop = Crop.drag(start, Handle.BOTTOM_RIGHT, 200f, 0f, image, 72f, 4f / 3f)
+        assertEquals(Box(100f, 100f, 700f, 550f), crop)
+        val far = Crop.drag(start, Handle.BOTTOM_RIGHT, 5000f, 5000f, image, 72f, 4f / 3f)
+        assertEquals(1080f, far.right, 0.01f)
+        assertEquals(4f / 3f, far.width / far.height, 0.001f)
+    }
+
+    @Test
+    fun anEdgeKeepsTheRatioAndStaysCentred() {
+        val start = Box(100f, 100f, 500f, 400f)
+        val crop = Crop.drag(start, Handle.RIGHT, 100f, 0f, image, 72f, 4f / 3f)
+        assertEquals(500f, crop.width, 0.01f)
+        assertEquals(375f, crop.height, 0.01f)
+        assertEquals(250f, (crop.top + crop.bottom) / 2, 0.01f)
+        assertEquals(100f, crop.left, 0.01f)
+    }
 }

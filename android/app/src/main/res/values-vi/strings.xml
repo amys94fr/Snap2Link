@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Lật dọc</string>
     <string name="editor_tilt">Xoay tự do</string>
     <string name="editor_tilt_reset">Thẳng</string>
+    <string name="editor_ratio">Tỷ lệ</string>
+    <string name="editor_ratio_free">Tự do</string>
+    <string name="editor_ratio_original">Gốc</string>
 </resources>

@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Inverter verticalmente</string>
     <string name="editor_tilt">Rotação livre</string>
     <string name="editor_tilt_reset">Reto</string>
+    <string name="editor_ratio">Proporções</string>
+    <string name="editor_ratio_free">Livre</string>
+    <string name="editor_ratio_original">Original</string>
 </resources>

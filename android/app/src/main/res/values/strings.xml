@@ -181,4 +181,7 @@
     <string name="editor_flip_vertical">Flip vertically</string>
     <string name="editor_tilt">Free rotation</string>
     <string name="editor_tilt_reset">Straight</string>
+    <string name="editor_ratio">Proportions</string>
+    <string name="editor_ratio_free">Free</string>
+    <string name="editor_ratio_original">Original</string>
 </resources>

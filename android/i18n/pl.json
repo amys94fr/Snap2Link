@@ -177,5 +177,8 @@
   "editor.flip": "Odbij w poziomie",
   "editor.flip_vertical": "Odbij w pionie",
   "editor.tilt": "Swobodny obrót",
-  "editor.tilt_reset": "Prosto"
+  "editor.tilt_reset": "Prosto",
+  "editor.ratio": "Proporcje",
+  "editor.ratio_free": "Dowolne",
+  "editor.ratio_original": "Oryginalne"
 }

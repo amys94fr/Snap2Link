@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Balik vertikal</string>
     <string name="editor_tilt">Putar bebas</string>
     <string name="editor_tilt_reset">Lurus</string>
+    <string name="editor_ratio">Proporsi</string>
+    <string name="editor_ratio_free">Bebas</string>
+    <string name="editor_ratio_original">Asli</string>
 </resources>

@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">قرینهٔ عمودی</string>
     <string name="editor_tilt">چرخش آزاد</string>
     <string name="editor_tilt_reset">صاف</string>
+    <string name="editor_ratio">تناسب</string>
+    <string name="editor_ratio_free">آزاد</string>
+    <string name="editor_ratio_original">اصلی</string>
 </resources>

@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Отразить по вертикали</string>
     <string name="editor_tilt">Свободный поворот</string>
     <string name="editor_tilt_reset">Ровно</string>
+    <string name="editor_ratio">Пропорции</string>
+    <string name="editor_ratio_free">Свободно</string>
+    <string name="editor_ratio_original">Исходные</string>
 </resources>

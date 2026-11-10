@@ -177,5 +177,8 @@
   "editor.flip": "Віддзеркалити по горизонталі",
   "editor.flip_vertical": "Віддзеркалити по вертикалі",
   "editor.tilt": "Вільний поворот",
-  "editor.tilt_reset": "Рівно"
+  "editor.tilt_reset": "Рівно",
+  "editor.ratio": "Пропорції",
+  "editor.ratio_free": "Вільно",
+  "editor.ratio_original": "Початкові"
 }

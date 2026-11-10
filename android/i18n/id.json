@@ -177,5 +177,8 @@
   "editor.flip": "Balik horizontal",
   "editor.flip_vertical": "Balik vertikal",
   "editor.tilt": "Putar bebas",
-  "editor.tilt_reset": "Lurus"
+  "editor.tilt_reset": "Lurus",
+  "editor.ratio": "Proporsi",
+  "editor.ratio_free": "Bebas",
+  "editor.ratio_original": "Asli"
 }

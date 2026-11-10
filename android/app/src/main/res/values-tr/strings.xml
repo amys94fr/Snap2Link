@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Dikey çevir</string>
     <string name="editor_tilt">Serbest döndürme</string>
     <string name="editor_tilt_reset">Düz</string>
+    <string name="editor_ratio">En boy oranı</string>
+    <string name="editor_ratio_free">Serbest</string>
+    <string name="editor_ratio_original">Orijinal</string>
 </resources>

@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">상하 반전</string>
     <string name="editor_tilt">자유 회전</string>
     <string name="editor_tilt_reset">똑바로</string>
+    <string name="editor_ratio">비율</string>
+    <string name="editor_ratio_free">자유</string>
+    <string name="editor_ratio_original">원본</string>
 </resources>

@@ -177,5 +177,8 @@
   "editor.flip": "قرینهٔ افقی",
   "editor.flip_vertical": "قرینهٔ عمودی",
   "editor.tilt": "چرخش آزاد",
-  "editor.tilt_reset": "صاف"
+  "editor.tilt_reset": "صاف",
+  "editor.ratio": "تناسب",
+  "editor.ratio_free": "آزاد",
+  "editor.ratio_original": "اصلی"
 }

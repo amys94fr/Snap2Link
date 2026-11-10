@@ -177,5 +177,8 @@
   "editor.flip": "Flip horizontally",
   "editor.flip_vertical": "Flip vertically",
   "editor.tilt": "Free rotation",
-  "editor.tilt_reset": "Straight"
+  "editor.tilt_reset": "Straight",
+  "editor.ratio": "Proportions",
+  "editor.ratio_free": "Free",
+  "editor.ratio_original": "Original"
 }

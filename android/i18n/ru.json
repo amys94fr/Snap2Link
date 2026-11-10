@@ -177,5 +177,8 @@
   "editor.flip": "Отразить по горизонтали",
   "editor.flip_vertical": "Отразить по вертикали",
   "editor.tilt": "Свободный поворот",
-  "editor.tilt_reset": "Ровно"
+  "editor.tilt_reset": "Ровно",
+  "editor.ratio": "Пропорции",
+  "editor.ratio_free": "Свободно",
+  "editor.ratio_original": "Исходные"
 }

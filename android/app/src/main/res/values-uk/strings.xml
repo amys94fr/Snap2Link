@@ -180,4 +180,7 @@
     <string name="editor_flip_vertical">Віддзеркалити по вертикалі</string>
     <string name="editor_tilt">Вільний поворот</string>
     <string name="editor_tilt_reset">Рівно</string>
+    <string name="editor_ratio">Пропорції</string>
+    <string name="editor_ratio_free">Вільно</string>
+    <string name="editor_ratio_original">Початкові</string>
 </resources>
