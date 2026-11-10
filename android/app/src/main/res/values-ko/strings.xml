@@ -164,6 +164,6 @@
     <string name="detect_notification_ignore">무시</string>
     <string name="annotator_stroke">선 두께</string>
     <string name="annotator_tool_select">선택</string>
-    <string name="editor_select_hint">도형을 탭해 선택한 뒤 드래그하세요.</string>
+    <string name="editor_select_hint">도형을 탭해 선택하세요. 드래그하면 이동하고, 핸들을 당기면 크기가 바뀝니다.</string>
     <string name="editor_delete_shape">도형 삭제</string>
 </resources>

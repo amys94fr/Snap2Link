@@ -164,6 +164,6 @@
     <string name="detect_notification_ignore">Ignorer</string>
     <string name="annotator_stroke">Épaisseur du trait</string>
     <string name="annotator_tool_select">Sélectionner</string>
-    <string name="editor_select_hint">Touchez une forme pour la sélectionner, puis faites-la glisser.</string>
+    <string name="editor_select_hint">Touchez une forme pour la sélectionner. Faites-la glisser pour la déplacer, ou tirez ses poignées pour la redimensionner.</string>
     <string name="editor_delete_shape">Supprimer la forme</string>
 </resources>

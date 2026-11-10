@@ -162,6 +162,6 @@
   "detect.notification.ignore": "Yoksay",
   "annotator.stroke": "Çizgi kalınlığı",
   "annotator.tool.select": "Seç",
-  "editor.select_hint": "Seçmek için bir şekle dokunun, ardından sürükleyin.",
+  "editor.select_hint": "Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin.",
   "editor.delete_shape": "Şekli sil"
 }

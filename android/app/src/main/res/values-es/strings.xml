@@ -164,6 +164,6 @@
     <string name="detect_notification_ignore">Ignorar</string>
     <string name="annotator_stroke">Grosor del trazo</string>
     <string name="annotator_tool_select">Seleccionar</string>
-    <string name="editor_select_hint">Toca una forma para seleccionarla y luego arrástrala.</string>
+    <string name="editor_select_hint">Toca una forma para seleccionarla. Arrástrala para moverla o tira de sus controles para cambiar su tamaño.</string>
     <string name="editor_delete_shape">Eliminar la forma</string>
 </resources>

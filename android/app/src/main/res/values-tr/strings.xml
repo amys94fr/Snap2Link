@@ -164,6 +164,6 @@
     <string name="detect_notification_ignore">Yoksay</string>
     <string name="annotator_stroke">Çizgi kalınlığı</string>
     <string name="annotator_tool_select">Seç</string>
-    <string name="editor_select_hint">Seçmek için bir şekle dokunun, ardından sürükleyin.</string>
+    <string name="editor_select_hint">Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin.</string>
     <string name="editor_delete_shape">Şekli sil</string>
 </resources>

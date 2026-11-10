@@ -162,6 +162,6 @@
   "detect.notification.ignore": "Ignorar",
   "annotator.stroke": "Espessura do traço",
   "annotator.tool.select": "Selecionar",
-  "editor.select_hint": "Toque em uma forma para selecioná-la e depois arraste-a.",
+  "editor.select_hint": "Toque em uma forma para selecioná-la. Arraste-a para movê-la ou puxe as alças para redimensioná-la.",
   "editor.delete_shape": "Excluir a forma"
 }

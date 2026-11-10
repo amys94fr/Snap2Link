@@ -162,6 +162,6 @@
   "detect.notification.ignore": "Bỏ qua",
   "annotator.stroke": "Độ dày nét",
   "annotator.tool.select": "Chọn",
-  "editor.select_hint": "Nhấn vào một hình để chọn, rồi kéo để di chuyển.",
+  "editor.select_hint": "Nhấn vào một hình để chọn. Kéo để di chuyển, hoặc kéo các tay nắm để đổi kích thước.",
   "editor.delete_shape": "Xóa hình"
 }

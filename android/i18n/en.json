@@ -162,6 +162,6 @@
   "detect.notification.ignore": "Ignore",
   "annotator.stroke": "Stroke width",
   "annotator.tool.select": "Select",
-  "editor.select_hint": "Tap a shape to select it, then drag it.",
+  "editor.select_hint": "Tap a shape to select it. Drag it to move it, or pull its handles to resize it.",
   "editor.delete_shape": "Delete shape"
 }

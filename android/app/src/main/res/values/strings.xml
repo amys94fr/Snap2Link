@@ -165,6 +165,6 @@
     <string name="detect_notification_ignore">Ignore</string>
     <string name="annotator_stroke">Stroke width</string>
     <string name="annotator_tool_select">Select</string>
-    <string name="editor_select_hint">Tap a shape to select it, then drag it.</string>
+    <string name="editor_select_hint">Tap a shape to select it. Drag it to move it, or pull its handles to resize it.</string>
     <string name="editor_delete_shape">Delete shape</string>
 </resources>

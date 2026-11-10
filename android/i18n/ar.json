@@ -162,6 +162,6 @@
   "detect.notification.ignore": "تجاهل",
   "annotator.stroke": "سُمك الخط",
   "annotator.tool.select": "تحديد",
-  "editor.select_hint": "اضغط على شكل لتحديده، ثم اسحبه.",
+  "editor.select_hint": "اضغط على شكل لتحديده. اسحبه لنقله، أو اسحب مقابضه لتغيير حجمه.",
   "editor.delete_shape": "حذف الشكل"
 }

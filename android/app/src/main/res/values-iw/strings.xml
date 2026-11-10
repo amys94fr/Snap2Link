@@ -164,6 +164,6 @@
     <string name="detect_notification_ignore">התעלמות</string>
     <string name="annotator_stroke">עובי קו</string>
     <string name="annotator_tool_select">בחירה</string>
-    <string name="editor_select_hint">מקישים על צורה כדי לבחור אותה, ואז גוררים אותה.</string>
+    <string name="editor_select_hint">מקישים על צורה כדי לבחור אותה. גוררים אותה כדי להזיז, או מושכים את הידיות כדי לשנות את הגודל.</string>
     <string name="editor_delete_shape">מחיקת הצורה</string>
 </resources>

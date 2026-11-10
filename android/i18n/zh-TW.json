@@ -162,6 +162,6 @@
   "detect.notification.ignore": "忽略",
   "annotator.stroke": "線條粗細",
   "annotator.tool.select": "選取",
-  "editor.select_hint": "輕觸圖形即可選取，然後拖曳。",
+  "editor.select_hint": "輕觸圖形即可選取。拖曳可移動，拖曳控點可調整大小。",
   "editor.delete_shape": "刪除圖形"
 }

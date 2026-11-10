@@ -154,4 +154,45 @@ class PictureTest {
         assertEquals(Pt(11f, 12f), arrow.to)
         assertEquals(Box(10f, 10f, 20f, 20f), (Shape.Blur(Box(0f, 0f, 10f, 10f), 6f).moved(10f, 10f) as Shape.Blur).box)
     }
+
+    @Test
+    fun aCornerResizesARectangleFromTheOppositeOne() {
+        val rect = Shape.Rectangle(Box(100f, 100f, 300f, 300f), red, 12f)
+        val grip = Resize.gripAt(rect, Pt(305f, 295f), reach = 20f, textBox = noText)
+        assertEquals(Grip.Corner(Handle.BOTTOM_RIGHT), grip)
+        val bigger = Resize.drag(rect, grip!!, 100f, 50f, smallest = 16f, textBox = noText) as Shape.Rectangle
+        assertEquals(Box(100f, 100f, 400f, 350f), bigger.box)
+    }
+
+    @Test
+    fun aShapeNeverShrinksToNothing() {
+        val circle = Shape.Circle(Box(0f, 0f, 100f, 100f), red, 12f)
+        val small = Resize.drag(circle, Grip.Corner(Handle.TOP_LEFT), 500f, 500f, smallest = 16f, textBox = noText) as Shape.Circle
+        assertEquals(Box(84f, 84f, 100f, 100f), small.box)
+    }
+
+    @Test
+    fun anArrowEndMovesAlone() {
+        val arrow = Shape.Arrow(Pt(0f, 0f), Pt(100f, 100f), red, 12f)
+        assertEquals(Grip.To, Resize.gripAt(arrow, Pt(95f, 98f), reach = 20f, textBox = noText))
+        val moved = Resize.drag(arrow, Grip.To, 50f, 0f, smallest = 16f, textBox = noText) as Shape.Arrow
+        assertEquals(Pt(0f, 0f), moved.from)
+        assertEquals(Pt(150f, 100f), moved.to)
+    }
+
+    @Test
+    fun aPenStrokeStretchesWithItsFrame() {
+        val pen = Shape.Pen(listOf(Pt(0f, 0f), Pt(50f, 100f), Pt(100f, 0f)), red, 12f)
+        val wide = Resize.drag(pen, Grip.Corner(Handle.BOTTOM_RIGHT), 100f, 0f, smallest = 16f, textBox = noText) as Shape.Pen
+        assertEquals(listOf(Pt(0f, 0f), Pt(100f, 100f), Pt(200f, 0f)), wide.points)
+    }
+
+    @Test
+    fun aTextGrowsFromItsCorner() {
+        val text = Shape.Text(Pt(0f, 0f), "Here", red, 40f)
+        assertEquals(1, Resize.grips(text, noText).size)
+        val larger = Resize.drag(text, Grip.Corner(Handle.BOTTOM_RIGHT), 100f, 40f, smallest = 16f, textBox = noText) as Shape.Text
+        assertEquals(80f, larger.size)
+        assertEquals(Pt(0f, 0f), larger.at)
+    }
 }

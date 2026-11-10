@@ -232,3 +232,84 @@ object Select {
         return hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
     }
 }
+
+/** What a finger can pull on a selected shape to resize it. */
+sealed interface Grip {
+    /** A corner of the shape's frame. */
+    data class Corner(val handle: Handle) : Grip
+
+    /** An arrow's tail or tip. */
+    data object From : Grip
+    data object To : Grip
+}
+
+object Resize {
+    private val everywhere = Box(-1e9f, -1e9f, 1e9f, 1e9f)
+
+    /** The handles of [shape] and where they sit. A text has one, to make it larger or smaller. */
+    fun grips(shape: Shape, textBox: (Shape.Text) -> Box): List<Pair<Grip, Pt>> = when (shape) {
+        is Shape.Arrow -> listOf(Grip.From to shape.from, Grip.To to shape.to)
+        is Shape.Text -> textBox(shape).let { listOf(Grip.Corner(Handle.BOTTOM_RIGHT) to Pt(it.right, it.bottom)) }
+        else -> frame(shape, textBox).let { b ->
+            listOf(
+                Grip.Corner(Handle.TOP_LEFT) to Pt(b.left, b.top),
+                Grip.Corner(Handle.TOP_RIGHT) to Pt(b.right, b.top),
+                Grip.Corner(Handle.BOTTOM_LEFT) to Pt(b.left, b.bottom),
+                Grip.Corner(Handle.BOTTOM_RIGHT) to Pt(b.right, b.bottom),
+            )
+        }
+    }
+
+    /** The handle within [reach] of [p], the nearest one if several are. */
+    fun gripAt(shape: Shape, p: Pt, reach: Float, textBox: (Shape.Text) -> Box): Grip? =
+        grips(shape, textBox)
+            .map { (grip, at) -> grip to hypot(p.x - at.x, p.y - at.y) }
+            .filter { it.second <= reach }
+            .minByOrNull { it.second }
+            ?.first
+
+    /** [shape] with [grip] pulled by ([dx], [dy]), never smaller than [smallest]. */
+    fun drag(shape: Shape, grip: Grip, dx: Float, dy: Float, smallest: Float, textBox: (Shape.Text) -> Box): Shape {
+        if (shape is Shape.Arrow) {
+            return when (grip) {
+                Grip.From -> shape.copy(from = Pt(shape.from.x + dx, shape.from.y + dy))
+                Grip.To -> shape.copy(to = Pt(shape.to.x + dx, shape.to.y + dy))
+                is Grip.Corner -> shape
+            }
+        }
+        val corner = (grip as? Grip.Corner)?.handle ?: return shape
+        val old = frame(shape, textBox)
+        val new = Crop.drag(old, corner, dx, dy, everywhere, smallest)
+        return when (shape) {
+            is Shape.Rectangle -> shape.copy(box = new)
+            is Shape.Circle -> shape.copy(box = new)
+            is Shape.Blur -> shape.copy(box = new)
+            is Shape.Pen -> shape.copy(points = shape.points.map { scale(it, old, new) })
+            is Shape.Text -> {
+                // The text grows from its top left corner, by how much the corner moved on average.
+                val factor = ((new.width / old.width) + (new.height / old.height)) / 2
+                shape.copy(size = (shape.size * factor).coerceAtLeast(smallest / 2))
+            }
+            is Shape.Arrow -> shape
+        }
+    }
+
+    /** The frame the corners pull: the shape itself, without its stroke. */
+    private fun frame(shape: Shape, textBox: (Shape.Text) -> Box): Box = when (shape) {
+        is Shape.Rectangle -> shape.box
+        is Shape.Circle -> shape.box
+        is Shape.Blur -> shape.box
+        is Shape.Pen -> Box(
+            shape.points.minOf { it.x }, shape.points.minOf { it.y },
+            shape.points.maxOf { it.x }, shape.points.maxOf { it.y },
+        )
+        is Shape.Text -> textBox(shape)
+        is Shape.Arrow -> Box.of(shape.from, shape.to)
+    }
+
+    /** [p] placed in [new] where it was in [old]. A flat stroke stays flat. */
+    private fun scale(p: Pt, old: Box, new: Box) = Pt(
+        if (old.width == 0f) p.x + (new.left - old.left) else new.left + (p.x - old.left) * new.width / old.width,
+        if (old.height == 0f) p.y + (new.top - old.top) else new.top + (p.y - old.top) * new.height / old.height,
+    )
+}

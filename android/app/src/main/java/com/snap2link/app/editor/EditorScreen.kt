@@ -244,6 +244,7 @@ private fun Board(
     val latestEdits by rememberUpdatedState(edits)
     val latestColor by rememberUpdatedState(color)
     val latestStroke by rememberUpdatedState(stroke)
+    val latestSelected by rememberUpdatedState(selected)
 
     val description = stringResource(R.string.editor_board)
     Canvas(
@@ -257,7 +258,11 @@ private fun Board(
                     val p = f.toImage(offset.x, offset.y)
                     when (tool) {
                         Tool.TEXT -> onText(p.inside(latestEdits.now.crop))
-                        Tool.SELECT -> onSelect(Select.at(latestEdits.now.shapes, p, reach / f.scale, renderer::textBox))
+                        Tool.SELECT -> {
+                            val current = latestSelected?.let { latestEdits.now.shapes.getOrNull(it) }
+                            val onHandle = current?.let { Resize.gripAt(it, p, reach / f.scale, renderer::textBox) } != null
+                            if (!onHandle) onSelect(Select.at(latestEdits.now.shapes, p, reach / f.scale, renderer::textBox))
+                        }
                         else -> Unit
                     }
                 }
@@ -266,6 +271,7 @@ private fun Board(
                 var start = Pt(0f, 0f)
                 var handle: Handle? = null
                 var startCrop = full
+                var grip: Grip? = null
                 detectDragGestures(
                     onDragStart = { offset ->
                         val f = latestFit ?: return@detectDragGestures
@@ -278,9 +284,16 @@ private fun Board(
                                 startCrop = now.crop
                             }
                             Tool.SELECT -> {
-                                val index = Select.at(now.shapes, p, reach / f.scale, renderer::textBox)
-                                onSelect(index)
-                                moving = index?.let { it to now.shapes[it] }
+                                // A handle of the selected shape resizes it; anywhere else picks a shape to move.
+                                val index = latestSelected?.takeIf { it in now.shapes.indices }
+                                grip = index?.let { Resize.gripAt(now.shapes[it], p, reach / f.scale, renderer::textBox) }
+                                if (index != null && grip != null) {
+                                    moving = index to now.shapes[index]
+                                } else {
+                                    val hit = Select.at(now.shapes, p, reach / f.scale, renderer::textBox)
+                                    onSelect(hit)
+                                    moving = hit?.let { it to now.shapes[it] }
+                                }
                             }
                             Tool.TEXT -> Unit
                             else -> draft = shapeFor(tool, p.inside(now.crop), p.inside(now.crop), latestColor, latestStroke, sizes)
@@ -295,7 +308,13 @@ private fun Board(
                             draftCrop = Crop.drag(startCrop, h, p.x - start.x, p.y - start.y, full, sizes.unit * 24)
                         } else if (tool == Tool.SELECT) {
                             val (index, _) = moving ?: return@detectDragGestures
-                            moving = index to latestEdits.now.shapes[index].moved(p.x - start.x, p.y - start.y)
+                            val original = latestEdits.now.shapes[index]
+                            val dx = p.x - start.x
+                            val dy = p.y - start.y
+                            moving = index to (
+                                grip?.let { Resize.drag(original, it, dx, dy, sizes.smallest, renderer::textBox) }
+                                    ?: original.moved(dx, dy)
+                                )
                         } else {
                             val inside = p.inside(latestEdits.now.crop)
                             draft = when (val d = draft) {
@@ -316,12 +335,14 @@ private fun Board(
                         draftCrop = null
                         moving = null
                         handle = null
+                        grip = null
                     },
                     onDragCancel = {
                         draft = null
                         draftCrop = null
                         moving = null
                         handle = null
+                        grip = null
                     },
                 )
             },
@@ -348,7 +369,15 @@ private fun Board(
         (draft as? Shape.Blur)?.let { dashed(f, it.box) }
         if (tool == Tool.SELECT) {
             val shape = moved?.second ?: selected?.let { picture.shapes.getOrNull(it) }
-            shape?.let { dashed(f, Select.bounds(it, renderer::textBox).grown(6.dp.toPx() / f.scale)) }
+            shape?.let { s ->
+                // An arrow's two handles say enough: a frame around it would cover a large empty area.
+                if (s !is Shape.Arrow) dashed(f, Select.bounds(s, renderer::textBox).grown(6.dp.toPx() / f.scale))
+                Resize.grips(s, renderer::textBox).forEach { (_, at) ->
+                    val centre = Offset(f.toViewX(at.x), f.toViewY(at.y))
+                    drawCircle(Color.Black.copy(alpha = 0.6f), radius = 9.dp.toPx(), center = centre)
+                    drawCircle(Color.White, radius = 7.dp.toPx(), center = centre)
+                }
+            }
         }
         if (tool == Tool.CROP) cropFrame(f, draftCrop ?: picture.crop)
     }

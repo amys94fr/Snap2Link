@@ -164,6 +164,6 @@
     <string name="detect_notification_ignore">Bỏ qua</string>
     <string name="annotator_stroke">Độ dày nét</string>
     <string name="annotator_tool_select">Chọn</string>
-    <string name="editor_select_hint">Nhấn vào một hình để chọn, rồi kéo để di chuyển.</string>
+    <string name="editor_select_hint">Nhấn vào một hình để chọn. Kéo để di chuyển, hoặc kéo các tay nắm để đổi kích thước.</string>
     <string name="editor_delete_shape">Xóa hình</string>
 </resources>
