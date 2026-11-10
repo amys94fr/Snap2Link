@@ -163,5 +163,9 @@
   "annotator.stroke": "Grosor del trazo",
   "annotator.tool.select": "Seleccionar",
   "editor.select_hint": "Toca una forma para seleccionarla. Arrástrala para moverla o tira de sus controles para cambiar su tamaño.",
-  "editor.delete_shape": "Eliminar la forma"
+  "editor.delete_shape": "Eliminar la forma",
+  "editor.text_size": "Tamaño del texto",
+  "editor.size.small": "Pequeño",
+  "editor.size.medium": "Mediano",
+  "editor.size.large": "Grande"
 }

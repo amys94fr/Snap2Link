@@ -163,5 +163,9 @@
   "annotator.stroke": "Ketebalan garis",
   "annotator.tool.select": "Pilih",
   "editor.select_hint": "Ketuk bentuk untuk memilihnya. Seret untuk memindahkannya, atau tarik pegangannya untuk mengubah ukuran.",
-  "editor.delete_shape": "Hapus bentuk"
+  "editor.delete_shape": "Hapus bentuk",
+  "editor.text_size": "Ukuran teks",
+  "editor.size.small": "Kecil",
+  "editor.size.medium": "Sedang",
+  "editor.size.large": "Besar"
 }

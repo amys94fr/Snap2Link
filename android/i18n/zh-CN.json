@@ -163,5 +163,9 @@
   "annotator.stroke": "线条粗细",
   "annotator.tool.select": "选择",
   "editor.select_hint": "点按图形将其选中。拖动可移动，拖动控点可调整大小。",
-  "editor.delete_shape": "删除图形"
+  "editor.delete_shape": "删除图形",
+  "editor.text_size": "文字大小",
+  "editor.size.small": "小",
+  "editor.size.medium": "中",
+  "editor.size.large": "大"
 }

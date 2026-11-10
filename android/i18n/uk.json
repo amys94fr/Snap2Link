@@ -163,5 +163,9 @@
   "annotator.stroke": "Товщина лінії",
   "annotator.tool.select": "Вибір",
   "editor.select_hint": "Торкніться фігури, щоб вибрати її. Перетягніть, щоб перемістити, або потягніть за маркери, щоб змінити розмір.",
-  "editor.delete_shape": "Видалити фігуру"
+  "editor.delete_shape": "Видалити фігуру",
+  "editor.text_size": "Розмір тексту",
+  "editor.size.small": "Малий",
+  "editor.size.medium": "Середній",
+  "editor.size.large": "Великий"
 }

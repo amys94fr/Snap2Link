@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">Sélectionner</string>
     <string name="editor_select_hint">Touchez une forme pour la sélectionner. Faites-la glisser pour la déplacer, ou tirez ses poignées pour la redimensionner.</string>
     <string name="editor_delete_shape">Supprimer la forme</string>
+    <string name="editor_text_size">Taille du texte</string>
+    <string name="editor_size_small">Petit</string>
+    <string name="editor_size_medium">Moyen</string>
+    <string name="editor_size_large">Grand</string>
 </resources>

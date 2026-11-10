@@ -163,5 +163,9 @@
   "annotator.stroke": "लाइन की मोटाई",
   "annotator.tool.select": "चुनें",
   "editor.select_hint": "किसी आकृति को चुनने के लिए उस पर टैप करें। उसे खिसकाने के लिए खींचें, या आकार बदलने के लिए उसके हैंडल खींचें।",
-  "editor.delete_shape": "आकृति हटाएँ"
+  "editor.delete_shape": "आकृति हटाएँ",
+  "editor.text_size": "टेक्स्ट का आकार",
+  "editor.size.small": "छोटा",
+  "editor.size.medium": "मध्यम",
+  "editor.size.large": "बड़ा"
 }

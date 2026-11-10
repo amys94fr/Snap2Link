@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">Вибір</string>
     <string name="editor_select_hint">Торкніться фігури, щоб вибрати її. Перетягніть, щоб перемістити, або потягніть за маркери, щоб змінити розмір.</string>
     <string name="editor_delete_shape">Видалити фігуру</string>
+    <string name="editor_text_size">Розмір тексту</string>
+    <string name="editor_size_small">Малий</string>
+    <string name="editor_size_medium">Середній</string>
+    <string name="editor_size_large">Великий</string>
 </resources>

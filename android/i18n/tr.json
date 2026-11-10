@@ -163,5 +163,9 @@
   "annotator.stroke": "Çizgi kalınlığı",
   "annotator.tool.select": "Seç",
   "editor.select_hint": "Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin.",
-  "editor.delete_shape": "Şekli sil"
+  "editor.delete_shape": "Şekli sil",
+  "editor.text_size": "Metin boyutu",
+  "editor.size.small": "Küçük",
+  "editor.size.medium": "Orta",
+  "editor.size.large": "Büyük"
 }

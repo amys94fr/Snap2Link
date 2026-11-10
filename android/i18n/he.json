@@ -163,5 +163,9 @@
   "annotator.stroke": "עובי קו",
   "annotator.tool.select": "בחירה",
   "editor.select_hint": "מקישים על צורה כדי לבחור אותה. גוררים אותה כדי להזיז, או מושכים את הידיות כדי לשנות את הגודל.",
-  "editor.delete_shape": "מחיקת הצורה"
+  "editor.delete_shape": "מחיקת הצורה",
+  "editor.text_size": "גודל הטקסט",
+  "editor.size.small": "קטן",
+  "editor.size.medium": "בינוני",
+  "editor.size.large": "גדול"
 }

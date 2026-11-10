@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">選択</string>
     <string name="editor_select_hint">図形をタップして選択します。ドラッグで移動、ハンドルを引くとサイズを変更できます。</string>
     <string name="editor_delete_shape">図形を削除</string>
+    <string name="editor_text_size">文字サイズ</string>
+    <string name="editor_size_small">小</string>
+    <string name="editor_size_medium">中</string>
+    <string name="editor_size_large">大</string>
 </resources>

@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">選取</string>
     <string name="editor_select_hint">輕觸圖形即可選取。拖曳可移動，拖曳控點可調整大小。</string>
     <string name="editor_delete_shape">刪除圖形</string>
+    <string name="editor_text_size">文字大小</string>
+    <string name="editor_size_small">小</string>
+    <string name="editor_size_medium">中</string>
+    <string name="editor_size_large">大</string>
 </resources>

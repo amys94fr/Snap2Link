@@ -163,5 +163,9 @@
   "annotator.stroke": "Spessore del tratto",
   "annotator.tool.select": "Seleziona",
   "editor.select_hint": "Tocca una forma per selezionarla. Trascinala per spostarla o tira le maniglie per ridimensionarla.",
-  "editor.delete_shape": "Elimina la forma"
+  "editor.delete_shape": "Elimina la forma",
+  "editor.text_size": "Dimensione del testo",
+  "editor.size.small": "Piccolo",
+  "editor.size.medium": "Medio",
+  "editor.size.large": "Grande"
 }

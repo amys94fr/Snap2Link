@@ -163,5 +163,9 @@
   "annotator.stroke": "선 두께",
   "annotator.tool.select": "선택",
   "editor.select_hint": "도형을 탭해 선택하세요. 드래그하면 이동하고, 핸들을 당기면 크기가 바뀝니다.",
-  "editor.delete_shape": "도형 삭제"
+  "editor.delete_shape": "도형 삭제",
+  "editor.text_size": "글자 크기",
+  "editor.size.small": "작게",
+  "editor.size.medium": "보통",
+  "editor.size.large": "크게"
 }

@@ -163,5 +163,9 @@
   "annotator.stroke": "線の太さ",
   "annotator.tool.select": "選択",
   "editor.select_hint": "図形をタップして選択します。ドラッグで移動、ハンドルを引くとサイズを変更できます。",
-  "editor.delete_shape": "図形を削除"
+  "editor.delete_shape": "図形を削除",
+  "editor.text_size": "文字サイズ",
+  "editor.size.small": "小",
+  "editor.size.medium": "中",
+  "editor.size.large": "大"
 }

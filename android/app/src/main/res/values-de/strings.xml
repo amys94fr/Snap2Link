@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">Auswählen</string>
     <string name="editor_select_hint">Tippen Sie auf eine Form, um sie auszuwählen. Ziehen Sie sie, um sie zu verschieben, oder ziehen Sie an den Griffen, um ihre Größe zu ändern.</string>
     <string name="editor_delete_shape">Form löschen</string>
+    <string name="editor_text_size">Textgröße</string>
+    <string name="editor_size_small">Klein</string>
+    <string name="editor_size_medium">Mittel</string>
+    <string name="editor_size_large">Groß</string>
 </resources>

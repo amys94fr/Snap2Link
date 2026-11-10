@@ -163,5 +163,9 @@
   "annotator.stroke": "ضخامت خط",
   "annotator.tool.select": "انتخاب",
   "editor.select_hint": "روی یک شکل بزنید تا انتخاب شود. آن را بکشید تا جابه‌جا شود، یا دستگیره‌هایش را بکشید تا اندازه‌اش عوض شود.",
-  "editor.delete_shape": "حذف شکل"
+  "editor.delete_shape": "حذف شکل",
+  "editor.text_size": "اندازهٔ متن",
+  "editor.size.small": "کوچک",
+  "editor.size.medium": "متوسط",
+  "editor.size.large": "بزرگ"
 }

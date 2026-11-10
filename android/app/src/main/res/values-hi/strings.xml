@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">चुनें</string>
     <string name="editor_select_hint">किसी आकृति को चुनने के लिए उस पर टैप करें। उसे खिसकाने के लिए खींचें, या आकार बदलने के लिए उसके हैंडल खींचें।</string>
     <string name="editor_delete_shape">आकृति हटाएँ</string>
+    <string name="editor_text_size">टेक्स्ट का आकार</string>
+    <string name="editor_size_small">छोटा</string>
+    <string name="editor_size_medium">मध्यम</string>
+    <string name="editor_size_large">बड़ा</string>
 </resources>

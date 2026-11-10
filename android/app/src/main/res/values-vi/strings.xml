@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">Chọn</string>
     <string name="editor_select_hint">Nhấn vào một hình để chọn. Kéo để di chuyển, hoặc kéo các tay nắm để đổi kích thước.</string>
     <string name="editor_delete_shape">Xóa hình</string>
+    <string name="editor_text_size">Cỡ chữ</string>
+    <string name="editor_size_small">Nhỏ</string>
+    <string name="editor_size_medium">Vừa</string>
+    <string name="editor_size_large">Lớn</string>
 </resources>

@@ -74,6 +74,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.graphics.withClip
 import androidx.core.view.WindowCompat
 import com.snap2link.app.R
@@ -539,7 +542,7 @@ private fun Options(
                         }
                         Spacer(Modifier.width(12.dp))
                     }
-                    StrokeButton(selectedStroke, onRestroke)
+                    StrokeButton(selectedStroke, onRestroke, text = selectedShape is Shape.Text)
                 }
             }
             return@Row
@@ -558,7 +561,7 @@ private fun Options(
                 }
                 Spacer(Modifier.width(12.dp))
             }
-            StrokeButton(stroke, onStroke)
+            StrokeButton(stroke, onStroke, text = tool == Tool.TEXT)
         }
     }
 }
@@ -573,6 +576,8 @@ private val ColorNames = listOf(
 )
 
 private val StrokeNames = listOf(R.string.editor_stroke_thin, R.string.editor_stroke_medium, R.string.editor_stroke_thick)
+
+private val TextSizeNames = listOf(R.string.editor_size_small, R.string.editor_size_medium, R.string.editor_size_large)
 
 @Composable
 private fun Swatch(color: Color, name: String, selected: Boolean, onClick: () -> Unit) {
@@ -595,8 +600,13 @@ private fun Swatch(color: Color, name: String, selected: Boolean, onClick: () ->
 
 /** One button for the three thicknesses, each tap the next one: six colours and three dots won't fit a phone. */
 @Composable
-private fun StrokeButton(stroke: Stroke, onStroke: (Stroke) -> Unit) {
-    val label = stringResource(R.string.annotator_stroke) + ": " + stringResource(StrokeNames[stroke.ordinal])
+private fun StrokeButton(stroke: Stroke, onStroke: (Stroke) -> Unit, text: Boolean) {
+    // For a text the same three steps are its size: an "A" says so better than a dot.
+    val label = if (text) {
+        stringResource(R.string.editor_text_size) + ": " + stringResource(TextSizeNames[stroke.ordinal])
+    } else {
+        stringResource(R.string.annotator_stroke) + ": " + stringResource(StrokeNames[stroke.ordinal])
+    }
     Box(
         Modifier
             .size(44.dp)
@@ -605,7 +615,17 @@ private fun StrokeButton(stroke: Stroke, onStroke: (Stroke) -> Unit) {
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.size((6 + stroke.ordinal * 6).dp).background(MaterialTheme.colorScheme.onSurface, CircleShape))
+        if (text) {
+            Text(
+                "A",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                fontSize = (13 + stroke.ordinal * 5).sp,
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        } else {
+            Box(Modifier.size((6 + stroke.ordinal * 6).dp).background(MaterialTheme.colorScheme.onSurface, CircleShape))
+        }
     }
 }
 

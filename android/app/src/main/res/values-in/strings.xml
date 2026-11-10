@@ -166,4 +166,8 @@
     <string name="annotator_tool_select">Pilih</string>
     <string name="editor_select_hint">Ketuk bentuk untuk memilihnya. Seret untuk memindahkannya, atau tarik pegangannya untuk mengubah ukuran.</string>
     <string name="editor_delete_shape">Hapus bentuk</string>
+    <string name="editor_text_size">Ukuran teks</string>
+    <string name="editor_size_small">Kecil</string>
+    <string name="editor_size_medium">Sedang</string>
+    <string name="editor_size_large">Besar</string>
 </resources>

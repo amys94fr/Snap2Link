@@ -163,5 +163,9 @@
   "annotator.stroke": "Độ dày nét",
   "annotator.tool.select": "Chọn",
   "editor.select_hint": "Nhấn vào một hình để chọn. Kéo để di chuyển, hoặc kéo các tay nắm để đổi kích thước.",
-  "editor.delete_shape": "Xóa hình"
+  "editor.delete_shape": "Xóa hình",
+  "editor.text_size": "Cỡ chữ",
+  "editor.size.small": "Nhỏ",
+  "editor.size.medium": "Vừa",
+  "editor.size.large": "Lớn"
 }

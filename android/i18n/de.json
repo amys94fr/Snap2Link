@@ -163,5 +163,9 @@
   "annotator.stroke": "Strichstärke",
   "annotator.tool.select": "Auswählen",
   "editor.select_hint": "Tippen Sie auf eine Form, um sie auszuwählen. Ziehen Sie sie, um sie zu verschieben, oder ziehen Sie an den Griffen, um ihre Größe zu ändern.",
-  "editor.delete_shape": "Form löschen"
+  "editor.delete_shape": "Form löschen",
+  "editor.text_size": "Textgröße",
+  "editor.size.small": "Klein",
+  "editor.size.medium": "Mittel",
+  "editor.size.large": "Groß"
 }
