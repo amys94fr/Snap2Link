@@ -44,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -81,6 +82,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
@@ -96,6 +98,7 @@ import com.snap2link.app.R
 import com.snap2link.app.ui.Snap2LinkTheme
 import kotlin.math.abs
 import kotlin.math.hypot
+import kotlin.math.roundToInt
 
 /** Crop and mark up a screenshot before it is sent, as the desktop annotator does. */
 @Composable
@@ -112,6 +115,10 @@ fun EditorScreen(
     var stroke by rememberSaveable { mutableStateOf(Stroke.MEDIUM) }
     var writing by remember { mutableStateOf<Writing?>(null) }
     var selected by remember { mutableStateOf<Int?>(null) }
+    var tilting by remember { mutableStateOf<Float?>(null) }
+    val baseWidth = renderer.width(edits.now.turns).toFloat()
+    val baseHeight = renderer.height(edits.now.turns).toFloat()
+    val preview = tilting?.let { edits.now.angled(it, baseWidth, baseHeight, renderer::textBox) }
     val color = Palette[colorIndex]
     // An undo can remove the selected shape: the selection only holds while it points at one.
     val chosen = selected?.takeIf { tool == Tool.SELECT && it in edits.now.shapes.indices }
@@ -159,6 +166,7 @@ fun EditorScreen(
                         modifier = Modifier.fillMaxSize(),
                         renderer = renderer,
                         edits = edits,
+                        preview = preview,
                         tool = tool,
                         color = color,
                         stroke = stroke,
@@ -184,31 +192,43 @@ fun EditorScreen(
                     tool = tool,
                     colorIndex = colorIndex,
                     stroke = stroke,
-                    canResetCrop = edits.now.crop != Box.of(renderer.width(edits.now.turns), renderer.height(edits.now.turns)),
+                    canResetCrop = edits.now.crop != renderer.whole(edits.now),
                     onColor = { colorIndex = it },
                     onStroke = { stroke = it },
                     onRotateLeft = {
-                        val turns = edits.now.turns
+                        val (width, height) = renderer.shownSize(edits.now)
                         selected = null
-                        onEdit(edits.then(edits.now.turnedLeft(renderer.width(turns), renderer.height(turns), renderer::textBox)))
+                        onEdit(edits.then(edits.now.turnedLeft(width, height, renderer::textBox)))
                     },
                     onRotate = {
-                        val turns = edits.now.turns
+                        val (width, height) = renderer.shownSize(edits.now)
                         selected = null
-                        onEdit(edits.then(edits.now.turned(renderer.width(turns), renderer.height(turns), renderer::textBox)))
+                        onEdit(edits.then(edits.now.turned(width, height, renderer::textBox)))
                     },
                     onFlip = {
                         selected = null
-                        onEdit(edits.then(edits.now.flippedOver(renderer.width(edits.now.turns), renderer::textBox)))
+                        onEdit(edits.then(edits.now.flippedOver(renderer.shownSize(edits.now).first, renderer::textBox)))
                     },
                     onFlipVertical = {
-                        val turns = edits.now.turns
+                        val (width, height) = renderer.shownSize(edits.now)
                         selected = null
-                        onEdit(edits.then(edits.now.flippedUpsideDown(renderer.width(turns), renderer.height(turns), renderer::textBox)))
+                        onEdit(edits.then(edits.now.flippedUpsideDown(width, height, renderer::textBox)))
                     },
                     onResetCrop = {
-                        val turns = edits.now.turns
-                        onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.width(turns), renderer.height(turns)))))
+                        onEdit(edits.then(edits.now.copy(crop = renderer.whole(edits.now))))
+                    },
+                    angle = tilting ?: edits.now.angle,
+                    onTilt = { tilting = it },
+                    onTiltDone = {
+                        tilting?.let { degrees ->
+                            selected = null
+                            onEdit(edits.then(edits.now.angled(degrees, baseWidth, baseHeight, renderer::textBox)))
+                        }
+                        tilting = null
+                    },
+                    onTiltReset = {
+                        selected = null
+                        onEdit(edits.then(edits.now.angled(0f, baseWidth, baseHeight, renderer::textBox)))
                     },
                     selectedShape = chosen?.let { edits.now.shapes[it] },
                     onRecolor = { index ->
@@ -304,6 +324,7 @@ private fun Board(
     modifier: Modifier,
     renderer: Renderer,
     edits: Edits,
+    preview: Picture?,
     tool: Tool,
     color: Int,
     stroke: Stroke,
@@ -317,8 +338,8 @@ private fun Board(
     onRedo: () -> Unit,
     onSwipe: () -> Unit,
 ) {
-    val picture = edits.now
-    val full = Box.of(renderer.width(picture.turns), renderer.height(picture.turns))
+    val picture = preview ?: edits.now
+    val full = renderer.shownSize(picture).let { (width, height) -> Box(0f, 0f, width, height) }
     val density = LocalDensity.current
     val margin = with(density) { 20.dp.toPx() }
     val reach = with(density) { 28.dp.toPx() }
@@ -536,7 +557,8 @@ private fun Board(
         // A blur being moved shows as a frame, as one being drawn: blurring on every move would be slow.
         val moved = moving
         val shapes = if (moved == null) {
-            picture.shapes
+            // While the tilt slider moves, blurs show as frames: blurring again on every step would be slow.
+            if (preview != null) picture.shapes.filter { it !is Shape.Blur } else picture.shapes
         } else {
             picture.shapes.mapIndexedNotNull { i, s -> if (i == moved.first) moved.second.takeIf { it !is Shape.Blur } else s }
         }
@@ -546,12 +568,13 @@ private fun Board(
                 translate(f.offsetX, f.offsetY)
                 scale(f.scale, f.scale)
                 translate(-shown.left, -shown.top)
-                renderer.draw(this, shapes, picture.turns, picture.flipped)
-                draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it, picture.turns, picture.flipped) }
+                renderer.draw(this, shapes, picture)
+                draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it, picture) }
             }
         }
         // Blurring on every move would be slow: a dashed frame stands in while drawing, as on the desktop.
         (draft as? Shape.Blur)?.let { dashed(f, it.box) }
+        if (preview != null) picture.shapes.filterIsInstance<Shape.Blur>().forEach { dashed(f, it.box) }
         if (tool == Tool.SELECT) {
             val shape = moved?.second ?: selected?.let { picture.shapes.getOrNull(it) }
             shape?.let { s ->
@@ -654,6 +677,10 @@ private fun Options(
     onFlip: () -> Unit,
     onFlipVertical: () -> Unit,
     onResetCrop: () -> Unit,
+    angle: Float,
+    onTilt: (Float) -> Unit,
+    onTiltDone: () -> Unit,
+    onTiltReset: () -> Unit,
     selectedShape: Shape?,
     onRecolor: (Int) -> Unit,
     selectedStroke: Stroke?,
@@ -689,6 +716,7 @@ private fun Options(
                         Text(stringResource(R.string.editor_crop_reset))
                     }
                 }
+                TiltSlider(angle, onTilt, onTiltDone, onTiltReset)
             }
             return@Row
         }
@@ -932,4 +960,43 @@ private fun SwipeTipBanner(modifier: Modifier, onDismiss: () -> Unit) {
             }
         }
     }
+}
+
+/** Free rotation: from 45 degrees one way to 45 the other, in half degrees, with 0 easy to find again. */
+@Composable
+private fun TiltSlider(angle: Float, onTilt: (Float) -> Unit, onDone: () -> Unit, onReset: () -> Unit) {
+    val label = stringResource(R.string.editor_tilt)
+    val shown = formatDegrees(angle)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            shown,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(56.dp).clearAndSetSemantics {},
+        )
+        Slider(
+            value = angle,
+            onValueChange = { value ->
+                val half = (value * 2).roundToInt() / 2f
+                onTilt(if (abs(half) < 1f) 0f else half)
+            },
+            onValueChangeFinished = onDone,
+            valueRange = -Tilt.MAX..Tilt.MAX,
+            modifier = Modifier
+                .weight(1f)
+                .semantics {
+                    contentDescription = label
+                    stateDescription = shown
+                },
+        )
+        TextButton(onClick = onReset, enabled = angle != 0f, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text(stringResource(R.string.editor_tilt_reset))
+        }
+    }
+}
+
+/** Degrees as people write them: "12°", "-3.5°". */
+private fun formatDegrees(angle: Float): String {
+    val whole = angle.roundToInt().toFloat() == angle
+    return (if (whole) angle.roundToInt().toString() else String.format(java.util.Locale.getDefault(), "%.1f", angle)) + "\u00B0"
 }

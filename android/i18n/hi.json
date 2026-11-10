@@ -175,5 +175,7 @@
   "editor.rotate": "दाईं ओर घुमाएँ",
   "editor.rotate_left": "बाईं ओर घुमाएँ",
   "editor.flip": "क्षैतिज रूप से पलटें",
-  "editor.flip_vertical": "लंबवत रूप से पलटें"
+  "editor.flip_vertical": "लंबवत रूप से पलटें",
+  "editor.tilt": "मुक्त घुमाव",
+  "editor.tilt_reset": "सीधा"
 }

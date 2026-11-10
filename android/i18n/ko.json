@@ -175,5 +175,7 @@
   "editor.rotate": "오른쪽으로 회전",
   "editor.rotate_left": "왼쪽으로 회전",
   "editor.flip": "좌우 반전",
-  "editor.flip_vertical": "상하 반전"
+  "editor.flip_vertical": "상하 반전",
+  "editor.tilt": "자유 회전",
+  "editor.tilt_reset": "똑바로"
 }

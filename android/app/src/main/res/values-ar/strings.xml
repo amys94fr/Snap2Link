@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">تدوير لليسار</string>
     <string name="editor_flip">قلب أفقي</string>
     <string name="editor_flip_vertical">قلب عمودي</string>
+    <string name="editor_tilt">تدوير حر</string>
+    <string name="editor_tilt_reset">مستقيم</string>
 </resources>

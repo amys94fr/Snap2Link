@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">Xoay sang trái</string>
     <string name="editor_flip">Lật ngang</string>
     <string name="editor_flip_vertical">Lật dọc</string>
+    <string name="editor_tilt">Xoay tự do</string>
+    <string name="editor_tilt_reset">Thẳng</string>
 </resources>

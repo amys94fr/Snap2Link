@@ -270,7 +270,7 @@ class PictureTest {
             ),
             crop = Box(0f, 0f, 1080f, 1200f),
         )
-        val turned = picture.turned(1080, 2400, noText)
+        val turned = picture.turned(1080f, 2400f, noText)
         assertEquals(1, turned.turns)
         assertEquals(Box(2150f, 100f, 2200f, 300f), (turned.shapes[0] as Shape.Rectangle).box)
         assertEquals(Pt(2400f, 0f), (turned.shapes[1] as Shape.Arrow).from)
@@ -286,8 +286,8 @@ class PictureTest {
             crop = Box(10f, 20f, 900f, 2000f),
         )
         var turned = picture
-        var width = 1080
-        var height = 2400
+        var width = 1080f
+        var height = 2400f
         repeat(4) {
             turned = turned.turned(width, height, noText)
             width = height.also { height = width }
@@ -299,7 +299,7 @@ class PictureTest {
     fun aTurnedTextStaysLevelAroundItsMiddle() {
         val text = Shape.Text(Pt(0f, 0f), "Here", red, 40f)
         // The test's text box is 100 x 40: its middle (50, 20) goes to (2380, 50).
-        val turned = Picture(listOf(text), Box.of(1080, 2400)).turned(1080, 2400, noText).shapes[0] as Shape.Text
+        val turned = Picture(listOf(text), Box.of(1080, 2400)).turned(1080f, 2400f, noText).shapes[0] as Shape.Text
         assertEquals(Pt(2330f, 30f), turned.at)
         assertEquals(40f, turned.size)
     }
@@ -310,10 +310,10 @@ class PictureTest {
             listOf(Shape.Arrow(Pt(10f, 20f), Pt(300f, 400f), red, 12f), Shape.Text(Pt(40f, 60f), "Here", red, 40f)),
             crop = Box(10f, 20f, 900f, 2000f),
         )
-        val left = picture.turnedLeft(1080, 2400, noText)
+        val left = picture.turnedLeft(1080f, 2400f, noText)
         assertEquals(3, left.turns)
         assertEquals(Pt(20f, 1070f), (left.shapes[0] as Shape.Arrow).from)
-        assertEquals(picture, left.turned(2400, 1080, noText).copy(turns = 0))
+        assertEquals(picture, left.turned(2400f, 1080f, noText).copy(turns = 0))
     }
 
     @Test
@@ -322,20 +322,20 @@ class PictureTest {
             listOf(Shape.Rectangle(Box(100f, 200f, 300f, 250f), red, 12f), Shape.Text(Pt(40f, 60f), "Here", red, 40f)),
             crop = Box(0f, 0f, 800f, 2400f),
         )
-        val flipped = picture.flippedOver(1080, noText)
+        val flipped = picture.flippedOver(1080f, noText)
         assertTrue(flipped.flipped)
         assertEquals(Box(780f, 200f, 980f, 250f), (flipped.shapes[0] as Shape.Rectangle).box)
         // The test's text box is 100 wide: from 40-140 it goes to 940-1040, still left to right.
         assertEquals(Pt(940f, 60f), (flipped.shapes[1] as Shape.Text).at)
         assertEquals(Box(280f, 0f, 1080f, 2400f), flipped.crop)
-        assertEquals(picture, flipped.flippedOver(1080, noText))
+        assertEquals(picture, flipped.flippedOver(1080f, noText))
     }
 
     @Test
     fun turningAMirroredImageTurnsTheOriginalTheOtherWay() {
-        val flipped = Picture.blank(1080, 2400).flippedOver(1080, noText)
-        assertEquals(3, flipped.turned(1080, 2400, noText).turns)
-        assertEquals(1, flipped.turnedLeft(1080, 2400, noText).turns)
+        val flipped = Picture.blank(1080, 2400).flippedOver(1080f, noText)
+        assertEquals(3, flipped.turned(1080f, 2400f, noText).turns)
+        assertEquals(1, flipped.turnedLeft(1080f, 2400f, noText).turns)
     }
 
     @Test
@@ -344,11 +344,59 @@ class PictureTest {
             listOf(Shape.Rectangle(Box(100f, 200f, 300f, 250f), red, 12f), Shape.Text(Pt(40f, 60f), "Here", red, 40f)),
             crop = Box(0f, 0f, 1080f, 2000f),
         )
-        val flipped = picture.flippedUpsideDown(1080, 2400, noText)
+        val flipped = picture.flippedUpsideDown(1080f, 2400f, noText)
         assertEquals(Box(100f, 2150f, 300f, 2200f), (flipped.shapes[0] as Shape.Rectangle).box)
         // The test's text box is 40 high: from 60-100 it goes to 2300-2340, still the right way up.
         assertEquals(Pt(40f, 2300f), (flipped.shapes[1] as Shape.Text).at)
         assertEquals(Box(0f, 400f, 1080f, 2400f), flipped.crop)
-        assertEquals(picture, flipped.flippedUpsideDown(1080, 2400, noText))
+        assertEquals(picture, flipped.flippedUpsideDown(1080f, 2400f, noText))
+    }
+
+    @Test
+    fun aTiltedImageNeedsALargerFrame() {
+        val (width, height) = Tilt.size(1000f, 500f, 90f)
+        assertEquals(500f, width, 0.01f)
+        assertEquals(1000f, height, 0.01f)
+        val (w45, h45) = Tilt.size(1000f, 1000f, 45f)
+        assertEquals(1414.2f, w45, 0.1f)
+        assertEquals(1414.2f, h45, 0.1f)
+        assertEquals(Box(0f, 0f, 1000f, 500f), Tilt.inner(1000f, 500f, 0f))
+    }
+
+    @Test
+    fun theCropOfATiltedImageHasNoEmptyCorner() {
+        // A square tilted 45 degrees: the largest square inside is half its area, centred.
+        val crop = Tilt.inner(1000f, 1000f, 45f)
+        assertEquals(707.1f, crop.width, 0.1f)
+        assertEquals((1414.2f - 707.1f) / 2, crop.left, 0.1f)
+    }
+
+    @Test
+    fun aTiltKeepsTheMarksOnTheImageAndGoesBack() {
+        val picture = Picture(
+            listOf(
+                Shape.Arrow(Pt(100f, 100f), Pt(500f, 300f), red, 12f),
+                Shape.Rectangle(Box(200f, 1000f, 400f, 1100f), red, 12f),
+                Shape.Text(Pt(40f, 60f), "Here", red, 40f),
+            ),
+            crop = Box.of(1080, 2400),
+        )
+        val tilted = picture.angled(10f, 1080f, 2400f, noText)
+        assertEquals(10f, tilted.angle)
+        val back = tilted.angled(0f, 1080f, 2400f, noText)
+        val arrow = back.shapes[0] as Shape.Arrow
+        assertEquals(100f, arrow.from.x, 0.01f)
+        assertEquals(300f, arrow.to.y, 0.01f)
+        assertEquals(200f, (back.shapes[1] as Shape.Rectangle).box.left, 0.01f)
+        assertEquals(60f, (back.shapes[2] as Shape.Text).at.y, 0.01f)
+        assertEquals(Box.of(1080, 2400), back.crop)
+    }
+
+    @Test
+    fun aMirrorTiltsTheOtherWayAndATurnKeepsTheTilt() {
+        val tilted = Picture.blank(1080, 2400).angled(12f, 1080f, 2400f, noText)
+        val (width, height) = Tilt.size(1080f, 2400f, 12f)
+        assertEquals(-12f, tilted.flippedOver(width, noText).angle)
+        assertEquals(12f, tilted.turned(width, height, noText).angle)
     }
 }

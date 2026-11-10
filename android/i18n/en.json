@@ -175,5 +175,7 @@
   "editor.rotate": "Rotate right",
   "editor.rotate_left": "Rotate left",
   "editor.flip": "Flip horizontally",
-  "editor.flip_vertical": "Flip vertically"
+  "editor.flip_vertical": "Flip vertically",
+  "editor.tilt": "Free rotation",
+  "editor.tilt_reset": "Straight"
 }

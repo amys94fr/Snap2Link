@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">סיבוב שמאלה</string>
     <string name="editor_flip">היפוך אופקי</string>
     <string name="editor_flip_vertical">היפוך אנכי</string>
+    <string name="editor_tilt">סיבוב חופשי</string>
+    <string name="editor_tilt_reset">ישר</string>
 </resources>

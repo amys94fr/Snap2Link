@@ -179,4 +179,6 @@
     <string name="editor_rotate_left">Rotate left</string>
     <string name="editor_flip">Flip horizontally</string>
     <string name="editor_flip_vertical">Flip vertically</string>
+    <string name="editor_tilt">Free rotation</string>
+    <string name="editor_tilt_reset">Straight</string>
 </resources>

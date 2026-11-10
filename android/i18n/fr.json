@@ -175,5 +175,7 @@
   "editor.rotate": "Faire pivoter vers la droite",
   "editor.rotate_left": "Faire pivoter vers la gauche",
   "editor.flip": "Retourner horizontalement",
-  "editor.flip_vertical": "Retourner verticalement"
+  "editor.flip_vertical": "Retourner verticalement",
+  "editor.tilt": "Rotation libre",
+  "editor.tilt_reset": "Droit"
 }

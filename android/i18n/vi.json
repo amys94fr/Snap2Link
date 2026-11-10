@@ -175,5 +175,7 @@
   "editor.rotate": "Xoay sang phải",
   "editor.rotate_left": "Xoay sang trái",
   "editor.flip": "Lật ngang",
-  "editor.flip_vertical": "Lật dọc"
+  "editor.flip_vertical": "Lật dọc",
+  "editor.tilt": "Xoay tự do",
+  "editor.tilt_reset": "Thẳng"
 }

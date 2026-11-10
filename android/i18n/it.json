@@ -175,5 +175,7 @@
   "editor.rotate": "Ruota a destra",
   "editor.rotate_left": "Ruota a sinistra",
   "editor.flip": "Capovolgi orizzontalmente",
-  "editor.flip_vertical": "Capovolgi verticalmente"
+  "editor.flip_vertical": "Capovolgi verticalmente",
+  "editor.tilt": "Rotazione libera",
+  "editor.tilt_reset": "Dritto"
 }

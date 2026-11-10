@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">چرخش به چپ</string>
     <string name="editor_flip">قرینهٔ افقی</string>
     <string name="editor_flip_vertical">قرینهٔ عمودی</string>
+    <string name="editor_tilt">چرخش آزاد</string>
+    <string name="editor_tilt_reset">صاف</string>
 </resources>

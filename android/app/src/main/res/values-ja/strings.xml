@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">左に回転</string>
     <string name="editor_flip">左右反転</string>
     <string name="editor_flip_vertical">上下反転</string>
+    <string name="editor_tilt">自由回転</string>
+    <string name="editor_tilt_reset">まっすぐ</string>
 </resources>

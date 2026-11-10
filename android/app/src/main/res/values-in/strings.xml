@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">Putar ke kiri</string>
     <string name="editor_flip">Balik horizontal</string>
     <string name="editor_flip_vertical">Balik vertikal</string>
+    <string name="editor_tilt">Putar bebas</string>
+    <string name="editor_tilt_reset">Lurus</string>
 </resources>

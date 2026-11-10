@@ -175,5 +175,7 @@
   "editor.rotate": "Sağa döndür",
   "editor.rotate_left": "Sola döndür",
   "editor.flip": "Yatay çevir",
-  "editor.flip_vertical": "Dikey çevir"
+  "editor.flip_vertical": "Dikey çevir",
+  "editor.tilt": "Serbest döndürme",
+  "editor.tilt_reset": "Düz"
 }

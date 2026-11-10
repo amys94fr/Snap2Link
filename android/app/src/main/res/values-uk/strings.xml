@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">Повернути ліворуч</string>
     <string name="editor_flip">Віддзеркалити по горизонталі</string>
     <string name="editor_flip_vertical">Віддзеркалити по вертикалі</string>
+    <string name="editor_tilt">Вільний поворот</string>
+    <string name="editor_tilt_reset">Рівно</string>
 </resources>

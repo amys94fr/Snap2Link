@@ -9,6 +9,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
+import androidx.core.graphics.withSave
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -35,7 +36,7 @@ class Renderer(val source: Bitmap) {
     }
 
     /** Blurred pieces, made once per shape and way the image shows: blurring on every frame would be slow. */
-    private val blurred = HashMap<Triple<Int, Boolean, Shape.Blur>, Bitmap>()
+    private val blurred = HashMap<Pair<Triple<Int, Boolean, Float>, Shape.Blur>, Bitmap>()
 
     /** The screenshot turned a quarter to the right [turns] times, then mirrored if [flipped], made once each. */
     private val turned = HashMap<Pair<Int, Boolean>, Bitmap>()
@@ -52,16 +53,55 @@ class Renderer(val source: Bitmap) {
         }
     }
 
+    /** The image's size after [turns], before any tilt. */
     fun width(turns: Int) = if (turns % 2 == 0) source.width else source.height
 
     fun height(turns: Int) = if (turns % 2 == 0) source.height else source.width
 
-    fun draw(canvas: Canvas, shapes: List<Shape>, turns: Int, flipped: Boolean) {
-        canvas.drawBitmap(image(turns, flipped), 0f, 0f, image)
-        shapes.forEach { draw(canvas, it, turns, flipped) }
+    /** The size [picture] shows at: its tilt needs a larger frame. */
+    fun shownSize(picture: Picture): Pair<Float, Float> =
+        Tilt.size(width(picture.turns).toFloat(), height(picture.turns).toFloat(), picture.angle)
+
+    /** The whole image of [picture] with no empty corner: what "Whole image" crops to. */
+    fun whole(picture: Picture): Box = Tilt.inner(width(picture.turns).toFloat(), height(picture.turns).toFloat(), picture.angle)
+
+    fun draw(canvas: Canvas, shapes: List<Shape>, picture: Picture) {
+        drawImage(canvas, picture)
+        shapes.forEach { draw(canvas, it, picture) }
     }
 
-    fun draw(canvas: Canvas, shape: Shape, turns: Int, flipped: Boolean) {
+    private fun drawImage(canvas: Canvas, picture: Picture) {
+        val base = image(picture.turns, picture.flipped)
+        if (picture.angle == 0f) {
+            canvas.drawBitmap(base, 0f, 0f, image)
+            return
+        }
+        val (width, height) = shownSize(picture)
+        canvas.withSave {
+            translate(width / 2, height / 2)
+            rotate(picture.angle)
+            translate(-base.width / 2f, -base.height / 2f)
+            drawBitmap(base, 0f, 0f, image)
+        }
+    }
+
+    /** The image as it shows, tilt included, in pixels: what a blur takes its colours from. Kept for one tilt at a time. */
+    private var shownKey: Triple<Int, Boolean, Float>? = null
+    private var shownBitmap: Bitmap? = null
+
+    private fun shown(picture: Picture): Bitmap {
+        if (picture.angle == 0f) return image(picture.turns, picture.flipped)
+        val key = Triple(picture.turns, picture.flipped, picture.angle)
+        shownBitmap?.takeIf { shownKey == key }?.let { return it }
+        val (width, height) = shownSize(picture)
+        val bitmap = createBitmap(width.roundToInt().coerceAtLeast(1), height.roundToInt().coerceAtLeast(1))
+        drawImage(Canvas(bitmap), picture)
+        shownKey = key
+        shownBitmap = bitmap
+        return bitmap
+    }
+
+    fun draw(canvas: Canvas, shape: Shape, picture: Picture) {
         when (shape) {
             is Shape.Pen -> {
                 if (shape.points.isEmpty()) return
@@ -97,7 +137,8 @@ class Renderer(val source: Bitmap) {
                 canvas.drawText(shape.text, shape.at.x, baseline, text)
             }
             is Shape.Blur -> {
-                val piece = blurred.getOrPut(Triple(turns, flipped, shape)) { blur(shape, image(turns, flipped)) }
+                val key = Triple(picture.turns, picture.flipped, picture.angle)
+                val piece = blurred.getOrPut(key to shape) { blur(shape, shown(picture)) }
                 canvas.drawBitmap(piece, null, shape.box.rect(), image)
             }
         }
@@ -160,15 +201,17 @@ class Renderer(val source: Bitmap) {
 
     /** The image to send: the marks drawn on it, then the crop applied. */
     fun export(picture: Picture): Bitmap {
-        val source = image(picture.turns, picture.flipped)
-        val left = picture.crop.left.roundToInt().coerceIn(0, source.width - 1)
-        val top = picture.crop.top.roundToInt().coerceIn(0, source.height - 1)
-        val width = picture.crop.width.roundToInt().coerceIn(1, source.width - left)
-        val height = picture.crop.height.roundToInt().coerceIn(1, source.height - top)
+        val (shownWidth, shownHeight) = shownSize(picture)
+        val fullWidth = shownWidth.roundToInt().coerceAtLeast(1)
+        val fullHeight = shownHeight.roundToInt().coerceAtLeast(1)
+        val left = picture.crop.left.roundToInt().coerceIn(0, fullWidth - 1)
+        val top = picture.crop.top.roundToInt().coerceIn(0, fullHeight - 1)
+        val width = picture.crop.width.roundToInt().coerceIn(1, fullWidth - left)
+        val height = picture.crop.height.roundToInt().coerceIn(1, fullHeight - top)
         val out = createBitmap(width, height)
         Canvas(out).apply {
             translate(-left.toFloat(), -top.toFloat())
-            draw(this, picture.shapes, picture.turns, picture.flipped)
+            draw(this, picture.shapes, picture)
         }
         return out
     }

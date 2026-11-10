@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">Girar para a esquerda</string>
     <string name="editor_flip">Inverter horizontalmente</string>
     <string name="editor_flip_vertical">Inverter verticalmente</string>
+    <string name="editor_tilt">Rotação livre</string>
+    <string name="editor_tilt_reset">Reto</string>
 </resources>

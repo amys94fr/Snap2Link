@@ -175,5 +175,7 @@
   "editor.rotate": "向右旋轉",
   "editor.rotate_left": "向左旋轉",
   "editor.flip": "水平翻轉",
-  "editor.flip_vertical": "垂直翻轉"
+  "editor.flip_vertical": "垂直翻轉",
+  "editor.tilt": "自由旋轉",
+  "editor.tilt_reset": "擺正"
 }

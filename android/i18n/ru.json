@@ -175,5 +175,7 @@
   "editor.rotate": "Повернуть вправо",
   "editor.rotate_left": "Повернуть влево",
   "editor.flip": "Отразить по горизонтали",
-  "editor.flip_vertical": "Отразить по вертикали"
+  "editor.flip_vertical": "Отразить по вертикали",
+  "editor.tilt": "Свободный поворот",
+  "editor.tilt_reset": "Ровно"
 }

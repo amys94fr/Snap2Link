@@ -175,5 +175,7 @@
   "editor.rotate": "סיבוב ימינה",
   "editor.rotate_left": "סיבוב שמאלה",
   "editor.flip": "היפוך אופקי",
-  "editor.flip_vertical": "היפוך אנכי"
+  "editor.flip_vertical": "היפוך אנכי",
+  "editor.tilt": "סיבוב חופשי",
+  "editor.tilt_reset": "ישר"
 }

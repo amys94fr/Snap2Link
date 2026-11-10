@@ -175,5 +175,7 @@
   "editor.rotate": "Girar para a direita",
   "editor.rotate_left": "Girar para a esquerda",
   "editor.flip": "Inverter horizontalmente",
-  "editor.flip_vertical": "Inverter verticalmente"
+  "editor.flip_vertical": "Inverter verticalmente",
+  "editor.tilt": "Rotação livre",
+  "editor.tilt_reset": "Reto"
 }

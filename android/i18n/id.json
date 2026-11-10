@@ -175,5 +175,7 @@
   "editor.rotate": "Putar ke kanan",
   "editor.rotate_left": "Putar ke kiri",
   "editor.flip": "Balik horizontal",
-  "editor.flip_vertical": "Balik vertikal"
+  "editor.flip_vertical": "Balik vertikal",
+  "editor.tilt": "Putar bebas",
+  "editor.tilt_reset": "Lurus"
 }

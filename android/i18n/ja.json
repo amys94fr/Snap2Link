@@ -175,5 +175,7 @@
   "editor.rotate": "右に回転",
   "editor.rotate_left": "左に回転",
   "editor.flip": "左右反転",
-  "editor.flip_vertical": "上下反転"
+  "editor.flip_vertical": "上下反転",
+  "editor.tilt": "自由回転",
+  "editor.tilt_reset": "まっすぐ"
 }

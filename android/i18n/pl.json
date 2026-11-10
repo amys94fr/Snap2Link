@@ -175,5 +175,7 @@
   "editor.rotate": "Obróć w prawo",
   "editor.rotate_left": "Obróć w lewo",
   "editor.flip": "Odbij w poziomie",
-  "editor.flip_vertical": "Odbij w pionie"
+  "editor.flip_vertical": "Odbij w pionie",
+  "editor.tilt": "Swobodny obrót",
+  "editor.tilt_reset": "Prosto"
 }

@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">Obróć w lewo</string>
     <string name="editor_flip">Odbij w poziomie</string>
     <string name="editor_flip_vertical">Odbij w pionie</string>
+    <string name="editor_tilt">Swobodny obrót</string>
+    <string name="editor_tilt_reset">Prosto</string>
 </resources>

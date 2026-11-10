@@ -77,17 +77,24 @@ class Sizes(width: Int, height: Int) {
 
 /**
  * What is sent: the marks, the part of the image to keep, how many quarter
- * turns to the right the image took, and whether it was then mirrored left
- * to right. Marks and crop are in the pixels of the image as it now shows.
+ * turns to the right the image took, whether it was then mirrored left to
+ * right, and how many degrees it was tilted after that, clockwise. Marks
+ * and crop are in the pixels of the image as it now shows.
  */
-data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0, val flipped: Boolean = false) {
+data class Picture(
+    val shapes: List<Shape>,
+    val crop: Box,
+    val turns: Int = 0,
+    val flipped: Boolean = false,
+    val angle: Float = 0f,
+) {
     /**
      * A quarter turn to the right of an image now [width] x [height]: the
      * marks and the crop turn with it. A text turns around its middle but
      * stays level, so that it can still be read.
      */
-    fun turned(width: Int, height: Int, textBox: (Shape.Text) -> Box): Picture {
-        val h = height.toFloat()
+    fun turned(width: Float, height: Float, textBox: (Shape.Text) -> Box): Picture {
+        val h = height
         fun turn(p: Pt) = Pt(h - p.y, p.x)
         fun turn(b: Box) = Box.of(turn(Pt(b.left, b.top)), turn(Pt(b.right, b.bottom)))
         val shapes = shapes.map { shape ->
@@ -105,15 +112,15 @@ data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0, v
             }
         }
         // Turning a mirrored image to the right turns the original one to the left.
-        return Picture(shapes, turn(crop), (turns + if (flipped) 3 else 1) % 4, flipped)
+        return Picture(shapes, turn(crop), (turns + if (flipped) 3 else 1) % 4, flipped, angle)
     }
 
     /**
      * Mirrored left to right, in an image [width] pixels wide: the marks and
      * the crop with it. A text moves across but still reads the right way.
      */
-    fun flippedOver(width: Int, textBox: (Shape.Text) -> Box): Picture {
-        val w = width.toFloat()
+    fun flippedOver(width: Float, textBox: (Shape.Text) -> Box): Picture {
+        val w = width
         fun flip(p: Pt) = Pt(w - p.x, p.y)
         fun flip(b: Box) = Box(w - b.right, b.top, w - b.left, b.bottom)
         val shapes = shapes.map { shape ->
@@ -129,16 +136,54 @@ data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0, v
                 }
             }
         }
-        return Picture(shapes, flip(crop), turns, !flipped)
+        // In a mirror, a tilt goes the other way.
+        return Picture(shapes, flip(crop), turns, !flipped, -angle)
     }
 
     /** Mirrored top to bottom: mirrored left to right, then turned half way round. */
-    fun flippedUpsideDown(width: Int, height: Int, textBox: (Shape.Text) -> Box): Picture =
+    fun flippedUpsideDown(width: Float, height: Float, textBox: (Shape.Text) -> Box): Picture =
         flippedOver(width, textBox).turned(width, height, textBox).turned(height, width, textBox)
 
     /** A quarter turn to the left: three to the right, the image's sides swapping each time. */
-    fun turnedLeft(width: Int, height: Int, textBox: (Shape.Text) -> Box): Picture =
+    fun turnedLeft(width: Float, height: Float, textBox: (Shape.Text) -> Box): Picture =
         turned(width, height, textBox).turned(height, width, textBox).turned(width, height, textBox)
+
+    /**
+     * Tilted to [degrees] (clockwise), the image being [width] x [height]
+     * before any tilt. Marks keep their place on the image: lines turn with
+     * it, frames and texts move with their middle and stay level. The crop
+     * becomes the largest frame with no empty corner, as photo editors do.
+     */
+    fun angled(degrees: Float, width: Float, height: Float, textBox: (Shape.Text) -> Box): Picture {
+        val (oldWidth, oldHeight) = Tilt.size(width, height, angle)
+        val (newWidth, newHeight) = Tilt.size(width, height, degrees)
+        val turn = Math.toRadians((degrees - angle).toDouble())
+        val cos = kotlin.math.cos(turn).toFloat()
+        val sin = kotlin.math.sin(turn).toFloat()
+        fun move(p: Pt): Pt {
+            val x = p.x - oldWidth / 2
+            val y = p.y - oldHeight / 2
+            return Pt(newWidth / 2 + x * cos - y * sin, newHeight / 2 + x * sin + y * cos)
+        }
+        fun move(b: Box): Box {
+            val middle = move(Pt((b.left + b.right) / 2, (b.top + b.bottom) / 2))
+            return Box(middle.x - b.width / 2, middle.y - b.height / 2, middle.x + b.width / 2, middle.y + b.height / 2)
+        }
+        val shapes = shapes.map { shape ->
+            when (shape) {
+                is Shape.Pen -> shape.copy(points = shape.points.map(::move))
+                is Shape.Arrow -> shape.copy(from = move(shape.from), to = move(shape.to))
+                is Shape.Rectangle -> shape.copy(box = move(shape.box))
+                is Shape.Circle -> shape.copy(box = move(shape.box))
+                is Shape.Blur -> shape.copy(box = move(shape.box))
+                is Shape.Text -> {
+                    val box = move(textBox(shape))
+                    shape.copy(at = Pt(box.left, box.top))
+                }
+            }
+        }
+        return Picture(shapes, Tilt.inner(width, height, degrees), turns, flipped, degrees)
+    }
 
     companion object {
         fun blank(width: Int, height: Int) = Picture(emptyList(), Box.of(width, height))
@@ -470,5 +515,33 @@ data class Zoom(val scale: Float = 1f, val panX: Float = 0f, val panY: Float = 0
 
         /** Close enough to 1 to fit again, so that pinching back always gets there. */
         const val SNAP = 1.05f
+    }
+}
+
+/** The geometry of an image tilted by some degrees: it shows inside a larger frame. */
+object Tilt {
+    const val MAX = 45f
+
+    /** The frame a [width] x [height] image tilted by [degrees] needs. */
+    fun size(width: Float, height: Float, degrees: Float): Pair<Float, Float> {
+        val r = Math.toRadians(degrees.toDouble())
+        val cos = abs(kotlin.math.cos(r)).toFloat()
+        val sin = abs(kotlin.math.sin(r)).toFloat()
+        return (width * cos + height * sin) to (width * sin + height * cos)
+    }
+
+    /**
+     * The largest frame of the image's own proportions that stays inside it
+     * once tilted, centred in the larger frame: the crop with no empty corner.
+     */
+    fun inner(width: Float, height: Float, degrees: Float): Box {
+        val (outerWidth, outerHeight) = size(width, height, degrees)
+        val r = Math.toRadians(degrees.toDouble())
+        val cos = abs(kotlin.math.cos(r)).toFloat()
+        val sin = abs(kotlin.math.sin(r)).toFloat()
+        val k = min(width / (width * cos + height * sin), height / (width * sin + height * cos))
+        val w = width * k
+        val h = height * k
+        return Box((outerWidth - w) / 2, (outerHeight - h) / 2, (outerWidth + w) / 2, (outerHeight + h) / 2)
     }
 }

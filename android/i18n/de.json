@@ -175,5 +175,7 @@
   "editor.rotate": "Nach rechts drehen",
   "editor.rotate_left": "Nach links drehen",
   "editor.flip": "Horizontal spiegeln",
-  "editor.flip_vertical": "Vertikal spiegeln"
+  "editor.flip_vertical": "Vertikal spiegeln",
+  "editor.tilt": "Freie Drehung",
+  "editor.tilt_reset": "Gerade"
 }

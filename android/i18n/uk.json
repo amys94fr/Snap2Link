@@ -175,5 +175,7 @@
   "editor.rotate": "Повернути праворуч",
   "editor.rotate_left": "Повернути ліворуч",
   "editor.flip": "Віддзеркалити по горизонталі",
-  "editor.flip_vertical": "Віддзеркалити по вертикалі"
+  "editor.flip_vertical": "Віддзеркалити по вертикалі",
+  "editor.tilt": "Вільний поворот",
+  "editor.tilt_reset": "Рівно"
 }

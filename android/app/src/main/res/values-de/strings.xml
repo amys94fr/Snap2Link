@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">Nach links drehen</string>
     <string name="editor_flip">Horizontal spiegeln</string>
     <string name="editor_flip_vertical">Vertikal spiegeln</string>
+    <string name="editor_tilt">Freie Drehung</string>
+    <string name="editor_tilt_reset">Gerade</string>
 </resources>

@@ -178,4 +178,6 @@
     <string name="editor_rotate_left">왼쪽으로 회전</string>
     <string name="editor_flip">좌우 반전</string>
     <string name="editor_flip_vertical">상하 반전</string>
+    <string name="editor_tilt">자유 회전</string>
+    <string name="editor_tilt_reset">똑바로</string>
 </resources>
