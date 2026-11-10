@@ -313,3 +313,23 @@ object Resize {
         if (old.height == 0f) p.y + (new.top - old.top) else new.top + (p.y - old.top) * new.height / old.height,
     )
 }
+
+/** The colour of a mark; a blur has none. */
+val Shape.color: Int?
+    get() = when (this) {
+        is Shape.Pen -> color
+        is Shape.Rectangle -> color
+        is Shape.Circle -> color
+        is Shape.Arrow -> color
+        is Shape.Text -> color
+        is Shape.Blur -> null
+    }
+
+fun Shape.recolored(color: Int): Shape = when (this) {
+    is Shape.Pen -> copy(color = color)
+    is Shape.Rectangle -> copy(color = color)
+    is Shape.Circle -> copy(color = color)
+    is Shape.Arrow -> copy(color = color)
+    is Shape.Text -> copy(color = color)
+    is Shape.Blur -> this
+}

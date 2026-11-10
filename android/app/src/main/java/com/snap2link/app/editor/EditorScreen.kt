@@ -150,7 +150,15 @@ fun EditorScreen(
                     onResetCrop = {
                         onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.source.width, renderer.source.height))))
                     },
-                    canDelete = chosen != null,
+                    selectedShape = chosen?.let { edits.now.shapes[it] },
+                    onRecolor = { index ->
+                        chosen?.let { i ->
+                            val shapes = edits.now.shapes.mapIndexed { j, shape -> if (j == i) shape.recolored(Palette[index]) else shape }
+                            onEdit(edits.then(edits.now.copy(shapes = shapes)))
+                        }
+                        // The next marks take the same colour.
+                        colorIndex = index
+                    },
                     onDelete = {
                         chosen?.let { index ->
                             onEdit(edits.then(edits.now.copy(shapes = edits.now.shapes.filterIndexed { i, _ -> i != index })))
@@ -465,7 +473,8 @@ private fun Options(
     onColor: (Int) -> Unit,
     onStroke: (Stroke) -> Unit,
     onResetCrop: () -> Unit,
-    canDelete: Boolean,
+    selectedShape: Shape?,
+    onRecolor: (Int) -> Unit,
     onDelete: () -> Unit,
 ) {
     Row(
@@ -485,13 +494,28 @@ private fun Options(
             return@Row
         }
         if (tool == Tool.SELECT) {
-            Text(
-                stringResource(R.string.editor_select_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            IconButton(onClick = onDelete, enabled = canDelete) {
+            // With a shape selected, its colours take the hint's place; a blur has none.
+            val current = selectedShape?.color
+            if (selectedShape == null) {
+                Text(
+                    stringResource(R.string.editor_select_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Row(
+                    Modifier.weight(1f).horizontalScroll(rememberScrollState()).selectableGroup(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (current != null) {
+                        Palette.forEachIndexed { index, value ->
+                            Swatch(Color(value), stringResource(ColorNames[index]), selected = value == current) { onRecolor(index) }
+                        }
+                    }
+                }
+            }
+            IconButton(onClick = onDelete, enabled = selectedShape != null) {
                 Icon(painterResource(R.drawable.ic_trash), contentDescription = stringResource(R.string.editor_delete_shape))
             }
             return@Row

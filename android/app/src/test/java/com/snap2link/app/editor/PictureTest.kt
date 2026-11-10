@@ -195,4 +195,16 @@ class PictureTest {
         assertEquals(80f, larger.size)
         assertEquals(Pt(0f, 0f), larger.at)
     }
+
+    @Test
+    fun aMarkTakesANewColourButABlurHasNone() {
+        val blue = Palette[3]
+        val arrow = Shape.Arrow(Pt(0f, 0f), Pt(10f, 10f), red, 12f)
+        assertEquals(red, arrow.color)
+        assertEquals(blue, arrow.recolored(blue).color)
+        assertEquals(arrow.from, (arrow.recolored(blue) as Shape.Arrow).from)
+        val blur = Shape.Blur(Box(0f, 0f, 10f, 10f), 6f)
+        assertNull(blur.color)
+        assertSame(blur, blur.recolored(blue))
+    }
 }
