@@ -38,6 +38,16 @@ object Png {
         return fit(bitmap)
     }
 
+    /** The image at [uri] as pixels, for the editor. Runs on a background thread. */
+    fun bitmap(resolver: ContentResolver, uri: Uri): Bitmap {
+        val decoded = decode(read(resolver, uri)) ?: throw Unreadable()
+        // The editor reads pixels back for the blur, which a hardware bitmap won't allow.
+        return if (decoded.config == Bitmap.Config.ARGB_8888) decoded else decoded.copy(Bitmap.Config.ARGB_8888, false) ?: throw Unreadable()
+    }
+
+    /** [bitmap] as a PNG small enough to send. Runs on a background thread. */
+    fun encode(bitmap: Bitmap): ByteArray = fit(bitmap)
+
     private fun read(resolver: ContentResolver, uri: Uri): ByteArray {
         val stream = try {
             resolver.openInputStream(uri)

@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import com.snap2link.app.MainActivity
 import com.snap2link.app.R
 import com.snap2link.app.drive.PlayDriveAuth
+import com.snap2link.app.editor.EditorScreen
 import com.snap2link.app.ui.AppLanguage
 import com.snap2link.app.ui.GuestCheckDialog
 import com.snap2link.app.ui.Snap2LinkTheme
@@ -66,7 +67,10 @@ import com.snap2link.app.ui.Success
 import com.snap2link.app.ui.copyLink
 import kotlinx.coroutines.delay
 
-/** "Share, then Snap2Link": sends the image and copies its link. */
+/**
+ * "Share, then Snap2Link": sends the image and copies its link. From a
+ * screenshot notification ([EXTRA_EDIT]), the editor opens first.
+ */
 class ShareActivity : ComponentActivity() {
     private val model: ShareViewModel by viewModels()
 
@@ -78,9 +82,21 @@ class ShareActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         model.driveAuth = PlayDriveAuth(this)
-        model.start(sharedImage(intent))
+        model.start(sharedImage(intent), edit = intent.getBooleanExtra(EXTRA_EDIT, false))
         setContent {
             Snap2LinkTheme {
+                val editing = model.state as? ShareState.Editing
+                val edits = model.edits
+                if (editing != null && edits != null) {
+                    EditorScreen(
+                        renderer = editing.renderer,
+                        edits = edits,
+                        onEdit = model::onEdit,
+                        onCancel = { finish() },
+                        onSend = model::sendEdited,
+                    )
+                    return@Snap2LinkTheme
+                }
                 ShareSheet(
                     model = model,
                     onClose = { finish() },
@@ -101,6 +117,11 @@ class ShareActivity : ComponentActivity() {
         // The model outlives a rotation; this activity doesn't.
         model.driveAuth = null
         super.onDestroy()
+    }
+
+    companion object {
+        /** Opens the image in the editor before sending it. */
+        const val EXTRA_EDIT = "com.snap2link.app.extra.EDIT"
     }
 
     private fun sharedImage(intent: Intent): Uri? {
@@ -145,7 +166,7 @@ private fun ShareSheet(model: ShareViewModel, onClose: () -> Unit, onSignUp: () 
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 when (val state = model.state) {
-                    ShareState.Preparing -> Progress(stringResource(R.string.share_preparing))
+                    ShareState.Preparing, is ShareState.Editing -> Progress(stringResource(R.string.share_preparing))
                     ShareState.Sending -> Progress(stringResource(R.string.uploader_title))
                     ShareState.NeedsCheck -> {
                         Progress(stringResource(R.string.uploader_title))

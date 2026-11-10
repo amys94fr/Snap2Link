@@ -16,6 +16,9 @@ import com.snap2link.app.detect.ScreenshotNotice
 import com.snap2link.app.drive
 import com.snap2link.app.drive.DriveAuth
 import com.snap2link.app.drive.DriveException
+import com.snap2link.app.editor.Edits
+import com.snap2link.app.editor.Picture
+import com.snap2link.app.editor.Renderer
 import com.snap2link.app.host
 import com.snap2link.app.hosting
 import com.snap2link.app.image.Png
@@ -32,6 +35,9 @@ import kotlinx.coroutines.withContext
 sealed interface ShareState {
     data object Preparing : ShareState
     data object Sending : ShareState
+
+    /** The screenshot is open in the editor: nothing is sent before the person says so. */
+    class Editing(val renderer: Renderer) : ShareState
 
     /** No guest token yet: the security check runs first. */
     data object NeedsCheck : ShareState
@@ -55,14 +61,22 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
     var state by mutableStateOf<ShareState>(ShareState.Preparing)
         private set
 
-    /** Runs once per shared image, even when the screen turns. */
-    fun start(uri: Uri?) {
+    /** The editor's crop and marks, kept here so that they survive a turn of the screen. */
+    var edits by mutableStateOf<Edits?>(null)
+        private set
+
+    /**
+     * Runs once per shared image, even when the screen turns. With [edit],
+     * the image opens in the editor first, as from a screenshot notification.
+     */
+    fun start(uri: Uri?, edit: Boolean = false) {
         if (source != null || png != null) return
         if (uri == null) {
             state = ShareState.Failed(R.string.share_no_image)
             return
         }
         source = uri
+        if (edit) return open(uri)
         viewModelScope.launch {
             png = try {
                 withContext(Dispatchers.IO) { Png.from(getApplication<Application>().contentResolver, uri) }
@@ -70,6 +84,42 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
                 state = ShareState.Failed(R.string.share_unreadable)
                 return@launch
             } catch (_: SecurityException) {
+                state = ShareState.Failed(R.string.share_unreadable)
+                return@launch
+            }
+            send()
+        }
+    }
+
+    private fun open(uri: Uri) {
+        viewModelScope.launch {
+            val bitmap = try {
+                withContext(Dispatchers.IO) { Png.bitmap(getApplication<Application>().contentResolver, uri) }
+            } catch (_: Png.Unreadable) {
+                state = ShareState.Failed(R.string.share_unreadable)
+                return@launch
+            } catch (_: SecurityException) {
+                state = ShareState.Failed(R.string.share_unreadable)
+                return@launch
+            }
+            edits = Edits(Picture.blank(bitmap.width, bitmap.height))
+            state = ShareState.Editing(Renderer(bitmap))
+        }
+    }
+
+    fun onEdit(next: Edits) {
+        edits = next
+    }
+
+    /** The person is done editing: the image with its marks and crop is sent. */
+    fun sendEdited() {
+        val editing = state as? ShareState.Editing ?: return
+        val picture = edits?.now ?: return
+        state = ShareState.Preparing
+        viewModelScope.launch {
+            png = try {
+                withContext(Dispatchers.Default) { Png.encode(editing.renderer.export(picture)) }
+            } catch (_: Png.Unreadable) {
                 state = ShareState.Failed(R.string.share_unreadable)
                 return@launch
             }
