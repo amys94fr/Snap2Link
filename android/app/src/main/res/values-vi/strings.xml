@@ -176,4 +176,5 @@
     <string name="editor_tip_ok">Đã hiểu</string>
     <string name="editor_rotate">Xoay sang phải</string>
     <string name="editor_rotate_left">Xoay sang trái</string>
+    <string name="editor_flip">Lật ngang</string>
 </resources>

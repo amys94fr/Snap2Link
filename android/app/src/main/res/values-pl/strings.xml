@@ -176,4 +176,5 @@
     <string name="editor_tip_ok">Rozumiem</string>
     <string name="editor_rotate">Obróć w prawo</string>
     <string name="editor_rotate_left">Obróć w lewo</string>
+    <string name="editor_flip">Odbij w poziomie</string>
 </resources>

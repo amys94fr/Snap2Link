@@ -315,4 +315,26 @@ class PictureTest {
         assertEquals(Pt(20f, 1070f), (left.shapes[0] as Shape.Arrow).from)
         assertEquals(picture, left.turned(2400, 1080, noText).copy(turns = 0))
     }
+
+    @Test
+    fun aFlipMirrorsTheMarksAndTheCropButNotTheText() {
+        val picture = Picture(
+            listOf(Shape.Rectangle(Box(100f, 200f, 300f, 250f), red, 12f), Shape.Text(Pt(40f, 60f), "Here", red, 40f)),
+            crop = Box(0f, 0f, 800f, 2400f),
+        )
+        val flipped = picture.flippedOver(1080, noText)
+        assertTrue(flipped.flipped)
+        assertEquals(Box(780f, 200f, 980f, 250f), (flipped.shapes[0] as Shape.Rectangle).box)
+        // The test's text box is 100 wide: from 40-140 it goes to 940-1040, still left to right.
+        assertEquals(Pt(940f, 60f), (flipped.shapes[1] as Shape.Text).at)
+        assertEquals(Box(280f, 0f, 1080f, 2400f), flipped.crop)
+        assertEquals(picture, flipped.flippedOver(1080, noText))
+    }
+
+    @Test
+    fun turningAMirroredImageTurnsTheOriginalTheOtherWay() {
+        val flipped = Picture.blank(1080, 2400).flippedOver(1080, noText)
+        assertEquals(3, flipped.turned(1080, 2400, noText).turns)
+        assertEquals(1, flipped.turnedLeft(1080, 2400, noText).turns)
+    }
 }

@@ -173,5 +173,6 @@
   "editor.swipe_tip": "Suggerimento: scorri con due dita verso sinistra per annullare, verso destra per ripetere. Allargale per ingrandire.",
   "editor.tip_ok": "Ho capito",
   "editor.rotate": "Ruota a destra",
-  "editor.rotate_left": "Ruota a sinistra"
+  "editor.rotate_left": "Ruota a sinistra",
+  "editor.flip": "Capovolgi orizzontalmente"
 }

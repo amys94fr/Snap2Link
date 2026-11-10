@@ -173,5 +173,6 @@
   "editor.swipe_tip": "Mẹo: vuốt hai ngón sang trái để hoàn tác, sang phải để làm lại. Tách hai ngón ra để phóng to.",
   "editor.tip_ok": "Đã hiểu",
   "editor.rotate": "Xoay sang phải",
-  "editor.rotate_left": "Xoay sang trái"
+  "editor.rotate_left": "Xoay sang trái",
+  "editor.flip": "Lật ngang"
 }

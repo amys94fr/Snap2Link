@@ -173,5 +173,6 @@
   "editor.swipe_tip": "팁: 두 손가락으로 왼쪽으로 밀면 실행 취소, 오른쪽으로 밀면 다시 실행됩니다. 두 손가락을 벌리면 확대됩니다.",
   "editor.tip_ok": "확인",
   "editor.rotate": "오른쪽으로 회전",
-  "editor.rotate_left": "왼쪽으로 회전"
+  "editor.rotate_left": "왼쪽으로 회전",
+  "editor.flip": "좌우 반전"
 }

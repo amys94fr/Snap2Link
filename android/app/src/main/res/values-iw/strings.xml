@@ -176,4 +176,5 @@
     <string name="editor_tip_ok">הבנתי</string>
     <string name="editor_rotate">סיבוב ימינה</string>
     <string name="editor_rotate_left">סיבוב שמאלה</string>
+    <string name="editor_flip">היפוך אופקי</string>
 </resources>

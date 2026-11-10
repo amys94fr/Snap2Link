@@ -173,5 +173,6 @@
   "editor.swipe_tip": "提示：双指向左滑动可撤销，向右滑动可重做。双指张开可放大。",
   "editor.tip_ok": "知道了",
   "editor.rotate": "向右旋转",
-  "editor.rotate_left": "向左旋转"
+  "editor.rotate_left": "向左旋转",
+  "editor.flip": "水平翻转"
 }

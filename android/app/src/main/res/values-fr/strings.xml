@@ -176,4 +176,5 @@
     <string name="editor_tip_ok">Compris</string>
     <string name="editor_rotate">Faire pivoter vers la droite</string>
     <string name="editor_rotate_left">Faire pivoter vers la gauche</string>
+    <string name="editor_flip">Retourner horizontalement</string>
 </resources>

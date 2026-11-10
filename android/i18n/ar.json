@@ -173,5 +173,6 @@
   "editor.swipe_tip": "نصيحة: اسحب بإصبعين إلى اليمين للتراجع، وإلى اليسار للإعادة. باعد بينهما للتكبير.",
   "editor.tip_ok": "حسنًا",
   "editor.rotate": "تدوير لليمين",
-  "editor.rotate_left": "تدوير لليسار"
+  "editor.rotate_left": "تدوير لليسار",
+  "editor.flip": "قلب أفقي"
 }

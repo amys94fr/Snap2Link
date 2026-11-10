@@ -34,17 +34,21 @@ class Renderer(val source: Bitmap) {
         strokeJoin = Paint.Join.ROUND
     }
 
-    /** Blurred pieces, made once per shape and turn: blurring on every frame would be slow. */
-    private val blurred = HashMap<Pair<Int, Shape.Blur>, Bitmap>()
+    /** Blurred pieces, made once per shape and way the image shows: blurring on every frame would be slow. */
+    private val blurred = HashMap<Triple<Int, Boolean, Shape.Blur>, Bitmap>()
 
-    /** The screenshot turned a quarter to the right [turns] times, made once each. */
-    private val turned = HashMap<Int, Bitmap>()
+    /** The screenshot turned a quarter to the right [turns] times, then mirrored if [flipped], made once each. */
+    private val turned = HashMap<Pair<Int, Boolean>, Bitmap>()
 
-    fun image(turns: Int): Bitmap {
+    fun image(turns: Int, flipped: Boolean): Bitmap {
         val t = turns.mod(4)
-        if (t == 0) return source
-        return turned.getOrPut(t) {
-            Bitmap.createBitmap(source, 0, 0, source.width, source.height, Matrix().apply { postRotate(90f * t) }, true)
+        if (t == 0 && !flipped) return source
+        return turned.getOrPut(t to flipped) {
+            val matrix = Matrix().apply {
+                postRotate(90f * t)
+                if (flipped) postScale(-1f, 1f)
+            }
+            Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
         }
     }
 
@@ -52,12 +56,12 @@ class Renderer(val source: Bitmap) {
 
     fun height(turns: Int) = if (turns % 2 == 0) source.height else source.width
 
-    fun draw(canvas: Canvas, shapes: List<Shape>, turns: Int) {
-        canvas.drawBitmap(image(turns), 0f, 0f, image)
-        shapes.forEach { draw(canvas, it, turns) }
+    fun draw(canvas: Canvas, shapes: List<Shape>, turns: Int, flipped: Boolean) {
+        canvas.drawBitmap(image(turns, flipped), 0f, 0f, image)
+        shapes.forEach { draw(canvas, it, turns, flipped) }
     }
 
-    fun draw(canvas: Canvas, shape: Shape, turns: Int) {
+    fun draw(canvas: Canvas, shape: Shape, turns: Int, flipped: Boolean) {
         when (shape) {
             is Shape.Pen -> {
                 if (shape.points.isEmpty()) return
@@ -93,7 +97,7 @@ class Renderer(val source: Bitmap) {
                 canvas.drawText(shape.text, shape.at.x, baseline, text)
             }
             is Shape.Blur -> {
-                val piece = blurred.getOrPut(turns to shape) { blur(shape, image(turns)) }
+                val piece = blurred.getOrPut(Triple(turns, flipped, shape)) { blur(shape, image(turns, flipped)) }
                 canvas.drawBitmap(piece, null, shape.box.rect(), image)
             }
         }
@@ -156,7 +160,7 @@ class Renderer(val source: Bitmap) {
 
     /** The image to send: the marks drawn on it, then the crop applied. */
     fun export(picture: Picture): Bitmap {
-        val source = image(picture.turns)
+        val source = image(picture.turns, picture.flipped)
         val left = picture.crop.left.roundToInt().coerceIn(0, source.width - 1)
         val top = picture.crop.top.roundToInt().coerceIn(0, source.height - 1)
         val width = picture.crop.width.roundToInt().coerceIn(1, source.width - left)
@@ -164,7 +168,7 @@ class Renderer(val source: Bitmap) {
         val out = createBitmap(width, height)
         Canvas(out).apply {
             translate(-left.toFloat(), -top.toFloat())
-            draw(this, picture.shapes, picture.turns)
+            draw(this, picture.shapes, picture.turns, picture.flipped)
         }
         return out
     }

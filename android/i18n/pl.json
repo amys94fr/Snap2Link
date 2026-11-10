@@ -173,5 +173,6 @@
   "editor.swipe_tip": "Wskazówka: przesuń dwoma palcami w lewo, aby cofnąć, i w prawo, aby ponowić. Rozsuń je, aby powiększyć.",
   "editor.tip_ok": "Rozumiem",
   "editor.rotate": "Obróć w prawo",
-  "editor.rotate_left": "Obróć w lewo"
+  "editor.rotate_left": "Obróć w lewo",
+  "editor.flip": "Odbij w poziomie"
 }

@@ -173,5 +173,6 @@
   "editor.swipe_tip": "Dica: deslize dois dedos para a esquerda para desfazer e para a direita para refazer. Afaste-os para ampliar.",
   "editor.tip_ok": "Entendi",
   "editor.rotate": "Girar para a direita",
-  "editor.rotate_left": "Girar para a esquerda"
+  "editor.rotate_left": "Girar para a esquerda",
+  "editor.flip": "Inverter horizontalmente"
 }

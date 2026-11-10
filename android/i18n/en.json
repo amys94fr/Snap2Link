@@ -173,5 +173,6 @@
   "editor.swipe_tip": "Tip: swipe two fingers left to undo, right to redo. Spread them to zoom in.",
   "editor.tip_ok": "Got it",
   "editor.rotate": "Rotate right",
-  "editor.rotate_left": "Rotate left"
+  "editor.rotate_left": "Rotate left",
+  "editor.flip": "Flip horizontally"
 }

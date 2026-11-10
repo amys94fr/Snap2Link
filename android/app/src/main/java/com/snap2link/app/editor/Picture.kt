@@ -76,11 +76,11 @@ class Sizes(width: Int, height: Int) {
 }
 
 /**
- * What is sent: the marks, the part of the image to keep, and how many
- * quarter turns to the right the image took. Marks and crop are in the
- * pixels of the turned image.
+ * What is sent: the marks, the part of the image to keep, how many quarter
+ * turns to the right the image took, and whether it was then mirrored left
+ * to right. Marks and crop are in the pixels of the image as it now shows.
  */
-data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0) {
+data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0, val flipped: Boolean = false) {
     /**
      * A quarter turn to the right of an image now [width] x [height]: the
      * marks and the crop turn with it. A text turns around its middle but
@@ -104,7 +104,32 @@ data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0) {
                 }
             }
         }
-        return Picture(shapes, turn(crop), (turns + 1) % 4)
+        // Turning a mirrored image to the right turns the original one to the left.
+        return Picture(shapes, turn(crop), (turns + if (flipped) 3 else 1) % 4, flipped)
+    }
+
+    /**
+     * Mirrored left to right, in an image [width] pixels wide: the marks and
+     * the crop with it. A text moves across but still reads the right way.
+     */
+    fun flippedOver(width: Int, textBox: (Shape.Text) -> Box): Picture {
+        val w = width.toFloat()
+        fun flip(p: Pt) = Pt(w - p.x, p.y)
+        fun flip(b: Box) = Box(w - b.right, b.top, w - b.left, b.bottom)
+        val shapes = shapes.map { shape ->
+            when (shape) {
+                is Shape.Pen -> shape.copy(points = shape.points.map(::flip))
+                is Shape.Rectangle -> shape.copy(box = flip(shape.box))
+                is Shape.Circle -> shape.copy(box = flip(shape.box))
+                is Shape.Arrow -> shape.copy(from = flip(shape.from), to = flip(shape.to))
+                is Shape.Blur -> shape.copy(box = flip(shape.box))
+                is Shape.Text -> {
+                    val box = textBox(shape)
+                    shape.copy(at = Pt(w - box.right, shape.at.y))
+                }
+            }
+        }
+        return Picture(shapes, flip(crop), turns, !flipped)
     }
 
     /** A quarter turn to the left: three to the right, the image's sides swapping each time. */

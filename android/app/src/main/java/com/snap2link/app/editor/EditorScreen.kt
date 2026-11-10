@@ -197,6 +197,10 @@ fun EditorScreen(
                         selected = null
                         onEdit(edits.then(edits.now.turned(renderer.width(turns), renderer.height(turns), renderer::textBox)))
                     },
+                    onFlip = {
+                        selected = null
+                        onEdit(edits.then(edits.now.flippedOver(renderer.width(edits.now.turns), renderer::textBox)))
+                    },
                     onResetCrop = {
                         val turns = edits.now.turns
                         onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.width(turns), renderer.height(turns)))))
@@ -323,9 +327,9 @@ private fun Board(
     // While cropping the whole image shows; otherwise only what is kept.
     val shown = if (tool == Tool.CROP) full else picture.crop
 
-    // Two fingers zoom in. Going in or out of cropping, or turning the image, shows another area: the view starts over.
+    // Two fingers zoom in. Going in or out of cropping, or turning or mirroring the image, shows another area: the view starts over.
     var zoom by remember { mutableStateOf(Zoom()) }
-    LaunchedEffect(tool == Tool.CROP, picture.turns) { zoom = Zoom() }
+    LaunchedEffect(tool == Tool.CROP, picture.turns, picture.flipped) { zoom = Zoom() }
     val fit = if (area == IntSize.Zero) {
         null
     } else {
@@ -537,8 +541,8 @@ private fun Board(
                 translate(f.offsetX, f.offsetY)
                 scale(f.scale, f.scale)
                 translate(-shown.left, -shown.top)
-                renderer.draw(this, shapes, picture.turns)
-                draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it, picture.turns) }
+                renderer.draw(this, shapes, picture.turns, picture.flipped)
+                draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it, picture.turns, picture.flipped) }
             }
         }
         // Blurring on every move would be slow: a dashed frame stands in while drawing, as on the desktop.
@@ -642,6 +646,7 @@ private fun Options(
     onStroke: (Stroke) -> Unit,
     onRotateLeft: () -> Unit,
     onRotate: () -> Unit,
+    onFlip: () -> Unit,
     onResetCrop: () -> Unit,
     selectedShape: Shape?,
     onRecolor: (Int) -> Unit,
@@ -653,20 +658,28 @@ private fun Options(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (tool == Tool.CROP) {
-            Text(
-                stringResource(R.string.editor_crop_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            IconButton(onClick = onRotateLeft) {
-                Icon(painterResource(R.drawable.ic_rotate_left), contentDescription = stringResource(R.string.editor_rotate_left))
-            }
-            IconButton(onClick = onRotate) {
-                Icon(painterResource(R.drawable.ic_rotate), contentDescription = stringResource(R.string.editor_rotate))
-            }
-            TextButton(onClick = onResetCrop, enabled = canResetCrop, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(stringResource(R.string.editor_crop_reset))
+            // The hint on its own line: next to three buttons it would wrap word by word.
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.editor_crop_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onRotateLeft) {
+                        Icon(painterResource(R.drawable.ic_rotate_left), contentDescription = stringResource(R.string.editor_rotate_left))
+                    }
+                    IconButton(onClick = onRotate) {
+                        Icon(painterResource(R.drawable.ic_rotate), contentDescription = stringResource(R.string.editor_rotate))
+                    }
+                    IconButton(onClick = onFlip) {
+                        Icon(painterResource(R.drawable.ic_flip), contentDescription = stringResource(R.string.editor_flip))
+                    }
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = onResetCrop, enabled = canResetCrop, modifier = Modifier.heightIn(min = 48.dp)) {
+                        Text(stringResource(R.string.editor_crop_reset))
+                    }
+                }
             }
             return@Row
         }
