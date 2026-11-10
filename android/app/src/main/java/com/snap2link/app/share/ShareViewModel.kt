@@ -12,6 +12,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.snap2link.app.Host
 import com.snap2link.app.R
+import com.snap2link.app.detect.ScreenshotNotice
 import com.snap2link.app.drive
 import com.snap2link.app.drive.DriveAuth
 import com.snap2link.app.drive.DriveException
@@ -118,6 +119,7 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
         state = try {
             val created = hosting.upload(bytes)
             copyLink(getApplication(), created.url)
+            ScreenshotNotice.cancel(getApplication())
             ShareState.Done(created.url, galleryItem = galleryItem(source))
         } catch (e: RelayException) {
             when (e.code) {
@@ -136,6 +138,7 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
         state = try {
             val link = drive.upload(auth, bytes)
             copyLink(getApplication(), link.url)
+            ScreenshotNotice.cancel(getApplication())
             ShareState.Done(link.url, galleryItem = galleryItem(source))
         } catch (e: DriveException) {
             ShareState.Failed(driveMessage(e.code))

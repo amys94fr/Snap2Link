@@ -121,4 +121,19 @@
     <string name="history_drive_needed">Połącz Dysk Google, aby widzieć tu swoje zrzuty.</string>
     <string name="history_keep_hint_drive">Automatyczne czyszczenie pomija zachowane zrzuty.</string>
     <string name="uploader_error_drive_not_connected">Nie połączono z Google Drive. Połącz go w ustawieniach.</string>
+    <string name="detect_title">Zrzuty ekranu</string>
+    <string name="detect_switch">Proponuj wysłanie każdego zrzutu</string>
+    <string name="detect_hint">Po każdym zrzucie ekranu pojawia się powiadomienie. Stuknij je, aby wysłać zrzut i skopiować link.</string>
+    <string name="detect_photos_needed">Snap2Link potrzebuje dostępu do wszystkich zdjęć, aby widzieć nowe zrzuty ekranu.</string>
+    <string name="detect_notifications_needed">Zezwól na powiadomienia, aby Snap2Link mógł proponować Twoje zrzuty.</string>
+    <string name="detect_open_settings">Otwórz ustawienia aplikacji</string>
+    <string name="detect_turn_off">Wyłącz</string>
+    <string name="detect_notification_title">Zrobiono zrzut ekranu</string>
+    <string name="detect_notification_text">Stuknij, aby wysłać go przez Snap2Link i skopiować link.</string>
+    <string name="detect_notification_send">Wyślij</string>
+    <string name="detect_channel">Nowe zrzuty ekranu</string>
+    <string name="detect_channel_hint">Proponuje wysłanie każdego nowego zrzutu ekranu.</string>
+    <string name="home_detect_title">Otrzymuj powiadomienie po każdym zrzucie</string>
+    <string name="home_detect_action">Włącz</string>
+    <string name="home_step2_notification">Stuknij powiadomienie Snap2Link albo Udostępnij, a potem Snap2Link.</string>
 </resources>

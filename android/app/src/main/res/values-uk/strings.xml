@@ -121,4 +121,19 @@
     <string name="history_drive_needed">Підключіть Google Диск, щоб бачити тут свої знімки.</string>
     <string name="history_keep_hint_drive">Автоматичне очищення не чіпає збережені знімки.</string>
     <string name="uploader_error_drive_not_connected">Google Drive не підключено. Підключіть його в налаштуваннях.</string>
+    <string name="detect_title">Знімки екрана</string>
+    <string name="detect_switch">Пропонувати надіслати кожен знімок</string>
+    <string name="detect_hint">Після кожного знімка екрана з’являється сповіщення. Торкніться його, щоб надіслати знімок і скопіювати посилання.</string>
+    <string name="detect_photos_needed">Snap2Link потрібен доступ до всіх ваших фото, щоб бачити нові знімки екрана.</string>
+    <string name="detect_notifications_needed">Дозвольте сповіщення, щоб Snap2Link міг пропонувати ваші знімки.</string>
+    <string name="detect_open_settings">Відкрити налаштування застосунку</string>
+    <string name="detect_turn_off">Вимкнути</string>
+    <string name="detect_notification_title">Знімок екрана зроблено</string>
+    <string name="detect_notification_text">Торкніться, щоб надіслати його через Snap2Link і скопіювати посилання.</string>
+    <string name="detect_notification_send">Надіслати</string>
+    <string name="detect_channel">Нові знімки екрана</string>
+    <string name="detect_channel_hint">Пропонує надіслати кожен новий знімок екрана.</string>
+    <string name="home_detect_title">Отримуйте сповіщення після кожного знімка</string>
+    <string name="home_detect_action">Увімкнути</string>
+    <string name="home_step2_notification">Торкніться сповіщення Snap2Link або «Поділитися», потім Snap2Link.</string>
 </resources>

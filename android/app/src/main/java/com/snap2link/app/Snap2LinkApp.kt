@@ -3,6 +3,7 @@ package com.snap2link.app
 import androidx.core.content.edit
 import android.app.Application
 import android.content.Context
+import com.snap2link.app.detect.ScreenshotWatch
 import com.snap2link.app.drive.DriveClient
 import com.snap2link.app.drive.DriveHosting
 import com.snap2link.app.drive.DriveStore
@@ -18,6 +19,12 @@ class Snap2LinkApp : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(AppLanguage.wrap(base))
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        // A watch Android dropped (the app was stopped) starts again.
+        ScreenshotWatch.refresh(this)
     }
 }
 

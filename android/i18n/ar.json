@@ -118,5 +118,20 @@
   "settings.switch_account": "تبديل الحساب",
   "history.drive_needed": "اربط Google Drive لرؤية لقطاتك هنا.",
   "history.keep_hint_drive": "لا يمس التنظيف التلقائي اللقطات المحفوظة.",
-  "uploader.error.drive_not_connected": "Google Drive غير مرتبط. اربطه من الإعدادات."
+  "uploader.error.drive_not_connected": "Google Drive غير مرتبط. اربطه من الإعدادات.",
+  "detect.title": "لقطات الشاشة",
+  "detect.switch": "اقتراح إرسال كل لقطة",
+  "detect.hint": "يظهر إشعار بعد كل لقطة شاشة. اضغط عليه لإرسال اللقطة ونسخ رابطها.",
+  "detect.photos_needed": "يحتاج Snap2Link إلى الوصول إلى كل صورك لرؤية لقطات الشاشة الجديدة.",
+  "detect.notifications_needed": "اسمح بالإشعارات ليتمكن Snap2Link من اقتراح لقطاتك.",
+  "detect.open_settings": "فتح إعدادات التطبيق",
+  "detect.turn_off": "إيقاف",
+  "detect.notification.title": "تم التقاط الشاشة",
+  "detect.notification.text": "اضغط لإرسالها عبر Snap2Link ونسخ الرابط.",
+  "detect.notification.send": "إرسال",
+  "detect.channel": "لقطات شاشة جديدة",
+  "detect.channel_hint": "يقترح إرسال كل لقطة شاشة جديدة.",
+  "home.detect_title": "احصل على إشعار بعد كل لقطة",
+  "home.detect_action": "تشغيل",
+  "home.step2_notification": "اضغط على إشعار Snap2Link، أو على مشاركة ثم Snap2Link."
 }

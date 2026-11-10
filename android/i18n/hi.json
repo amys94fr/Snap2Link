@@ -118,5 +118,20 @@
   "settings.switch_account": "खाता बदलें",
   "history.drive_needed": "अपने कैप्चर यहाँ देखने के लिए Google Drive कनेक्ट करें।",
   "history.keep_hint_drive": "स्वचालित सफ़ाई रखे गए कैप्चर को नहीं छूती।",
-  "uploader.error.drive_not_connected": "Google Drive कनेक्ट नहीं है। इसे सेटिंग्स में कनेक्ट करें।"
+  "uploader.error.drive_not_connected": "Google Drive कनेक्ट नहीं है। इसे सेटिंग्स में कनेक्ट करें।",
+  "detect.title": "स्क्रीनशॉट",
+  "detect.switch": "हर स्क्रीनशॉट भेजने का सुझाव दें",
+  "detect.hint": "हर स्क्रीनशॉट के बाद एक सूचना आती है। स्क्रीनशॉट भेजने और उसका लिंक कॉपी करने के लिए उस पर टैप करें।",
+  "detect.photos_needed": "नए स्क्रीनशॉट देखने के लिए Snap2Link को आपकी सभी फ़ोटो तक पहुंच चाहिए।",
+  "detect.notifications_needed": "सूचनाओं की अनुमति दें ताकि Snap2Link आपके स्क्रीनशॉट भेजने का सुझाव दे सके।",
+  "detect.open_settings": "ऐप की सेटिंग खोलें",
+  "detect.turn_off": "बंद करें",
+  "detect.notification.title": "स्क्रीनशॉट लिया गया",
+  "detect.notification.text": "Snap2Link से भेजने और लिंक कॉपी करने के लिए टैप करें।",
+  "detect.notification.send": "भेजें",
+  "detect.channel": "नए स्क्रीनशॉट",
+  "detect.channel_hint": "हर नया स्क्रीनशॉट भेजने का सुझाव देता है।",
+  "home.detect_title": "हर स्क्रीनशॉट के बाद सूचना पाएं",
+  "home.detect_action": "चालू करें",
+  "home.step2_notification": "Snap2Link की सूचना पर टैप करें, या शेयर पर टैप करें फिर Snap2Link चुनें।"
 }

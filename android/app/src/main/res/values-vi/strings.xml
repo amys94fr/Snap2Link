@@ -121,4 +121,19 @@
     <string name="history_drive_needed">Kết nối Google Drive để xem ảnh chụp của bạn tại đây.</string>
     <string name="history_keep_hint_drive">Tính năng dọn dẹp tự động không động đến ảnh đã giữ.</string>
     <string name="uploader_error_drive_not_connected">Google Drive chưa được kết nối. Hãy kết nối trong phần cài đặt.</string>
+    <string name="detect_title">Ảnh chụp màn hình</string>
+    <string name="detect_switch">Đề nghị gửi mỗi ảnh chụp</string>
+    <string name="detect_hint">Một thông báo xuất hiện sau mỗi lần chụp màn hình. Nhấn vào để gửi ảnh và sao chép liên kết.</string>
+    <string name="detect_photos_needed">Snap2Link cần quyền truy cập tất cả ảnh của bạn để thấy ảnh chụp màn hình mới.</string>
+    <string name="detect_notifications_needed">Hãy cho phép thông báo để Snap2Link có thể đề nghị gửi ảnh chụp của bạn.</string>
+    <string name="detect_open_settings">Mở cài đặt ứng dụng</string>
+    <string name="detect_turn_off">Tắt</string>
+    <string name="detect_notification_title">Đã chụp màn hình</string>
+    <string name="detect_notification_text">Nhấn để gửi bằng Snap2Link và sao chép liên kết.</string>
+    <string name="detect_notification_send">Gửi</string>
+    <string name="detect_channel">Ảnh chụp màn hình mới</string>
+    <string name="detect_channel_hint">Đề nghị gửi mỗi ảnh chụp màn hình mới.</string>
+    <string name="home_detect_title">Nhận thông báo sau mỗi lần chụp</string>
+    <string name="home_detect_action">Bật</string>
+    <string name="home_step2_notification">Nhấn vào thông báo Snap2Link, hoặc Chia sẻ rồi chọn Snap2Link.</string>
 </resources>

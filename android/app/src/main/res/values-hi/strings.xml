@@ -121,4 +121,19 @@
     <string name="history_drive_needed">अपने कैप्चर यहाँ देखने के लिए Google Drive कनेक्ट करें।</string>
     <string name="history_keep_hint_drive">स्वचालित सफ़ाई रखे गए कैप्चर को नहीं छूती।</string>
     <string name="uploader_error_drive_not_connected">Google Drive कनेक्ट नहीं है। इसे सेटिंग्स में कनेक्ट करें।</string>
+    <string name="detect_title">स्क्रीनशॉट</string>
+    <string name="detect_switch">हर स्क्रीनशॉट भेजने का सुझाव दें</string>
+    <string name="detect_hint">हर स्क्रीनशॉट के बाद एक सूचना आती है। स्क्रीनशॉट भेजने और उसका लिंक कॉपी करने के लिए उस पर टैप करें।</string>
+    <string name="detect_photos_needed">नए स्क्रीनशॉट देखने के लिए Snap2Link को आपकी सभी फ़ोटो तक पहुंच चाहिए।</string>
+    <string name="detect_notifications_needed">सूचनाओं की अनुमति दें ताकि Snap2Link आपके स्क्रीनशॉट भेजने का सुझाव दे सके।</string>
+    <string name="detect_open_settings">ऐप की सेटिंग खोलें</string>
+    <string name="detect_turn_off">बंद करें</string>
+    <string name="detect_notification_title">स्क्रीनशॉट लिया गया</string>
+    <string name="detect_notification_text">Snap2Link से भेजने और लिंक कॉपी करने के लिए टैप करें।</string>
+    <string name="detect_notification_send">भेजें</string>
+    <string name="detect_channel">नए स्क्रीनशॉट</string>
+    <string name="detect_channel_hint">हर नया स्क्रीनशॉट भेजने का सुझाव देता है।</string>
+    <string name="home_detect_title">हर स्क्रीनशॉट के बाद सूचना पाएं</string>
+    <string name="home_detect_action">चालू करें</string>
+    <string name="home_step2_notification">Snap2Link की सूचना पर टैप करें, या शेयर पर टैप करें फिर Snap2Link चुनें।</string>
 </resources>
