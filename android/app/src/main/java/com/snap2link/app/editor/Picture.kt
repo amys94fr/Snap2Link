@@ -19,6 +19,19 @@ data class Box(val left: Float, val top: Float, val right: Float, val bottom: Fl
 
     fun grown(by: Float) = Box(left - by, top - by, right + by, bottom + by)
 
+    /** The part both boxes share, or null when they don't meet. */
+    fun intersect(other: Box): Box? {
+        val l = max(left, other.left)
+        val t = max(top, other.top)
+        val r = min(right, other.right)
+        val b = min(bottom, other.bottom)
+        return if (l < r && t < b) Box(l, t, r, b) else null
+    }
+
+    /** The same box give or take half a pixel: tilting computes with floats. */
+    fun near(other: Box) = abs(left - other.left) < 0.5f && abs(top - other.top) < 0.5f &&
+        abs(right - other.right) < 0.5f && abs(bottom - other.bottom) < 0.5f
+
     companion object {
         fun of(a: Pt, b: Pt) = Box(min(a.x, b.x), min(a.y, b.y), max(a.x, b.x), max(a.y, b.y))
         fun of(width: Int, height: Int) = Box(0f, 0f, width.toFloat(), height.toFloat())
@@ -151,8 +164,13 @@ data class Picture(
     /**
      * Tilted to [degrees] (clockwise), the image being [width] x [height]
      * before any tilt. Marks keep their place on the image: lines turn with
-     * it, frames and texts move with their middle and stay level. The crop
-     * becomes the largest frame with no empty corner, as photo editors do.
+     * it, frames and texts move with their middle and stay level.
+     *
+     * Nothing hidden may show after a tilt. A blur grows to cover all it
+     * covered, turned. An uncropped image gets the largest frame with no
+     * empty corner, as photo editors do; a cropped one keeps its crop, cut
+     * down to the largest frame inside it once turned, so that nothing the
+     * crop left out comes back.
      */
     fun angled(degrees: Float, width: Float, height: Float, textBox: (Shape.Text) -> Box): Picture {
         val (oldWidth, oldHeight) = Tilt.size(width, height, angle)
@@ -175,14 +193,32 @@ data class Picture(
                 is Shape.Arrow -> shape.copy(from = move(shape.from), to = move(shape.to))
                 is Shape.Rectangle -> shape.copy(box = move(shape.box))
                 is Shape.Circle -> shape.copy(box = move(shape.box))
-                is Shape.Blur -> shape.copy(box = move(shape.box))
+                is Shape.Blur -> {
+                    val middle = move(Pt((shape.box.left + shape.box.right) / 2, (shape.box.top + shape.box.bottom) / 2))
+                    val (w, h) = Tilt.size(shape.box.width, shape.box.height, degrees - angle)
+                    shape.copy(box = Box(middle.x - w / 2, middle.y - h / 2, middle.x + w / 2, middle.y + h / 2))
+                }
                 is Shape.Text -> {
                     val box = move(textBox(shape))
                     shape.copy(at = Pt(box.left, box.top))
                 }
             }
         }
-        return Picture(shapes, Tilt.inner(width, height, degrees), turns, flipped, degrees)
+        val whole = Tilt.inner(width, height, degrees)
+        val crop = if (crop.near(Tilt.inner(width, height, angle))) {
+            whole
+        } else {
+            val middle = move(Pt((crop.left + crop.right) / 2, (crop.top + crop.bottom) / 2))
+            val inside = Tilt.inner(crop.width, crop.height, degrees - angle)
+            val kept = Box(
+                middle.x - inside.width / 2,
+                middle.y - inside.height / 2,
+                middle.x + inside.width / 2,
+                middle.y + inside.height / 2,
+            )
+            kept.intersect(whole) ?: kept
+        }
+        return Picture(shapes, crop, turns, flipped, degrees)
     }
 
     companion object {

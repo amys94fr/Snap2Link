@@ -399,4 +399,32 @@ class PictureTest {
         assertEquals(-12f, tilted.flippedOver(width, noText).angle)
         assertEquals(12f, tilted.turned(width, height, noText).angle)
     }
+
+    @Test
+    fun aBlurStillCoversWhatItHidAfterATilt() {
+        val blur = Shape.Blur(Box(100f, 100f, 300f, 140f), 6f)
+        val tilted = Picture(listOf(blur), Box.of(1080, 2400)).angled(20f, 1080f, 2400f, noText).shapes[0] as Shape.Blur
+        val (w, h) = Tilt.size(200f, 40f, 20f)
+        assertEquals(w, tilted.box.width, 0.01f)
+        assertEquals(h, tilted.box.height, 0.01f)
+        assertTrue(tilted.box.width > 200f && tilted.box.height > 40f)
+    }
+
+    @Test
+    fun aTiltNeverBringsBackWhatTheCropLeftOut() {
+        val cropped = Picture(emptyList(), Box(100f, 300f, 700f, 900f))
+        val tilted = cropped.angled(15f, 1080f, 2400f, noText)
+        // Back at 0 degrees, the crop must lie inside the first one: nothing outside it shows again.
+        val back = tilted.angled(0f, 1080f, 2400f, noText).crop
+        assertTrue(back.left >= 100f - 0.01f && back.top >= 300f - 0.01f)
+        assertTrue(back.right <= 700f + 0.01f && back.bottom <= 900f + 0.01f)
+        assertTrue(back.width > 0f && back.height > 0f)
+    }
+
+    @Test
+    fun anUncroppedImageGetsTheWholeFrameWithNoEmptyCorner() {
+        val tilted = Picture.blank(1080, 2400).angled(15f, 1080f, 2400f, noText)
+        assertEquals(Tilt.inner(1080f, 2400f, 15f), tilted.crop)
+        assertEquals(Box.of(1080, 2400), tilted.angled(0f, 1080f, 2400f, noText).crop)
+    }
 }
