@@ -31,12 +31,11 @@ object ScreenshotNotice {
         if (!manager.areNotificationsEnabled()) return
         createChannel(context)
 
-        // The same screen as "Share, then Snap2Link", the editor first.
+        // The same screen as "Share, then Snap2Link": the editor.
         val send = Intent(context, ShareActivity::class.java)
             .setAction(Intent.ACTION_SEND)
             .setType("image/*")
             .putExtra(Intent.EXTRA_STREAM, image)
-            .putExtra(ShareActivity.EXTRA_EDIT, true)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         send.clipData = ClipData.newRawUri(null, image)
         val open = PendingIntent.getActivity(

@@ -68,8 +68,8 @@ import com.snap2link.app.ui.copyLink
 import kotlinx.coroutines.delay
 
 /**
- * "Share, then Snap2Link": sends the image and copies its link. From a
- * screenshot notification ([EXTRA_EDIT]), the editor opens first.
+ * "Share, then Snap2Link", or a screenshot notification: the image opens in
+ * the editor, then is sent and its link copied.
  */
 class ShareActivity : ComponentActivity() {
     private val model: ShareViewModel by viewModels()
@@ -82,7 +82,7 @@ class ShareActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         model.driveAuth = PlayDriveAuth(this)
-        model.start(sharedImage(intent), edit = intent.getBooleanExtra(EXTRA_EDIT, false))
+        model.start(sharedImage(intent))
         setContent {
             Snap2LinkTheme {
                 val editing = model.state as? ShareState.Editing
@@ -117,11 +117,6 @@ class ShareActivity : ComponentActivity() {
         // The model outlives a rotation; this activity doesn't.
         model.driveAuth = null
         super.onDestroy()
-    }
-
-    companion object {
-        /** Opens the image in the editor before sending it. */
-        const val EXTRA_EDIT = "com.snap2link.app.extra.EDIT"
     }
 
     private fun sharedImage(intent: Intent): Uri? {

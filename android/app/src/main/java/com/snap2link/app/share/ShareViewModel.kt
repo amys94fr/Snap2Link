@@ -66,29 +66,17 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     /**
-     * Runs once per shared image, even when the screen turns. With [edit],
-     * the image opens in the editor first, as from a screenshot notification.
+     * Runs once per shared image, even when the screen turns: the image opens
+     * in the editor, and nothing is sent before the person says so.
      */
-    fun start(uri: Uri?, edit: Boolean = false) {
+    fun start(uri: Uri?) {
         if (source != null || png != null) return
         if (uri == null) {
             state = ShareState.Failed(R.string.share_no_image)
             return
         }
         source = uri
-        if (edit) return open(uri)
-        viewModelScope.launch {
-            png = try {
-                withContext(Dispatchers.IO) { Png.from(getApplication<Application>().contentResolver, uri) }
-            } catch (_: Png.Unreadable) {
-                state = ShareState.Failed(R.string.share_unreadable)
-                return@launch
-            } catch (_: SecurityException) {
-                state = ShareState.Failed(R.string.share_unreadable)
-                return@launch
-            }
-            send()
-        }
+        open(uri)
     }
 
     private fun open(uri: Uri) {
