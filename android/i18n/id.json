@@ -118,5 +118,20 @@
   "settings.switch_account": "Ganti akun",
   "history.drive_needed": "Hubungkan Google Drive untuk melihat tangkapanmu di sini.",
   "history.keep_hint_drive": "Pembersihan otomatis tidak menyentuh tangkapan yang disimpan.",
-  "uploader.error.drive_not_connected": "Google Drive tidak terhubung. Hubungkan di pengaturan."
+  "uploader.error.drive_not_connected": "Google Drive tidak terhubung. Hubungkan di pengaturan.",
+  "detect.title": "Tangkapan layar",
+  "detect.switch": "Tawarkan pengiriman setiap tangkapan",
+  "detect.hint": "Notifikasi muncul setelah setiap tangkapan layar. Ketuk untuk mengirim tangkapan dan menyalin tautannya.",
+  "detect.photos_needed": "Snap2Link memerlukan akses ke semua foto Anda untuk melihat tangkapan layar baru.",
+  "detect.notifications_needed": "Izinkan notifikasi agar Snap2Link dapat menawarkan tangkapan layar Anda.",
+  "detect.open_settings": "Buka setelan aplikasi",
+  "detect.turn_off": "Matikan",
+  "detect.notification.title": "Tangkapan layar diambil",
+  "detect.notification.text": "Ketuk untuk mengirimnya dengan Snap2Link dan menyalin tautan.",
+  "detect.notification.send": "Kirim",
+  "detect.channel": "Tangkapan layar baru",
+  "detect.channel_hint": "Menawarkan pengiriman setiap tangkapan layar baru.",
+  "home.detect_title": "Dapatkan notifikasi setelah setiap tangkapan",
+  "home.detect_action": "Aktifkan",
+  "home.step2_notification": "Ketuk notifikasi Snap2Link, atau Bagikan lalu Snap2Link."
 }

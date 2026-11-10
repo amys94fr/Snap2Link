@@ -118,5 +118,20 @@
   "settings.switch_account": "Zmień konto",
   "history.drive_needed": "Połącz Dysk Google, aby widzieć tu swoje zrzuty.",
   "history.keep_hint_drive": "Automatyczne czyszczenie pomija zachowane zrzuty.",
-  "uploader.error.drive_not_connected": "Nie połączono z Google Drive. Połącz go w ustawieniach."
+  "uploader.error.drive_not_connected": "Nie połączono z Google Drive. Połącz go w ustawieniach.",
+  "detect.title": "Zrzuty ekranu",
+  "detect.switch": "Proponuj wysłanie każdego zrzutu",
+  "detect.hint": "Po każdym zrzucie ekranu pojawia się powiadomienie. Stuknij je, aby wysłać zrzut i skopiować link.",
+  "detect.photos_needed": "Snap2Link potrzebuje dostępu do wszystkich zdjęć, aby widzieć nowe zrzuty ekranu.",
+  "detect.notifications_needed": "Zezwól na powiadomienia, aby Snap2Link mógł proponować Twoje zrzuty.",
+  "detect.open_settings": "Otwórz ustawienia aplikacji",
+  "detect.turn_off": "Wyłącz",
+  "detect.notification.title": "Zrobiono zrzut ekranu",
+  "detect.notification.text": "Stuknij, aby wysłać go przez Snap2Link i skopiować link.",
+  "detect.notification.send": "Wyślij",
+  "detect.channel": "Nowe zrzuty ekranu",
+  "detect.channel_hint": "Proponuje wysłanie każdego nowego zrzutu ekranu.",
+  "home.detect_title": "Otrzymuj powiadomienie po każdym zrzucie",
+  "home.detect_action": "Włącz",
+  "home.step2_notification": "Stuknij powiadomienie Snap2Link albo Udostępnij, a potem Snap2Link."
 }

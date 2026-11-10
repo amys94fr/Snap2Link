@@ -121,4 +121,19 @@
     <string name="history_drive_needed">Conecta Google Drive para ver aquí tus capturas.</string>
     <string name="history_keep_hint_drive">La limpieza automática no toca las capturas conservadas.</string>
     <string name="uploader_error_drive_not_connected">Google Drive no está conectado. Conéctalo en los ajustes.</string>
+    <string name="detect_title">Capturas de pantalla</string>
+    <string name="detect_switch">Ofrecer el envío de cada captura</string>
+    <string name="detect_hint">Después de cada captura aparece una notificación. Tócala para enviar la captura y copiar su enlace.</string>
+    <string name="detect_photos_needed">Snap2Link necesita acceso a todas tus fotos para ver las nuevas capturas.</string>
+    <string name="detect_notifications_needed">Permite las notificaciones para que Snap2Link pueda ofrecerte tus capturas.</string>
+    <string name="detect_open_settings">Abrir los ajustes de la app</string>
+    <string name="detect_turn_off">Desactivar</string>
+    <string name="detect_notification_title">Captura de pantalla hecha</string>
+    <string name="detect_notification_text">Toca para enviarla con Snap2Link y copiar el enlace.</string>
+    <string name="detect_notification_send">Enviar</string>
+    <string name="detect_channel">Nuevas capturas</string>
+    <string name="detect_channel_hint">Ofrece el envío de cada nueva captura de pantalla.</string>
+    <string name="home_detect_title">Recibe una notificación después de cada captura</string>
+    <string name="home_detect_action">Activar</string>
+    <string name="home_step2_notification">Toca la notificación de Snap2Link, o Compartir y luego Snap2Link.</string>
 </resources>

@@ -118,5 +118,20 @@
   "settings.switch_account": "アカウントを切り替え",
   "history.drive_needed": "ここにキャプチャを表示するには Google Drive を接続してください。",
   "history.keep_hint_drive": "自動クリーンアップは保持中のキャプチャを削除しません。",
-  "uploader.error.drive_not_connected": "Google Drive が接続されていません。設定で接続してください。"
+  "uploader.error.drive_not_connected": "Google Drive が接続されていません。設定で接続してください。",
+  "detect.title": "スクリーンショット",
+  "detect.switch": "スクリーンショットごとに送信を提案",
+  "detect.hint": "スクリーンショットを撮るたびに通知が表示されます。タップするとスクリーンショットを送信し、リンクをコピーします。",
+  "detect.photos_needed": "新しいスクリーンショットを見つけるには、Snap2Link にすべての写真へのアクセスが必要です。",
+  "detect.notifications_needed": "Snap2Link がスクリーンショットを提案できるよう、通知を許可してください。",
+  "detect.open_settings": "アプリの設定を開く",
+  "detect.turn_off": "オフにする",
+  "detect.notification.title": "スクリーンショットを撮りました",
+  "detect.notification.text": "タップすると Snap2Link で送信し、リンクをコピーします。",
+  "detect.notification.send": "送信",
+  "detect.channel": "新しいスクリーンショット",
+  "detect.channel_hint": "新しいスクリーンショットごとに送信を提案します。",
+  "home.detect_title": "スクリーンショットのたびに通知を受け取る",
+  "home.detect_action": "オンにする",
+  "home.step2_notification": "Snap2Link の通知をタップするか、[共有] から Snap2Link を選びます。"
 }

@@ -118,5 +118,20 @@
   "settings.switch_account": "החלפת חשבון",
   "history.drive_needed": "יש לחבר את Google Drive כדי לראות כאן את הצילומים.",
   "history.keep_hint_drive": "הניקוי האוטומטי לא נוגע בצילומים שמורים.",
-  "uploader.error.drive_not_connected": "Google Drive לא מחובר. אפשר לחבר אותו בהגדרות."
+  "uploader.error.drive_not_connected": "Google Drive לא מחובר. אפשר לחבר אותו בהגדרות.",
+  "detect.title": "צילומי מסך",
+  "detect.switch": "להציע לשלוח כל צילום מסך",
+  "detect.hint": "אחרי כל צילום מסך מופיעה התראה. מקישים עליה כדי לשלוח את הצילום ולהעתיק את הקישור.",
+  "detect.photos_needed": "Snap2Link צריכה גישה לכל התמונות כדי לראות צילומי מסך חדשים.",
+  "detect.notifications_needed": "צריך לאשר התראות כדי ש-Snap2Link תוכל להציע את צילומי המסך.",
+  "detect.open_settings": "פתיחת הגדרות האפליקציה",
+  "detect.turn_off": "כיבוי",
+  "detect.notification.title": "צילום המסך נשמר",
+  "detect.notification.text": "מקישים כדי לשלוח עם Snap2Link ולהעתיק את הקישור.",
+  "detect.notification.send": "שליחה",
+  "detect.channel": "צילומי מסך חדשים",
+  "detect.channel_hint": "מציעה לשלוח כל צילום מסך חדש.",
+  "home.detect_title": "קבלת התראה אחרי כל צילום מסך",
+  "home.detect_action": "הפעלה",
+  "home.step2_notification": "מקישים על ההתראה של Snap2Link, או על שיתוף ואז על Snap2Link."
 }

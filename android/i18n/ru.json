@@ -118,5 +118,20 @@
   "settings.switch_account": "Сменить аккаунт",
   "history.drive_needed": "Подключите Google Диск, чтобы видеть здесь свои снимки.",
   "history.keep_hint_drive": "Автоматическая очистка не трогает сохранённые снимки.",
-  "uploader.error.drive_not_connected": "Google Drive не подключён. Подключите его в настройках."
+  "uploader.error.drive_not_connected": "Google Drive не подключён. Подключите его в настройках.",
+  "detect.title": "Скриншоты",
+  "detect.switch": "Предлагать отправить каждый скриншот",
+  "detect.hint": "После каждого скриншота появляется уведомление. Нажмите на него, чтобы отправить скриншот и скопировать ссылку.",
+  "detect.photos_needed": "Snap2Link нужен доступ ко всем вашим фото, чтобы видеть новые скриншоты.",
+  "detect.notifications_needed": "Разрешите уведомления, чтобы Snap2Link мог предлагать ваши скриншоты.",
+  "detect.open_settings": "Открыть настройки приложения",
+  "detect.turn_off": "Выключить",
+  "detect.notification.title": "Скриншот сделан",
+  "detect.notification.text": "Нажмите, чтобы отправить его через Snap2Link и скопировать ссылку.",
+  "detect.notification.send": "Отправить",
+  "detect.channel": "Новые скриншоты",
+  "detect.channel_hint": "Предлагает отправить каждый новый скриншот.",
+  "home.detect_title": "Получайте уведомление после каждого скриншота",
+  "home.detect_action": "Включить",
+  "home.step2_notification": "Нажмите на уведомление Snap2Link или «Поделиться», затем Snap2Link."
 }

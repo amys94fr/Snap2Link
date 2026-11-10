@@ -118,5 +118,20 @@
   "settings.switch_account": "Trocar de conta",
   "history.drive_needed": "Conecte o Google Drive para ver suas capturas aqui.",
   "history.keep_hint_drive": "A limpeza automática não mexe nas capturas mantidas.",
-  "uploader.error.drive_not_connected": "O Google Drive não está conectado. Conecte-o nas configurações."
+  "uploader.error.drive_not_connected": "O Google Drive não está conectado. Conecte-o nas configurações.",
+  "detect.title": "Capturas de tela",
+  "detect.switch": "Oferecer o envio de cada captura",
+  "detect.hint": "Uma notificação aparece depois de cada captura de tela. Toque nela para enviar a captura e copiar o link.",
+  "detect.photos_needed": "O Snap2Link precisa de acesso a todas as suas fotos para ver as novas capturas.",
+  "detect.notifications_needed": "Permita as notificações para que o Snap2Link possa oferecer suas capturas.",
+  "detect.open_settings": "Abrir as configurações do app",
+  "detect.turn_off": "Desativar",
+  "detect.notification.title": "Captura de tela feita",
+  "detect.notification.text": "Toque para enviar com o Snap2Link e copiar o link.",
+  "detect.notification.send": "Enviar",
+  "detect.channel": "Novas capturas",
+  "detect.channel_hint": "Oferece o envio de cada nova captura de tela.",
+  "home.detect_title": "Receba uma notificação depois de cada captura",
+  "home.detect_action": "Ativar",
+  "home.step2_notification": "Toque na notificação do Snap2Link, ou em Compartilhar e depois em Snap2Link."
 }

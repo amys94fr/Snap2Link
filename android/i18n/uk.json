@@ -118,5 +118,20 @@
   "settings.switch_account": "Змінити обліковий запис",
   "history.drive_needed": "Підключіть Google Диск, щоб бачити тут свої знімки.",
   "history.keep_hint_drive": "Автоматичне очищення не чіпає збережені знімки.",
-  "uploader.error.drive_not_connected": "Google Drive не підключено. Підключіть його в налаштуваннях."
+  "uploader.error.drive_not_connected": "Google Drive не підключено. Підключіть його в налаштуваннях.",
+  "detect.title": "Знімки екрана",
+  "detect.switch": "Пропонувати надіслати кожен знімок",
+  "detect.hint": "Після кожного знімка екрана з’являється сповіщення. Торкніться його, щоб надіслати знімок і скопіювати посилання.",
+  "detect.photos_needed": "Snap2Link потрібен доступ до всіх ваших фото, щоб бачити нові знімки екрана.",
+  "detect.notifications_needed": "Дозвольте сповіщення, щоб Snap2Link міг пропонувати ваші знімки.",
+  "detect.open_settings": "Відкрити налаштування застосунку",
+  "detect.turn_off": "Вимкнути",
+  "detect.notification.title": "Знімок екрана зроблено",
+  "detect.notification.text": "Торкніться, щоб надіслати його через Snap2Link і скопіювати посилання.",
+  "detect.notification.send": "Надіслати",
+  "detect.channel": "Нові знімки екрана",
+  "detect.channel_hint": "Пропонує надіслати кожен новий знімок екрана.",
+  "home.detect_title": "Отримуйте сповіщення після кожного знімка",
+  "home.detect_action": "Увімкнути",
+  "home.step2_notification": "Торкніться сповіщення Snap2Link або «Поділитися», потім Snap2Link."
 }

@@ -122,4 +122,19 @@
     <string name="history_drive_needed">Connect Google Drive to see your captures here.</string>
     <string name="history_keep_hint_drive">The automatic cleanup leaves kept captures alone.</string>
     <string name="uploader_error_drive_not_connected">Google Drive isn\'t connected. Connect it in the settings.</string>
+    <string name="detect_title">Screenshots</string>
+    <string name="detect_switch">Offer to send each screenshot</string>
+    <string name="detect_hint">A notification appears after each screenshot. Tap it to send the screenshot and copy its link.</string>
+    <string name="detect_photos_needed">Snap2Link needs access to all your photos to see new screenshots.</string>
+    <string name="detect_notifications_needed">Allow notifications so Snap2Link can offer your screenshots.</string>
+    <string name="detect_open_settings">Open the app\'s settings</string>
+    <string name="detect_turn_off">Turn off</string>
+    <string name="detect_notification_title">Screenshot taken</string>
+    <string name="detect_notification_text">Tap to send it with Snap2Link and copy the link.</string>
+    <string name="detect_notification_send">Send</string>
+    <string name="detect_channel">New screenshots</string>
+    <string name="detect_channel_hint">Offers to send each new screenshot.</string>
+    <string name="home_detect_title">Get a notification after each screenshot</string>
+    <string name="home_detect_action">Turn on</string>
+    <string name="home_step2_notification">Tap the Snap2Link notification, or Share then Snap2Link.</string>
 </resources>

@@ -121,4 +121,19 @@
     <string name="history_drive_needed">ここにキャプチャを表示するには Google Drive を接続してください。</string>
     <string name="history_keep_hint_drive">自動クリーンアップは保持中のキャプチャを削除しません。</string>
     <string name="uploader_error_drive_not_connected">Google Drive が接続されていません。設定で接続してください。</string>
+    <string name="detect_title">スクリーンショット</string>
+    <string name="detect_switch">スクリーンショットごとに送信を提案</string>
+    <string name="detect_hint">スクリーンショットを撮るたびに通知が表示されます。タップするとスクリーンショットを送信し、リンクをコピーします。</string>
+    <string name="detect_photos_needed">新しいスクリーンショットを見つけるには、Snap2Link にすべての写真へのアクセスが必要です。</string>
+    <string name="detect_notifications_needed">Snap2Link がスクリーンショットを提案できるよう、通知を許可してください。</string>
+    <string name="detect_open_settings">アプリの設定を開く</string>
+    <string name="detect_turn_off">オフにする</string>
+    <string name="detect_notification_title">スクリーンショットを撮りました</string>
+    <string name="detect_notification_text">タップすると Snap2Link で送信し、リンクをコピーします。</string>
+    <string name="detect_notification_send">送信</string>
+    <string name="detect_channel">新しいスクリーンショット</string>
+    <string name="detect_channel_hint">新しいスクリーンショットごとに送信を提案します。</string>
+    <string name="home_detect_title">スクリーンショットのたびに通知を受け取る</string>
+    <string name="home_detect_action">オンにする</string>
+    <string name="home_step2_notification">Snap2Link の通知をタップするか、[共有] から Snap2Link を選びます。</string>
 </resources>

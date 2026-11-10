@@ -121,4 +121,19 @@
     <string name="history_drive_needed">برای دیدن عکس‌هایتان در اینجا، Google Drive را متصل کنید.</string>
     <string name="history_keep_hint_drive">پاک‌سازی خودکار به عکس‌های نگه‌داشته‌شده دست نمی‌زند.</string>
     <string name="uploader_error_drive_not_connected">Google Drive متصل نیست. آن را در تنظیمات متصل کنید.</string>
+    <string name="detect_title">اسکرین‌شات‌ها</string>
+    <string name="detect_switch">پیشنهاد ارسال هر اسکرین‌شات</string>
+    <string name="detect_hint">بعد از هر اسکرین‌شات یک اعلان ظاهر می‌شود. برای ارسال اسکرین‌شات و کپی پیوند آن، روی اعلان بزنید.</string>
+    <string name="detect_photos_needed">Snap2Link برای دیدن اسکرین‌شات‌های جدید به همه عکس‌های شما دسترسی نیاز دارد.</string>
+    <string name="detect_notifications_needed">اعلان‌ها را مجاز کنید تا Snap2Link بتواند اسکرین‌شات‌هایتان را پیشنهاد دهد.</string>
+    <string name="detect_open_settings">باز کردن تنظیمات برنامه</string>
+    <string name="detect_turn_off">خاموش کردن</string>
+    <string name="detect_notification_title">اسکرین‌شات گرفته شد</string>
+    <string name="detect_notification_text">برای ارسال با Snap2Link و کپی پیوند بزنید.</string>
+    <string name="detect_notification_send">ارسال</string>
+    <string name="detect_channel">اسکرین‌شات‌های جدید</string>
+    <string name="detect_channel_hint">ارسال هر اسکرین‌شات جدید را پیشنهاد می‌دهد.</string>
+    <string name="home_detect_title">بعد از هر اسکرین‌شات اعلان بگیرید</string>
+    <string name="home_detect_action">روشن کردن</string>
+    <string name="home_step2_notification">روی اعلان Snap2Link بزنید، یا روی «اشتراک‌گذاری» و سپس Snap2Link.</string>
 </resources>

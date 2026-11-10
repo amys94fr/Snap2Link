@@ -37,6 +37,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.snap2link.app.R
+import com.snap2link.app.detect.WatchCard
+import com.snap2link.app.detect.rememberWatchControl
 import com.snap2link.app.Host
 import com.snap2link.app.drive
 import com.snap2link.app.host
@@ -47,6 +49,7 @@ import com.snap2link.app.share.ShareActivity
 fun HomeScreen(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
     val context = LocalContext.current
     val hosting = context.hosting
+    val watch = rememberWatchControl()
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             // The same sheet as "Share, then Snap2Link".
@@ -79,8 +82,13 @@ fun HomeScreen(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Step(1, R.drawable.ic_camera, stringResource(R.string.home_step1))
-            Step(2, R.drawable.ic_share, stringResource(R.string.home_step2))
+            Step(
+                2,
+                R.drawable.ic_share,
+                stringResource(if (watch.active) R.string.home_step2_notification else R.string.home_step2),
+            )
             Step(3, R.drawable.ic_copy, stringResource(R.string.home_step3))
+            WatchCard(watch)
 
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

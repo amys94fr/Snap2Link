@@ -121,4 +121,19 @@
     <string name="history_drive_needed">여기에서 캡처를 보려면 Google Drive를 연결하세요.</string>
     <string name="history_keep_hint_drive">자동 정리는 보관된 캡처를 건드리지 않습니다.</string>
     <string name="uploader_error_drive_not_connected">Google Drive가 연결되어 있지 않습니다. 설정에서 연결하세요.</string>
+    <string name="detect_title">스크린샷</string>
+    <string name="detect_switch">스크린샷마다 보내기 제안</string>
+    <string name="detect_hint">스크린샷을 찍을 때마다 알림이 나타납니다. 탭하면 스크린샷을 보내고 링크를 복사합니다.</string>
+    <string name="detect_photos_needed">새 스크린샷을 보려면 Snap2Link가 모든 사진에 접근해야 합니다.</string>
+    <string name="detect_notifications_needed">Snap2Link가 스크린샷을 제안할 수 있도록 알림을 허용하세요.</string>
+    <string name="detect_open_settings">앱 설정 열기</string>
+    <string name="detect_turn_off">끄기</string>
+    <string name="detect_notification_title">스크린샷을 찍었습니다</string>
+    <string name="detect_notification_text">탭하면 Snap2Link로 보내고 링크를 복사합니다.</string>
+    <string name="detect_notification_send">보내기</string>
+    <string name="detect_channel">새 스크린샷</string>
+    <string name="detect_channel_hint">새 스크린샷마다 보내기를 제안합니다.</string>
+    <string name="home_detect_title">스크린샷마다 알림 받기</string>
+    <string name="home_detect_action">켜기</string>
+    <string name="home_step2_notification">Snap2Link 알림을 누르거나, 공유를 누른 다음 Snap2Link를 선택하세요.</string>
 </resources>

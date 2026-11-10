@@ -63,6 +63,8 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.snap2link.app.Host
 import com.snap2link.app.R
+import com.snap2link.app.detect.WatchSetting
+import com.snap2link.app.detect.rememberWatchControl
 import com.snap2link.app.ui.GuestCheckDialog
 
 private const val ONLINE_ACCOUNT = "https://snap2link.app/account/"
@@ -107,6 +109,8 @@ fun AccountScreen(modifier: Modifier = Modifier, model: AccountViewModel = viewM
                 }
             }
             HorizontalDivider(Modifier.padding(top = 16.dp))
+            WatchSetting(rememberWatchControl())
+            HorizontalDivider(Modifier.padding(top = 8.dp))
             LanguageRow()
         }
     }

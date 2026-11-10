@@ -118,5 +118,20 @@
   "settings.switch_account": "Konto wechseln",
   "history.drive_needed": "Verbinden Sie Google Drive, um Ihre Aufnahmen hier zu sehen.",
   "history.keep_hint_drive": "Die automatische Bereinigung lässt behaltene Aufnahmen in Ruhe.",
-  "uploader.error.drive_not_connected": "Google Drive ist nicht verbunden. Verbinden Sie es in den Einstellungen."
+  "uploader.error.drive_not_connected": "Google Drive ist nicht verbunden. Verbinden Sie es in den Einstellungen.",
+  "detect.title": "Screenshots",
+  "detect.switch": "Jeden Screenshot zum Senden anbieten",
+  "detect.hint": "Nach jedem Screenshot erscheint eine Benachrichtigung. Tippen Sie darauf, um den Screenshot zu senden und den Link zu kopieren.",
+  "detect.photos_needed": "Snap2Link braucht Zugriff auf alle Ihre Fotos, um neue Screenshots zu sehen.",
+  "detect.notifications_needed": "Erlauben Sie Benachrichtigungen, damit Snap2Link Ihre Screenshots anbieten kann.",
+  "detect.open_settings": "App-Einstellungen öffnen",
+  "detect.turn_off": "Ausschalten",
+  "detect.notification.title": "Screenshot aufgenommen",
+  "detect.notification.text": "Tippen, um ihn mit Snap2Link zu senden und den Link zu kopieren.",
+  "detect.notification.send": "Senden",
+  "detect.channel": "Neue Screenshots",
+  "detect.channel_hint": "Bietet jeden neuen Screenshot zum Senden an.",
+  "home.detect_title": "Nach jedem Screenshot benachrichtigt werden",
+  "home.detect_action": "Einschalten",
+  "home.step2_notification": "Tippen Sie auf die Snap2Link-Benachrichtigung oder auf Teilen und dann auf Snap2Link."
 }

@@ -121,4 +121,19 @@
     <string name="history_drive_needed">连接 Google Drive 后即可在此查看截图。</string>
     <string name="history_keep_hint_drive">自动清理不会删除已保留的截图。</string>
     <string name="uploader_error_drive_not_connected">Google Drive 未连接，请在设置中连接。</string>
+    <string name="detect_title">屏幕截图</string>
+    <string name="detect_switch">每次截屏后提示发送</string>
+    <string name="detect_hint">每次截屏后都会出现一条通知。点按即可发送截图并复制链接。</string>
+    <string name="detect_photos_needed">Snap2Link 需要访问您的所有照片才能看到新的截图。</string>
+    <string name="detect_notifications_needed">请允许通知，以便 Snap2Link 提示您发送截图。</string>
+    <string name="detect_open_settings">打开应用设置</string>
+    <string name="detect_turn_off">关闭</string>
+    <string name="detect_notification_title">已截屏</string>
+    <string name="detect_notification_text">点按即可通过 Snap2Link 发送并复制链接。</string>
+    <string name="detect_notification_send">发送</string>
+    <string name="detect_channel">新截图</string>
+    <string name="detect_channel_hint">每次有新截图时提示发送。</string>
+    <string name="home_detect_title">每次截屏后收到通知</string>
+    <string name="home_detect_action">开启</string>
+    <string name="home_step2_notification">点按 Snap2Link 通知，或点按“分享”后选择 Snap2Link。</string>
 </resources>

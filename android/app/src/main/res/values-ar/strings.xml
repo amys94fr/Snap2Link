@@ -121,4 +121,19 @@
     <string name="history_drive_needed">اربط Google Drive لرؤية لقطاتك هنا.</string>
     <string name="history_keep_hint_drive">لا يمس التنظيف التلقائي اللقطات المحفوظة.</string>
     <string name="uploader_error_drive_not_connected">Google Drive غير مرتبط. اربطه من الإعدادات.</string>
+    <string name="detect_title">لقطات الشاشة</string>
+    <string name="detect_switch">اقتراح إرسال كل لقطة</string>
+    <string name="detect_hint">يظهر إشعار بعد كل لقطة شاشة. اضغط عليه لإرسال اللقطة ونسخ رابطها.</string>
+    <string name="detect_photos_needed">يحتاج Snap2Link إلى الوصول إلى كل صورك لرؤية لقطات الشاشة الجديدة.</string>
+    <string name="detect_notifications_needed">اسمح بالإشعارات ليتمكن Snap2Link من اقتراح لقطاتك.</string>
+    <string name="detect_open_settings">فتح إعدادات التطبيق</string>
+    <string name="detect_turn_off">إيقاف</string>
+    <string name="detect_notification_title">تم التقاط الشاشة</string>
+    <string name="detect_notification_text">اضغط لإرسالها عبر Snap2Link ونسخ الرابط.</string>
+    <string name="detect_notification_send">إرسال</string>
+    <string name="detect_channel">لقطات شاشة جديدة</string>
+    <string name="detect_channel_hint">يقترح إرسال كل لقطة شاشة جديدة.</string>
+    <string name="home_detect_title">احصل على إشعار بعد كل لقطة</string>
+    <string name="home_detect_action">تشغيل</string>
+    <string name="home_step2_notification">اضغط على إشعار Snap2Link، أو على مشاركة ثم Snap2Link.</string>
 </resources>
