@@ -55,7 +55,8 @@ private val Light = lightColorScheme(
 val Success: Color
     @Composable get() = if (isSystemInDarkTheme()) Color(0xFF86EFAC) else Color(0xFF15803D)
 
+/** [dark]: the editor is always dark, as photo editors are, so the screenshot stands out. */
 @Composable
-fun Snap2LinkTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) Dark else Light, content = content)
+fun Snap2LinkTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = if (dark) Dark else Light, content = content)
 }

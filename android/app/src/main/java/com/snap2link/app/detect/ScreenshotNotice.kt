@@ -3,6 +3,7 @@ package com.snap2link.app.detect
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -16,7 +17,10 @@ import com.snap2link.app.R
 import com.snap2link.app.share.ShareActivity
 import java.io.IOException
 
-/** The notification that offers a new screenshot. A newer one replaces it. */
+/**
+ * The notification that offers to open a new screenshot in the editor,
+ * to crop, mark up and send it. A newer one replaces it.
+ */
 object ScreenshotNotice {
     private const val CHANNEL = "screenshots"
     private const val ID = 1
@@ -27,7 +31,7 @@ object ScreenshotNotice {
         if (!manager.areNotificationsEnabled()) return
         createChannel(context)
 
-        // The same sheet as "Share, then Snap2Link".
+        // The same screen as "Share, then Snap2Link": the editor.
         val send = Intent(context, ShareActivity::class.java)
             .setAction(Intent.ACTION_SEND)
             .setType("image/*")
@@ -40,6 +44,12 @@ object ScreenshotNotice {
             send,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
+        val ignore = PendingIntent.getBroadcast(
+            context,
+            0,
+            Intent(context, Ignore::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
 
         val builder = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
@@ -49,6 +59,7 @@ object ScreenshotNotice {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(open)
             .addAction(0, context.getString(R.string.detect_notification_send), open)
+            .addAction(0, context.getString(R.string.detect_notification_ignore), ignore)
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setTimeoutAfter(TIMEOUT_MS)
@@ -70,6 +81,11 @@ object ScreenshotNotice {
 
     fun cancel(context: Context) {
         NotificationManagerCompat.from(context).cancel(ID)
+    }
+
+    /** "Ignore": the notification goes, the screenshot stays where it is. */
+    class Ignore : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = cancel(context)
     }
 
     private fun createChannel(context: Context) {

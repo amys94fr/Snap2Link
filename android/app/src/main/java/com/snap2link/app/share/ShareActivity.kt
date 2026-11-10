@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import com.snap2link.app.MainActivity
 import com.snap2link.app.R
 import com.snap2link.app.drive.PlayDriveAuth
+import com.snap2link.app.editor.EditorScreen
 import com.snap2link.app.ui.AppLanguage
 import com.snap2link.app.ui.GuestCheckDialog
 import com.snap2link.app.ui.Snap2LinkTheme
@@ -66,7 +67,10 @@ import com.snap2link.app.ui.Success
 import com.snap2link.app.ui.copyLink
 import kotlinx.coroutines.delay
 
-/** "Share, then Snap2Link": sends the image and copies its link. */
+/**
+ * "Share, then Snap2Link", or a screenshot notification: the image opens in
+ * the editor, then is sent and its link copied.
+ */
 class ShareActivity : ComponentActivity() {
     private val model: ShareViewModel by viewModels()
 
@@ -81,6 +85,18 @@ class ShareActivity : ComponentActivity() {
         model.start(sharedImage(intent))
         setContent {
             Snap2LinkTheme {
+                val editing = model.state as? ShareState.Editing
+                val edits = model.edits
+                if (editing != null && edits != null) {
+                    EditorScreen(
+                        renderer = editing.renderer,
+                        edits = edits,
+                        onEdit = model::onEdit,
+                        onCancel = { finish() },
+                        onSend = model::sendEdited,
+                    )
+                    return@Snap2LinkTheme
+                }
                 ShareSheet(
                     model = model,
                     onClose = { finish() },
@@ -145,7 +161,7 @@ private fun ShareSheet(model: ShareViewModel, onClose: () -> Unit, onSignUp: () 
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 when (val state = model.state) {
-                    ShareState.Preparing -> Progress(stringResource(R.string.share_preparing))
+                    ShareState.Preparing, is ShareState.Editing -> Progress(stringResource(R.string.share_preparing))
                     ShareState.Sending -> Progress(stringResource(R.string.uploader_title))
                     ShareState.NeedsCheck -> {
                         Progress(stringResource(R.string.uploader_title))

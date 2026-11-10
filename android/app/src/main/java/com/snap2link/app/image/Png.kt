@@ -10,9 +10,9 @@ import java.io.IOException
 import kotlin.math.roundToInt
 
 /**
- * Snap2Link hosting takes PNG files of 5 MB at most. Screenshots usually are
- * already; photos and other formats are decoded and saved again as PNG, which
- * also drops their metadata, such as where a photo was taken.
+ * Snap2Link hosting takes PNG files of 5 MB at most. Every image goes through
+ * the editor, so it is decoded, then saved again as PNG, which also drops its
+ * metadata, such as where a photo was taken.
  */
 object Png {
     const val MAX_BYTES = 5_000_000
@@ -23,20 +23,17 @@ object Png {
     /** The longest side a decoded image keeps, so that memory stays bounded. */
     private const val MAX_SIDE = 4_096
 
-    private val SIGNATURE = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
-
     class Unreadable : Exception()
 
-    fun isPng(bytes: ByteArray): Boolean =
-        bytes.size >= SIGNATURE.size && SIGNATURE.indices.all { bytes[it] == SIGNATURE[it] }
-
-    /** The image at [uri], ready to send. Runs on a background thread. */
-    fun from(resolver: ContentResolver, uri: Uri): ByteArray {
-        val source = read(resolver, uri)
-        if (isPng(source) && source.size <= MAX_BYTES) return source
-        val bitmap = decode(source) ?: throw Unreadable()
-        return fit(bitmap)
+    /** The image at [uri] as pixels, for the editor. Runs on a background thread. */
+    fun bitmap(resolver: ContentResolver, uri: Uri): Bitmap {
+        val decoded = decode(read(resolver, uri)) ?: throw Unreadable()
+        // The editor reads pixels back for the blur, which a hardware bitmap won't allow.
+        return if (decoded.config == Bitmap.Config.ARGB_8888) decoded else decoded.copy(Bitmap.Config.ARGB_8888, false) ?: throw Unreadable()
     }
+
+    /** [bitmap] as a PNG small enough to send. Runs on a background thread. */
+    fun encode(bitmap: Bitmap): ByteArray = fit(bitmap)
 
     private fun read(resolver: ContentResolver, uri: Uri): ByteArray {
         val stream = try {

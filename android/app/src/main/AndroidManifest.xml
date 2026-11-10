@@ -59,5 +59,8 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".detect.ScreenshotNotice$Ignore"
+            android:exported="false" />
     </application>
 </manifest>
