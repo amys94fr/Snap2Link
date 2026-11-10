@@ -172,6 +172,6 @@
     <string name="editor_size_large">Великий</string>
     <string name="editor_text_edit_title">Змінити текст</string>
     <string name="editor_text_save">Зберегти</string>
-    <string name="editor_swipe_tip">Порада: проведіть двома пальцями ліворуч, щоб скасувати, і праворуч, щоб повторити.</string>
+    <string name="editor_swipe_tip">Порада: проведіть двома пальцями ліворуч, щоб скасувати, і праворуч, щоб повторити. Розведіть їх, щоб збільшити.</string>
     <string name="editor_tip_ok">Зрозуміло</string>
 </resources>

@@ -173,6 +173,6 @@
     <string name="editor_size_large">Large</string>
     <string name="editor_text_edit_title">Edit text</string>
     <string name="editor_text_save">Save</string>
-    <string name="editor_swipe_tip">Tip: swipe two fingers left to undo, right to redo.</string>
+    <string name="editor_swipe_tip">Tip: swipe two fingers left to undo, right to redo. Spread them to zoom in.</string>
     <string name="editor_tip_ok">Got it</string>
 </resources>

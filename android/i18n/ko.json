@@ -170,6 +170,6 @@
   "editor.size.large": "크게",
   "editor.text_edit_title": "텍스트 편집",
   "editor.text_save": "저장",
-  "editor.swipe_tip": "팁: 두 손가락으로 왼쪽으로 밀면 실행 취소, 오른쪽으로 밀면 다시 실행됩니다.",
+  "editor.swipe_tip": "팁: 두 손가락으로 왼쪽으로 밀면 실행 취소, 오른쪽으로 밀면 다시 실행됩니다. 두 손가락을 벌리면 확대됩니다.",
   "editor.tip_ok": "확인"
 }

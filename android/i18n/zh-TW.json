@@ -170,6 +170,6 @@
   "editor.size.large": "大",
   "editor.text_edit_title": "編輯文字",
   "editor.text_save": "儲存",
-  "editor.swipe_tip": "提示：雙指向左滑動可復原，向右滑動可重做。",
+  "editor.swipe_tip": "提示：雙指向左滑動可復原，向右滑動可重做。雙指張開可放大。",
   "editor.tip_ok": "知道了"
 }

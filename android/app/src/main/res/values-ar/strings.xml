@@ -172,6 +172,6 @@
     <string name="editor_size_large">كبير</string>
     <string name="editor_text_edit_title">تعديل النص</string>
     <string name="editor_text_save">حفظ</string>
-    <string name="editor_swipe_tip">نصيحة: اسحب بإصبعين إلى اليمين للتراجع، وإلى اليسار للإعادة.</string>
+    <string name="editor_swipe_tip">نصيحة: اسحب بإصبعين إلى اليمين للتراجع، وإلى اليسار للإعادة. باعد بينهما للتكبير.</string>
     <string name="editor_tip_ok">حسنًا</string>
 </resources>

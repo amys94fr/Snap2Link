@@ -172,6 +172,6 @@
     <string name="editor_size_large">大</string>
     <string name="editor_text_edit_title">テキストを編集</string>
     <string name="editor_text_save">保存</string>
-    <string name="editor_swipe_tip">ヒント：2本指で左にスワイプすると元に戻し、右にスワイプするとやり直します。</string>
+    <string name="editor_swipe_tip">ヒント：2本指で左にスワイプすると元に戻し、右にスワイプするとやり直します。2本指を広げるとズームします。</string>
     <string name="editor_tip_ok">OK</string>
 </resources>

@@ -172,6 +172,6 @@
     <string name="editor_size_large">Большой</string>
     <string name="editor_text_edit_title">Изменить текст</string>
     <string name="editor_text_save">Сохранить</string>
-    <string name="editor_swipe_tip">Совет: проведите двумя пальцами влево, чтобы отменить, и вправо, чтобы повторить.</string>
+    <string name="editor_swipe_tip">Совет: проведите двумя пальцами влево, чтобы отменить, и вправо, чтобы повторить. Разведите их, чтобы увеличить.</string>
     <string name="editor_tip_ok">Понятно</string>
 </resources>

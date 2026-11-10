@@ -362,3 +362,50 @@ fun Shape.restroked(stroke: Stroke, sizes: Sizes): Shape = when (this) {
     is Shape.Text -> copy(size = sizes.text(stroke))
     is Shape.Blur -> copy(cell = sizes.blur(stroke))
 }
+
+/**
+ * How far two fingers zoomed in, and where they moved the view, in screen
+ * pixels around the centre of a [width] x [height] view. At 1 the image fits.
+ */
+data class Zoom(val scale: Float = 1f, val panX: Float = 0f, val panY: Float = 0f) {
+    val zoomedIn get() = scale > 1f
+
+    /** [fit] seen through this zoom. */
+    fun apply(fit: Fit, width: Float, height: Float): Fit {
+        val cx = width / 2
+        val cy = height / 2
+        return fit.copy(
+            scale = fit.scale * scale,
+            offsetX = cx + (fit.offsetX - cx) * scale + panX,
+            offsetY = cy + (fit.offsetY - cy) * scale + panY,
+        )
+    }
+
+    /**
+     * Fingers centred on ([x], [y]) spread by [factor] and moved by
+     * ([dx], [dy]): what was under them stays under them.
+     */
+    fun pinched(factor: Float, x: Float, y: Float, dx: Float, dy: Float, width: Float, height: Float): Zoom {
+        val next = (scale * factor).coerceIn(1f, MAX)
+        if (next <= SNAP) return Zoom()
+        val cx = width / 2
+        val cy = height / 2
+        // The point under the fingers, before any zoom.
+        val ux = (x - cx - panX) / scale + cx
+        val uy = (y - cy - panY) / scale + cy
+        val limitX = (next - 1) * width / 2
+        val limitY = (next - 1) * height / 2
+        return Zoom(
+            next,
+            (x + dx - cx - (ux - cx) * next).coerceIn(-limitX, limitX),
+            (y + dy - cy - (uy - cy) * next).coerceIn(-limitY, limitY),
+        )
+    }
+
+    private companion object {
+        const val MAX = 8f
+
+        /** Close enough to 1 to fit again, so that pinching back always gets there. */
+        const val SNAP = 1.05f
+    }
+}

@@ -172,6 +172,6 @@
     <string name="editor_size_large">Grande</string>
     <string name="editor_text_edit_title">Editar texto</string>
     <string name="editor_text_save">Guardar</string>
-    <string name="editor_swipe_tip">Consejo: desliza dos dedos a la izquierda para deshacer y a la derecha para rehacer.</string>
+    <string name="editor_swipe_tip">Consejo: desliza dos dedos a la izquierda para deshacer y a la derecha para rehacer. Sepáralos para ampliar.</string>
     <string name="editor_tip_ok">Entendido</string>
 </resources>

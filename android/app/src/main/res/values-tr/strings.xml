@@ -172,6 +172,6 @@
     <string name="editor_size_large">Büyük</string>
     <string name="editor_text_edit_title">Metni düzenle</string>
     <string name="editor_text_save">Kaydet</string>
-    <string name="editor_swipe_tip">İpucu: geri almak için iki parmağınızı sola, yinelemek için sağa kaydırın.</string>
+    <string name="editor_swipe_tip">İpucu: geri almak için iki parmağınızı sola, yinelemek için sağa kaydırın. Yakınlaştırmak için parmaklarınızı açın.</string>
     <string name="editor_tip_ok">Anladım</string>
 </resources>

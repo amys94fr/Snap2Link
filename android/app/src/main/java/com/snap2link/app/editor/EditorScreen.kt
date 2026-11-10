@@ -311,7 +311,17 @@ private fun Board(
 
     // While cropping the whole image shows; otherwise only what is kept.
     val shown = if (tool == Tool.CROP) full else picture.crop
-    val fit = if (area == IntSize.Zero) null else Fit.of(shown, area.width.toFloat(), area.height.toFloat(), margin)
+
+    // Two fingers zoom in. Going in or out of cropping shows another area: the view starts over.
+    var zoom by remember { mutableStateOf(Zoom()) }
+    LaunchedEffect(tool == Tool.CROP) { zoom = Zoom() }
+    val fit = if (area == IntSize.Zero) {
+        null
+    } else {
+        val width = area.width.toFloat()
+        val height = area.height.toFloat()
+        zoom.apply(Fit.of(shown, width, height, margin), width, height)
+    }
 
     // Gestures outlive recompositions: they read the latest values through these.
     val latestFit by rememberUpdatedState(fit)
@@ -327,6 +337,7 @@ private fun Board(
     val latestOnRedo by rememberUpdatedState(onRedo)
     val latestOnSwipe by rememberUpdatedState(onSwipe)
     val swipe = with(density) { 48.dp.toPx() }
+    val pinch = with(density) { 24.dp.toPx() }
     // Undo goes back, which is to the right in a right-to-left language, as the arrows show.
     val rightToLeft = LocalLayoutDirection.current == LayoutDirection.Rtl
 
@@ -336,33 +347,54 @@ private fun Board(
             .clipToBounds()
             .onSizeChanged { area = it }
             .semantics { contentDescription = description }
-            // Two fingers swiped sideways undo or redo. This runs before the other gestures and
-            // takes the events from them, so a mark begun by the first finger is dropped.
+            // Two fingers: spread or pinched, they zoom; swiped sideways at the normal size, they
+            // undo or redo. Zoomed in, they move the view instead. This runs before the other
+            // gestures and takes the events from them, so a mark begun by the first finger is dropped.
             .pointerInput(Unit) {
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                     var twoFingers = false
                     var startX = 0f
                     var startY = 0f
+                    var startSpread = 0f
+                    var lastX = 0f
+                    var lastY = 0f
+                    var lastSpread = 0f
+                    var zooming = false
                     var done = false
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         val down = event.changes.filter { it.pressed }
                         if (down.isEmpty()) break
                         if (down.size >= 2) {
-                            val x = down.map { it.position.x }.average().toFloat()
-                            val y = down.map { it.position.y }.average().toFloat()
+                            val x = (down[0].position.x + down[1].position.x) / 2
+                            val y = (down[0].position.y + down[1].position.y) / 2
+                            val spread = (down[0].position - down[1].position).getDistance()
                             if (!twoFingers) {
                                 twoFingers = true
                                 startX = x
                                 startY = y
+                                startSpread = spread
+                                lastX = x
+                                lastY = y
+                                lastSpread = spread
+                                zooming = zoom.zoomedIn
                             }
-                            val dx = x - startX
-                            if (!done && abs(dx) > swipe && abs(dx) > abs(y - startY) * 1.5f) {
-                                done = true
-                                if ((dx < 0) != rightToLeft) latestOnUndo() else latestOnRedo()
-                                latestOnSwipe()
+                            if (!zooming && !done && abs(spread - startSpread) > pinch) zooming = true
+                            if (zooming) {
+                                val factor = if (lastSpread > 0f) spread / lastSpread else 1f
+                                zoom = zoom.pinched(factor, lastX, lastY, x - lastX, y - lastY, size.width.toFloat(), size.height.toFloat())
+                            } else {
+                                val dx = x - startX
+                                if (!done && abs(dx) > swipe && abs(dx) > abs(y - startY) * 1.5f) {
+                                    done = true
+                                    if ((dx < 0) != rightToLeft) latestOnUndo() else latestOnRedo()
+                                    latestOnSwipe()
+                                }
                             }
+                            lastX = x
+                            lastY = y
+                            lastSpread = spread
                         }
                         // Once two fingers touched, the rest of the gesture is theirs, even when one lifts first.
                         if (twoFingers) event.changes.forEach { it.consume() }

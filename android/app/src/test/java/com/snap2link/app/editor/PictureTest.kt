@@ -235,4 +235,29 @@ class PictureTest {
         assertEquals(0, Select.textAt(shapes, Pt(70f, 70f), reach = 0f, textBox = noText))
         assertNull(Select.textAt(shapes, Pt(250f, 250f), reach = 0f, textBox = noText))
     }
+
+    @Test
+    fun aPinchKeepsWhatIsUnderTheFingers() {
+        val fit = Fit.of(Box.of(1000, 1000), width = 1000f, height = 1000f, margin = 0f)
+        val zoom = Zoom().pinched(2f, x = 250f, y = 250f, dx = 0f, dy = 0f, width = 1000f, height = 1000f)
+        assertEquals(2f, zoom.scale)
+        val zoomed = zoom.apply(fit, 1000f, 1000f)
+        val under = zoomed.toImage(250f, 250f)
+        assertEquals(250f, under.x, 0.01f)
+        assertEquals(250f, under.y, 0.01f)
+    }
+
+    @Test
+    fun pinchingBackFitsTheImageAgain() {
+        val zoom = Zoom(3f, 400f, -200f).pinched(0.34f, x = 500f, y = 500f, dx = 0f, dy = 0f, width = 1000f, height = 1000f)
+        assertEquals(Zoom(), zoom)
+        assertFalse(zoom.zoomedIn)
+    }
+
+    @Test
+    fun theViewCannotBeDraggedAwayFromTheImage() {
+        val zoom = Zoom(2f).pinched(1f, x = 500f, y = 500f, dx = 5000f, dy = 0f, width = 1000f, height = 1000f)
+        assertEquals(500f, zoom.panX)
+        assertEquals(8f, Zoom(6f).pinched(4f, 500f, 500f, 0f, 0f, 1000f, 1000f).scale)
+    }
 }

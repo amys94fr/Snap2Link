@@ -172,6 +172,6 @@
     <string name="editor_size_large">Lớn</string>
     <string name="editor_text_edit_title">Sửa văn bản</string>
     <string name="editor_text_save">Lưu</string>
-    <string name="editor_swipe_tip">Mẹo: vuốt hai ngón sang trái để hoàn tác, sang phải để làm lại.</string>
+    <string name="editor_swipe_tip">Mẹo: vuốt hai ngón sang trái để hoàn tác, sang phải để làm lại. Tách hai ngón ra để phóng to.</string>
     <string name="editor_tip_ok">Đã hiểu</string>
 </resources>
