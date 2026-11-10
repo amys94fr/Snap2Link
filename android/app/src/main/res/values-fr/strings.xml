@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">Astuce : glissez deux doigts vers la gauche pour annuler, vers la droite pour rétablir. Écartez-les pour zoomer.</string>
     <string name="editor_tip_ok">Compris</string>
     <string name="editor_rotate">Faire pivoter vers la droite</string>
+    <string name="editor_rotate_left">Faire pivoter vers la gauche</string>
 </resources>

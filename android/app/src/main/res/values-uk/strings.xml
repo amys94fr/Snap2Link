@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">Порада: проведіть двома пальцями ліворуч, щоб скасувати, і праворуч, щоб повторити. Розведіть їх, щоб збільшити.</string>
     <string name="editor_tip_ok">Зрозуміло</string>
     <string name="editor_rotate">Повернути праворуч</string>
+    <string name="editor_rotate_left">Повернути ліворуч</string>
 </resources>

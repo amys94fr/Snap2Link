@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">טיפ: מחליקים בשתי אצבעות ימינה כדי לבטל, ושמאלה כדי לבצע שוב. מרחיקים אותן זו מזו כדי להגדיל.</string>
     <string name="editor_tip_ok">הבנתי</string>
     <string name="editor_rotate">סיבוב ימינה</string>
+    <string name="editor_rotate_left">סיבוב שמאלה</string>
 </resources>

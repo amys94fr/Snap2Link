@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">Tipp: Wischen Sie mit zwei Fingern nach links, um etwas rückgängig zu machen, und nach rechts, um es wiederherzustellen. Spreizen Sie sie, um zu zoomen.</string>
     <string name="editor_tip_ok">Verstanden</string>
     <string name="editor_rotate">Nach rechts drehen</string>
+    <string name="editor_rotate_left">Nach links drehen</string>
 </resources>

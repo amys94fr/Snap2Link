@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">Consejo: desliza dos dedos a la izquierda para deshacer y a la derecha para rehacer. Sepáralos para ampliar.</string>
     <string name="editor_tip_ok">Entendido</string>
     <string name="editor_rotate">Girar a la derecha</string>
+    <string name="editor_rotate_left">Girar a la izquierda</string>
 </resources>

@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">提示：雙指向左滑動可復原，向右滑動可重做。雙指張開可放大。</string>
     <string name="editor_tip_ok">知道了</string>
     <string name="editor_rotate">向右旋轉</string>
+    <string name="editor_rotate_left">向左旋轉</string>
 </resources>

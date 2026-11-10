@@ -107,6 +107,10 @@ data class Picture(val shapes: List<Shape>, val crop: Box, val turns: Int = 0) {
         return Picture(shapes, turn(crop), (turns + 1) % 4)
     }
 
+    /** A quarter turn to the left: three to the right, the image's sides swapping each time. */
+    fun turnedLeft(width: Int, height: Int, textBox: (Shape.Text) -> Box): Picture =
+        turned(width, height, textBox).turned(height, width, textBox).turned(width, height, textBox)
+
     companion object {
         fun blank(width: Int, height: Int) = Picture(emptyList(), Box.of(width, height))
     }

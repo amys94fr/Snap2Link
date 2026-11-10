@@ -303,4 +303,16 @@ class PictureTest {
         assertEquals(Pt(2330f, 30f), turned.at)
         assertEquals(40f, turned.size)
     }
+
+    @Test
+    fun aTurnLeftUndoesATurnRight() {
+        val picture = Picture(
+            listOf(Shape.Arrow(Pt(10f, 20f), Pt(300f, 400f), red, 12f), Shape.Text(Pt(40f, 60f), "Here", red, 40f)),
+            crop = Box(10f, 20f, 900f, 2000f),
+        )
+        val left = picture.turnedLeft(1080, 2400, noText)
+        assertEquals(3, left.turns)
+        assertEquals(Pt(20f, 1070f), (left.shapes[0] as Shape.Arrow).from)
+        assertEquals(picture, left.turned(2400, 1080, noText).copy(turns = 0))
+    }
 }

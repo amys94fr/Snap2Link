@@ -172,5 +172,6 @@
   "editor.text_save": "Kaydet",
   "editor.swipe_tip": "İpucu: geri almak için iki parmağınızı sola, yinelemek için sağa kaydırın. Yakınlaştırmak için parmaklarınızı açın.",
   "editor.tip_ok": "Anladım",
-  "editor.rotate": "Sağa döndür"
+  "editor.rotate": "Sağa döndür",
+  "editor.rotate_left": "Sola döndür"
 }

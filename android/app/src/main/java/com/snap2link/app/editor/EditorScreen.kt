@@ -187,6 +187,11 @@ fun EditorScreen(
                     canResetCrop = edits.now.crop != Box.of(renderer.width(edits.now.turns), renderer.height(edits.now.turns)),
                     onColor = { colorIndex = it },
                     onStroke = { stroke = it },
+                    onRotateLeft = {
+                        val turns = edits.now.turns
+                        selected = null
+                        onEdit(edits.then(edits.now.turnedLeft(renderer.width(turns), renderer.height(turns), renderer::textBox)))
+                    },
                     onRotate = {
                         val turns = edits.now.turns
                         selected = null
@@ -635,6 +640,7 @@ private fun Options(
     canResetCrop: Boolean,
     onColor: (Int) -> Unit,
     onStroke: (Stroke) -> Unit,
+    onRotateLeft: () -> Unit,
     onRotate: () -> Unit,
     onResetCrop: () -> Unit,
     selectedShape: Shape?,
@@ -653,6 +659,9 @@ private fun Options(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
+            IconButton(onClick = onRotateLeft) {
+                Icon(painterResource(R.drawable.ic_rotate_left), contentDescription = stringResource(R.string.editor_rotate_left))
+            }
             IconButton(onClick = onRotate) {
                 Icon(painterResource(R.drawable.ic_rotate), contentDescription = stringResource(R.string.editor_rotate))
             }

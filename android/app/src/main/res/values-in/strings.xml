@@ -175,4 +175,5 @@
     <string name="editor_swipe_tip">Tips: geser dua jari ke kiri untuk mengurungkan, ke kanan untuk mengulangi. Renggangkan untuk memperbesar.</string>
     <string name="editor_tip_ok">Mengerti</string>
     <string name="editor_rotate">Putar ke kanan</string>
+    <string name="editor_rotate_left">Putar ke kiri</string>
 </resources>

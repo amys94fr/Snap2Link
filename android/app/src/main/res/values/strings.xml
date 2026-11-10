@@ -176,4 +176,5 @@
     <string name="editor_swipe_tip">Tip: swipe two fingers left to undo, right to redo. Spread them to zoom in.</string>
     <string name="editor_tip_ok">Got it</string>
     <string name="editor_rotate">Rotate right</string>
+    <string name="editor_rotate_left">Rotate left</string>
 </resources>

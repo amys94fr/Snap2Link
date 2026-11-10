@@ -172,5 +172,6 @@
   "editor.text_save": "Simpan",
   "editor.swipe_tip": "Tips: geser dua jari ke kiri untuk mengurungkan, ke kanan untuk mengulangi. Renggangkan untuk memperbesar.",
   "editor.tip_ok": "Mengerti",
-  "editor.rotate": "Putar ke kanan"
+  "editor.rotate": "Putar ke kanan",
+  "editor.rotate_left": "Putar ke kiri"
 }
