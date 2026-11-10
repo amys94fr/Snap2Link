@@ -25,9 +25,9 @@
     <string name="history_thumbnail">Tangkapan dari %1$s</string>
     <string name="history_kept_count" formatted="true">%1$s dari %2$s tautan disimpan</string>
     <string name="history_keep_hint_relay">Tangkapan baru tidak menggantikan tautan yang disimpan, tetapi tautan itu tetap berakhir tepat waktu.</string>
-    <string name="history_error_load">Tidak dapat memuat tautanmu. Periksa koneksi dan coba lagi.</string>
+    <string name="history_error_load">Tidak dapat memuat tautan Anda. Periksa koneksi dan coba lagi.</string>
     <string name="history_error_action">Tidak berhasil. Coba lagi.</string>
-    <string name="history_error_pin_limit">Kamu sudah menyimpan tautan sebanyak yang diizinkan paketmu.</string>
+    <string name="history_error_pin_limit">Anda sudah menyimpan tautan sebanyak yang diizinkan paket Anda.</string>
     <string name="history_retry">Coba lagi</string>
     <string name="account_free_title">Akun gratis</string>
     <string name="account_free_hint">20 tangkapan layar per hari dan 6 tautan sekaligus, hingga 48 jam. Cukup dengan alamat email Anda.</string>
@@ -44,7 +44,7 @@
     <string name="account_plan_free">Paket gratis</string>
     <string name="account_captures_today">Tangkapan hari ini</string>
     <string name="account_active_links">Tautan aktif</string>
-    <string name="account_active_links_hint">Setelah semuanya terpakai, tangkapan baru mengakhiri tautan terlama yang tidak kamu simpan.</string>
+    <string name="account_active_links_hint">Setelah semuanya terpakai, tangkapan baru mengakhiri tautan terlama yang tidak Anda simpan.</string>
     <string name="account_online_title">Akun Anda secara online</string>
     <string name="account_online_hint">Tautan, perangkat, dan profil Anda, dari browser mana pun.</string>
     <string name="account_online_open">Buka</string>
@@ -118,7 +118,7 @@
     <string name="settings_save">Simpan</string>
     <string name="settings_delete_saved">Tangkapan layar dihapus setelah %1$s hari</string>
     <string name="settings_switch_account">Ganti akun</string>
-    <string name="history_drive_needed">Hubungkan Google Drive untuk melihat tangkapanmu di sini.</string>
+    <string name="history_drive_needed">Hubungkan Google Drive untuk melihat tangkapan Anda di sini.</string>
     <string name="history_keep_hint_drive">Pembersihan otomatis tidak menyentuh tangkapan yang disimpan.</string>
     <string name="uploader_error_drive_not_connected">Google Drive tidak terhubung. Hubungkan di pengaturan.</string>
     <string name="detect_title">Tangkapan layar</string>
