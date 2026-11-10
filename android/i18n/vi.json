@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Vừa",
   "editor.stroke.thick": "Dày",
   "detect.notification.ignore": "Bỏ qua",
-  "annotator.stroke": "Độ dày nét"
+  "annotator.stroke": "Độ dày nét",
+  "annotator.tool.select": "Chọn",
+  "editor.select_hint": "Nhấn vào một hình để chọn, rồi kéo để di chuyển.",
+  "editor.delete_shape": "Xóa hình"
 }

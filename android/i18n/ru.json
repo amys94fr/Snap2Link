@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Средняя",
   "editor.stroke.thick": "Толстая",
   "detect.notification.ignore": "Пропустить",
-  "annotator.stroke": "Толщина линии"
+  "annotator.stroke": "Толщина линии",
+  "annotator.tool.select": "Выбор",
+  "editor.select_hint": "Нажмите на фигуру, чтобы выбрать её, затем перетащите.",
+  "editor.delete_shape": "Удалить фигуру"
 }

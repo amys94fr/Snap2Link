@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">Толстая</string>
     <string name="detect_notification_ignore">Пропустить</string>
     <string name="annotator_stroke">Толщина линии</string>
+    <string name="annotator_tool_select">Выбор</string>
+    <string name="editor_select_hint">Нажмите на фигуру, чтобы выбрать её, затем перетащите.</string>
+    <string name="editor_delete_shape">Удалить фигуру</string>
 </resources>

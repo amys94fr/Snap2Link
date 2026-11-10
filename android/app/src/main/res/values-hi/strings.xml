@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">मोटा</string>
     <string name="detect_notification_ignore">अनदेखा करें</string>
     <string name="annotator_stroke">लाइन की मोटाई</string>
+    <string name="annotator_tool_select">चुनें</string>
+    <string name="editor_select_hint">किसी आकृति को चुनने के लिए उस पर टैप करें, फिर उसे खींचें।</string>
+    <string name="editor_delete_shape">आकृति हटाएँ</string>
 </resources>

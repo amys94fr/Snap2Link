@@ -160,5 +160,8 @@
   "editor.stroke.medium": "中",
   "editor.stroke.thick": "太",
   "detect.notification.ignore": "無視",
-  "annotator.stroke": "線の太さ"
+  "annotator.stroke": "線の太さ",
+  "annotator.tool.select": "選択",
+  "editor.select_hint": "図形をタップして選択し、ドラッグして移動します。",
+  "editor.delete_shape": "図形を削除"
 }

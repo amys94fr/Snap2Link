@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">Tebal</string>
     <string name="detect_notification_ignore">Abaikan</string>
     <string name="annotator_stroke">Ketebalan garis</string>
+    <string name="annotator_tool_select">Pilih</string>
+    <string name="editor_select_hint">Ketuk bentuk untuk memilihnya, lalu seret.</string>
+    <string name="editor_delete_shape">Hapus bentuk</string>
 </resources>

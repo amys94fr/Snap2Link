@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Moyen",
   "editor.stroke.thick": "Épais",
   "detect.notification.ignore": "Ignorer",
-  "annotator.stroke": "Épaisseur du trait"
+  "annotator.stroke": "Épaisseur du trait",
+  "annotator.tool.select": "Sélectionner",
+  "editor.select_hint": "Touchez une forme pour la sélectionner, puis faites-la glisser.",
+  "editor.delete_shape": "Supprimer la forme"
 }

@@ -160,5 +160,8 @@
   "editor.stroke.medium": "मध्यम",
   "editor.stroke.thick": "मोटा",
   "detect.notification.ignore": "अनदेखा करें",
-  "annotator.stroke": "लाइन की मोटाई"
+  "annotator.stroke": "लाइन की मोटाई",
+  "annotator.tool.select": "चुनें",
+  "editor.select_hint": "किसी आकृति को चुनने के लिए उस पर टैप करें, फिर उसे खींचें।",
+  "editor.delete_shape": "आकृति हटाएँ"
 }

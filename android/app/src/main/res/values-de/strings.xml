@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">Dick</string>
     <string name="detect_notification_ignore">Ignorieren</string>
     <string name="annotator_stroke">Strichstärke</string>
+    <string name="annotator_tool_select">Auswählen</string>
+    <string name="editor_select_hint">Tippen Sie auf eine Form, um sie auszuwählen, und ziehen Sie sie dann.</string>
+    <string name="editor_delete_shape">Form löschen</string>
 </resources>

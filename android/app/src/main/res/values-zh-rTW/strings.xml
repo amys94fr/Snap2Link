@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">粗</string>
     <string name="detect_notification_ignore">忽略</string>
     <string name="annotator_stroke">線條粗細</string>
+    <string name="annotator_tool_select">選取</string>
+    <string name="editor_select_hint">輕觸圖形即可選取，然後拖曳。</string>
+    <string name="editor_delete_shape">刪除圖形</string>
 </resources>

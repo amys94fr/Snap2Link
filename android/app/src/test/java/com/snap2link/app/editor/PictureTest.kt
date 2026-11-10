@@ -108,4 +108,50 @@ class PictureTest {
     fun drawingStaysInsideTheCrop() {
         assertEquals(Pt(100f, 500f), Pt(-20f, 900f).inside(Box(100f, 0f, 600f, 500f)))
     }
+
+    private val noText: (Shape.Text) -> Box = { Box(it.at.x, it.at.y, it.at.x + 100f, it.at.y + 40f) }
+
+    @Test
+    fun theTopmostShapeUnderTheFingerIsSelected() {
+        val under = Shape.Rectangle(Box(100f, 100f, 500f, 500f), red, 12f)
+        val over = Shape.Circle(Box(200f, 200f, 400f, 400f), red, 12f)
+        assertEquals(1, Select.at(listOf(under, over), Pt(300f, 300f), reach = 20f, textBox = noText))
+        assertEquals(0, Select.at(listOf(under, over), Pt(120f, 480f), reach = 20f, textBox = noText))
+        assertNull(Select.at(listOf(under, over), Pt(900f, 900f), reach = 20f, textBox = noText))
+    }
+
+    @Test
+    fun linesAreHitNearTheirPath() {
+        val arrow = Shape.Arrow(Pt(0f, 0f), Pt(1000f, 0f), red, 12f)
+        assertTrue(Select.hits(arrow, Pt(500f, 20f), reach = 20f, textBox = noText))
+        assertFalse(Select.hits(arrow, Pt(500f, 60f), reach = 20f, textBox = noText))
+        assertFalse(Select.hits(arrow, Pt(1100f, 0f), reach = 20f, textBox = noText))
+        val pen = Shape.Pen(listOf(Pt(0f, 0f), Pt(100f, 100f), Pt(200f, 0f)), red, 12f)
+        assertTrue(Select.hits(pen, Pt(150f, 55f), reach = 10f, textBox = noText))
+        assertFalse(Select.hits(pen, Pt(100f, 0f), reach = 10f, textBox = noText))
+    }
+
+    @Test
+    fun aCircleIsHitInsideButNotInItsCorners() {
+        val circle = Shape.Circle(Box(0f, 0f, 200f, 200f), red, 4f)
+        assertTrue(Select.hits(circle, Pt(100f, 100f), reach = 10f, textBox = noText))
+        assertFalse(Select.hits(circle, Pt(5f, 5f), reach = 10f, textBox = noText))
+    }
+
+    @Test
+    fun aTextIsHitWhereItIsDrawn() {
+        val text = Shape.Text(Pt(50f, 50f), "Here", red, 40f)
+        assertTrue(Select.hits(text, Pt(120f, 70f), reach = 0f, textBox = noText))
+        assertFalse(Select.hits(text, Pt(200f, 70f), reach = 0f, textBox = noText))
+    }
+
+    @Test
+    fun movingAShapeMovesAllOfIt() {
+        val pen = Shape.Pen(listOf(Pt(0f, 0f), Pt(10f, 20f)), red, 12f).moved(5f, -5f) as Shape.Pen
+        assertEquals(listOf(Pt(5f, -5f), Pt(15f, 15f)), pen.points)
+        val arrow = Shape.Arrow(Pt(0f, 0f), Pt(10f, 10f), red, 12f).moved(1f, 2f) as Shape.Arrow
+        assertEquals(Pt(1f, 2f), arrow.from)
+        assertEquals(Pt(11f, 12f), arrow.to)
+        assertEquals(Box(10f, 10f, 20f, 20f), (Shape.Blur(Box(0f, 0f, 10f, 10f), 6f).moved(10f, 10f) as Shape.Blur).box)
+    }
 }

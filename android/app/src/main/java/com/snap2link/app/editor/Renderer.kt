@@ -83,6 +83,14 @@ class Renderer(val source: Bitmap) {
         }
     }
 
+    /** Where a text sits, measured with the font it is drawn with. */
+    fun textBox(shape: Shape.Text): Box {
+        text.textSize = shape.size
+        val width = text.measureText(shape.text)
+        val height = text.descent() - text.ascent()
+        return Box(shape.at.x, shape.at.y, shape.at.x + width, shape.at.y + height)
+    }
+
     private fun stroke(color: Int, width: Float) {
         line.color = color
         line.strokeWidth = width

@@ -160,5 +160,8 @@
   "editor.stroke.medium": "보통",
   "editor.stroke.thick": "두껍게",
   "detect.notification.ignore": "무시",
-  "annotator.stroke": "선 두께"
+  "annotator.stroke": "선 두께",
+  "annotator.tool.select": "선택",
+  "editor.select_hint": "도형을 탭해 선택한 뒤 드래그하세요.",
+  "editor.delete_shape": "도형 삭제"
 }

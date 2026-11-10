@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Medio",
   "editor.stroke.thick": "Spesso",
   "detect.notification.ignore": "Ignora",
-  "annotator.stroke": "Spessore del tratto"
+  "annotator.stroke": "Spessore del tratto",
+  "annotator.tool.select": "Seleziona",
+  "editor.select_hint": "Tocca una forma per selezionarla, poi trascinala.",
+  "editor.delete_shape": "Elimina la forma"
 }

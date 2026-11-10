@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">Spesso</string>
     <string name="detect_notification_ignore">Ignora</string>
     <string name="annotator_stroke">Spessore del tratto</string>
+    <string name="annotator_tool_select">Seleziona</string>
+    <string name="editor_select_hint">Tocca una forma per selezionarla, poi trascinala.</string>
+    <string name="editor_delete_shape">Elimina la forma</string>
 </resources>

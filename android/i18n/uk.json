@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Середня",
   "editor.stroke.thick": "Товста",
   "detect.notification.ignore": "Пропустити",
-  "annotator.stroke": "Товщина лінії"
+  "annotator.stroke": "Товщина лінії",
+  "annotator.tool.select": "Вибір",
+  "editor.select_hint": "Торкніться фігури, щоб вибрати її, а потім перетягніть.",
+  "editor.delete_shape": "Видалити фігуру"
 }

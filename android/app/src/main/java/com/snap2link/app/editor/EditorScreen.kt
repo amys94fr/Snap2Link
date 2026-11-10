@@ -94,7 +94,10 @@ fun EditorScreen(
     var colorIndex by rememberSaveable { mutableIntStateOf(0) }
     var stroke by rememberSaveable { mutableStateOf(Stroke.MEDIUM) }
     var textAt by remember { mutableStateOf<Pt?>(null) }
+    var selected by remember { mutableStateOf<Int?>(null) }
     val color = Palette[colorIndex]
+    // An undo can remove the selected shape: the selection only holds while it points at one.
+    val chosen = selected?.takeIf { tool == Tool.SELECT && it in edits.now.shapes.indices }
 
     // Light status bar icons on the dark editor, and back as they were when it closes.
     val view = LocalView.current
@@ -115,7 +118,15 @@ fun EditorScreen(
     Snap2LinkTheme(dark = true) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize().systemBarsPadding()) {
-                TopBar(edits, onEdit, onCancel, onSend)
+                TopBar(
+                    edits = edits,
+                    onHistory = {
+                        selected = null
+                        onEdit(it)
+                    },
+                    onCancel = onCancel,
+                    onSend = onSend,
+                )
                 Board(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                     renderer = renderer,
@@ -126,6 +137,8 @@ fun EditorScreen(
                     sizes = sizes,
                     onEdit = onEdit,
                     onText = { textAt = it },
+                    selected = chosen,
+                    onSelect = { selected = it },
                 )
                 Options(
                     tool = tool,
@@ -137,8 +150,21 @@ fun EditorScreen(
                     onResetCrop = {
                         onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.source.width, renderer.source.height))))
                     },
+                    canDelete = chosen != null,
+                    onDelete = {
+                        chosen?.let { index ->
+                            onEdit(edits.then(edits.now.copy(shapes = edits.now.shapes.filterIndexed { i, _ -> i != index })))
+                        }
+                        selected = null
+                    },
                 )
-                Tools(tool, onTool = { tool = it })
+                Tools(
+                    tool,
+                    onTool = {
+                        tool = it
+                        selected = null
+                    },
+                )
             }
         }
         textAt?.let { at ->
@@ -155,7 +181,7 @@ fun EditorScreen(
 }
 
 @Composable
-private fun TopBar(edits: Edits, onEdit: (Edits) -> Unit, onCancel: () -> Unit, onSend: () -> Unit) {
+private fun TopBar(edits: Edits, onHistory: (Edits) -> Unit, onCancel: () -> Unit, onSend: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -164,10 +190,10 @@ private fun TopBar(edits: Edits, onEdit: (Edits) -> Unit, onCancel: () -> Unit, 
             Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.share_close))
         }
         Spacer(Modifier.weight(1f))
-        IconButton(onClick = { onEdit(edits.undo()) }, enabled = edits.canUndo) {
+        IconButton(onClick = { onHistory(edits.undo()) }, enabled = edits.canUndo) {
             Icon(painterResource(R.drawable.ic_undo), contentDescription = stringResource(R.string.annotator_undo))
         }
-        IconButton(onClick = { onEdit(edits.redo()) }, enabled = edits.canRedo) {
+        IconButton(onClick = { onHistory(edits.redo()) }, enabled = edits.canRedo) {
             Icon(painterResource(R.drawable.ic_redo), contentDescription = stringResource(R.string.annotator_redo))
         }
         Spacer(Modifier.width(8.dp))
@@ -179,7 +205,10 @@ private fun TopBar(edits: Edits, onEdit: (Edits) -> Unit, onCancel: () -> Unit, 
     }
 }
 
-/** The screenshot, where fingers crop and draw. Positions are turned into image pixels at once. */
+/**
+ * The screenshot, where fingers crop, draw and move marks. Positions are
+ * turned into image pixels at once.
+ */
 @Composable
 private fun Board(
     modifier: Modifier,
@@ -191,6 +220,8 @@ private fun Board(
     sizes: Sizes,
     onEdit: (Edits) -> Unit,
     onText: (Pt) -> Unit,
+    selected: Int?,
+    onSelect: (Int?) -> Unit,
 ) {
     val picture = edits.now
     val full = remember(renderer) { Box.of(renderer.source.width, renderer.source.height) }
@@ -200,6 +231,9 @@ private fun Board(
     var area by remember { mutableStateOf(IntSize.Zero) }
     var draft by remember { mutableStateOf<Shape?>(null) }
     var draftCrop by remember { mutableStateOf<Box?>(null) }
+
+    /** The shape being moved, by its index, where the finger has taken it so far. */
+    var moving by remember { mutableStateOf<Pair<Int, Shape>?>(null) }
 
     // While cropping the whole image shows; otherwise only what is kept.
     val shown = if (tool == Tool.CROP) full else picture.crop
@@ -220,7 +254,12 @@ private fun Board(
             .pointerInput(tool) {
                 detectTapGestures { offset ->
                     val f = latestFit ?: return@detectTapGestures
-                    if (tool == Tool.TEXT) onText(f.toImage(offset.x, offset.y).inside(latestEdits.now.crop))
+                    val p = f.toImage(offset.x, offset.y)
+                    when (tool) {
+                        Tool.TEXT -> onText(p.inside(latestEdits.now.crop))
+                        Tool.SELECT -> onSelect(Select.at(latestEdits.now.shapes, p, reach / f.scale, renderer::textBox))
+                        else -> Unit
+                    }
                 }
             }
             .pointerInput(tool) {
@@ -238,6 +277,11 @@ private fun Board(
                                 handle = Crop.handleAt(now.crop, p, reach / f.scale)
                                 startCrop = now.crop
                             }
+                            Tool.SELECT -> {
+                                val index = Select.at(now.shapes, p, reach / f.scale, renderer::textBox)
+                                onSelect(index)
+                                moving = index?.let { it to now.shapes[it] }
+                            }
                             Tool.TEXT -> Unit
                             else -> draft = shapeFor(tool, p.inside(now.crop), p.inside(now.crop), latestColor, latestStroke, sizes)
                         }
@@ -249,6 +293,9 @@ private fun Board(
                         if (tool == Tool.CROP) {
                             val h = handle ?: return@detectDragGestures
                             draftCrop = Crop.drag(startCrop, h, p.x - start.x, p.y - start.y, full, sizes.unit * 24)
+                        } else if (tool == Tool.SELECT) {
+                            val (index, _) = moving ?: return@detectDragGestures
+                            moving = index to latestEdits.now.shapes[index].moved(p.x - start.x, p.y - start.y)
                         } else {
                             val inside = p.inside(latestEdits.now.crop)
                             draft = when (val d = draft) {
@@ -261,41 +308,63 @@ private fun Board(
                     onDragEnd = {
                         val now = latestEdits.now
                         draftCrop?.let { onEdit(latestEdits.then(now.copy(crop = it))) }
+                        moving?.let { (index, shape) ->
+                            onEdit(latestEdits.then(now.copy(shapes = now.shapes.mapIndexed { i, s -> if (i == index) shape else s })))
+                        }
                         draft?.takeIf { it.isWorthKeeping(sizes) }?.let { onEdit(latestEdits.then(now.copy(shapes = now.shapes + it))) }
                         draft = null
                         draftCrop = null
+                        moving = null
                         handle = null
                     },
                     onDragCancel = {
                         draft = null
                         draftCrop = null
+                        moving = null
                         handle = null
                     },
                 )
             },
     ) {
         val f = fit ?: return@Canvas
+        // A blur being moved shows as a frame, as one being drawn: blurring on every move would be slow.
+        val moved = moving
+        val shapes = if (moved == null) {
+            picture.shapes
+        } else {
+            picture.shapes.mapIndexedNotNull { i, s -> if (i == moved.first) moved.second.takeIf { it !is Shape.Blur } else s }
+        }
         drawIntoCanvas { canvas ->
             val native = canvas.nativeCanvas
             native.withClip(f.toViewX(shown.left), f.toViewY(shown.top), f.toViewX(shown.right), f.toViewY(shown.bottom)) {
                 translate(f.offsetX, f.offsetY)
                 scale(f.scale, f.scale)
                 translate(-shown.left, -shown.top)
-                renderer.draw(this, picture.shapes)
+                renderer.draw(this, shapes)
                 draft?.takeIf { it !is Shape.Blur }?.let { renderer.draw(this, it) }
             }
         }
         // Blurring on every move would be slow: a dashed frame stands in while drawing, as on the desktop.
-        (draft as? Shape.Blur)?.let { blur ->
-            drawRect(
-                color = Color.White,
-                topLeft = Offset(f.toViewX(blur.box.left), f.toViewY(blur.box.top)),
-                size = Size(blur.box.width * f.scale, blur.box.height * f.scale),
-                style = DrawStroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f))),
-            )
+        (draft as? Shape.Blur)?.let { dashed(f, it.box) }
+        if (tool == Tool.SELECT) {
+            val shape = moved?.second ?: selected?.let { picture.shapes.getOrNull(it) }
+            shape?.let { dashed(f, Select.bounds(it, renderer::textBox).grown(6.dp.toPx() / f.scale)) }
         }
         if (tool == Tool.CROP) cropFrame(f, draftCrop ?: picture.crop)
     }
+}
+
+/** A dashed frame, dark under light so that it shows on any screenshot. */
+private fun DrawScope.dashed(f: Fit, box: Box) {
+    val topLeft = Offset(f.toViewX(box.left), f.toViewY(box.top))
+    val size = Size(box.width * f.scale, box.height * f.scale)
+    drawRect(Color.Black.copy(alpha = 0.6f), topLeft, size, style = DrawStroke(width = 4.dp.toPx()))
+    drawRect(
+        Color.White,
+        topLeft,
+        size,
+        style = DrawStroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f))),
+    )
 }
 
 /** Darkens what is cut off, and draws the frame with its thirds and corners. */
@@ -343,7 +412,7 @@ private fun shapeFor(tool: Tool, a: Pt, b: Pt, color: Int, stroke: Stroke, sizes
     Tool.CIRCLE -> Shape.Circle(Box.of(a, b), color, sizes.line(stroke))
     Tool.ARROW -> Shape.Arrow(a, b, color, sizes.line(stroke))
     Tool.BLUR -> Shape.Blur(Box.of(a, b), sizes.blur(stroke))
-    Tool.CROP, Tool.TEXT -> null
+    Tool.CROP, Tool.SELECT, Tool.TEXT -> null
 }
 
 /** A slip of the finger leaves nothing behind. */
@@ -367,6 +436,8 @@ private fun Options(
     onColor: (Int) -> Unit,
     onStroke: (Stroke) -> Unit,
     onResetCrop: () -> Unit,
+    canDelete: Boolean,
+    onDelete: () -> Unit,
 ) {
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp),
@@ -381,6 +452,18 @@ private fun Options(
             )
             TextButton(onClick = onResetCrop, enabled = canResetCrop, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.editor_crop_reset))
+            }
+            return@Row
+        }
+        if (tool == Tool.SELECT) {
+            Text(
+                stringResource(R.string.editor_select_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(onClick = onDelete, enabled = canDelete) {
+                Icon(painterResource(R.drawable.ic_trash), contentDescription = stringResource(R.string.editor_delete_shape))
             }
             return@Row
         }
@@ -453,6 +536,7 @@ private data class ToolItem(val tool: Tool, @DrawableRes val icon: Int, @StringR
 
 private val ToolItems = listOf(
     ToolItem(Tool.CROP, R.drawable.ic_crop, R.string.editor_crop),
+    ToolItem(Tool.SELECT, R.drawable.ic_select, R.string.annotator_tool_select),
     ToolItem(Tool.PEN, R.drawable.ic_pen, R.string.annotator_tool_pen),
     ToolItem(Tool.RECTANGLE, R.drawable.ic_square, R.string.annotator_tool_rectangle),
     ToolItem(Tool.CIRCLE, R.drawable.ic_circle, R.string.annotator_tool_circle),
@@ -473,7 +557,7 @@ private fun Tools(selected: Tool, onTool: (Tool) -> Unit) {
                     val on = item.tool == selected
                     Box(
                         Modifier
-                            .size(48.dp)
+                            .size(44.dp)
                             .background(
                                 if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
                                 RoundedCornerShape(14.dp),

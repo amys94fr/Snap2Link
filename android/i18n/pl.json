@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Średnia",
   "editor.stroke.thick": "Gruba",
   "detect.notification.ignore": "Pomiń",
-  "annotator.stroke": "Grubość linii"
+  "annotator.stroke": "Grubość linii",
+  "annotator.tool.select": "Zaznaczanie",
+  "editor.select_hint": "Stuknij kształt, aby go zaznaczyć, a potem go przeciągnij.",
+  "editor.delete_shape": "Usuń kształt"
 }

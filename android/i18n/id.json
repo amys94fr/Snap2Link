@@ -160,5 +160,8 @@
   "editor.stroke.medium": "Sedang",
   "editor.stroke.thick": "Tebal",
   "detect.notification.ignore": "Abaikan",
-  "annotator.stroke": "Ketebalan garis"
+  "annotator.stroke": "Ketebalan garis",
+  "annotator.tool.select": "Pilih",
+  "editor.select_hint": "Ketuk bentuk untuk memilihnya, lalu seret.",
+  "editor.delete_shape": "Hapus bentuk"
 }

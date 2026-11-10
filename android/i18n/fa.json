@@ -160,5 +160,8 @@
   "editor.stroke.medium": "متوسط",
   "editor.stroke.thick": "ضخیم",
   "detect.notification.ignore": "نادیده گرفتن",
-  "annotator.stroke": "ضخامت خط"
+  "annotator.stroke": "ضخامت خط",
+  "annotator.tool.select": "انتخاب",
+  "editor.select_hint": "روی یک شکل بزنید تا انتخاب شود، سپس آن را بکشید.",
+  "editor.delete_shape": "حذف شکل"
 }

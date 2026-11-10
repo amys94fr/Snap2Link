@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">ضخیم</string>
     <string name="detect_notification_ignore">نادیده گرفتن</string>
     <string name="annotator_stroke">ضخامت خط</string>
+    <string name="annotator_tool_select">انتخاب</string>
+    <string name="editor_select_hint">روی یک شکل بزنید تا انتخاب شود، سپس آن را بکشید.</string>
+    <string name="editor_delete_shape">حذف شکل</string>
 </resources>

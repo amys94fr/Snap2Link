@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">太</string>
     <string name="detect_notification_ignore">無視</string>
     <string name="annotator_stroke">線の太さ</string>
+    <string name="annotator_tool_select">選択</string>
+    <string name="editor_select_hint">図形をタップして選択し、ドラッグして移動します。</string>
+    <string name="editor_delete_shape">図形を削除</string>
 </resources>

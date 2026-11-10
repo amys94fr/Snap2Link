@@ -160,5 +160,8 @@
   "editor.stroke.medium": "בינוני",
   "editor.stroke.thick": "עבה",
   "detect.notification.ignore": "התעלמות",
-  "annotator.stroke": "עובי קו"
+  "annotator.stroke": "עובי קו",
+  "annotator.tool.select": "בחירה",
+  "editor.select_hint": "מקישים על צורה כדי לבחור אותה, ואז גוררים אותה.",
+  "editor.delete_shape": "מחיקת הצורה"
 }

@@ -160,5 +160,8 @@
   "editor.stroke.medium": "متوسط",
   "editor.stroke.thick": "سميك",
   "detect.notification.ignore": "تجاهل",
-  "annotator.stroke": "سُمك الخط"
+  "annotator.stroke": "سُمك الخط",
+  "annotator.tool.select": "تحديد",
+  "editor.select_hint": "اضغط على شكل لتحديده، ثم اسحبه.",
+  "editor.delete_shape": "حذف الشكل"
 }

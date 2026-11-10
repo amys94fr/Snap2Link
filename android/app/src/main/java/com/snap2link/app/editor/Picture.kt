@@ -1,6 +1,7 @@
 package com.snap2link.app.editor
 
 import kotlin.math.abs
+import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 
@@ -14,13 +15,17 @@ data class Box(val left: Float, val top: Float, val right: Float, val bottom: Fl
 
     operator fun contains(p: Pt) = p.x in left..right && p.y in top..bottom
 
+    fun moved(dx: Float, dy: Float) = Box(left + dx, top + dy, right + dx, bottom + dy)
+
+    fun grown(by: Float) = Box(left - by, top - by, right + by, bottom + by)
+
     companion object {
         fun of(a: Pt, b: Pt) = Box(min(a.x, b.x), min(a.y, b.y), max(a.x, b.x), max(a.y, b.y))
         fun of(width: Int, height: Int) = Box(0f, 0f, width.toFloat(), height.toFloat())
     }
 }
 
-enum class Tool { CROP, PEN, RECTANGLE, CIRCLE, ARROW, TEXT, BLUR }
+enum class Tool { CROP, SELECT, PEN, RECTANGLE, CIRCLE, ARROW, TEXT, BLUR }
 
 /** The three thicknesses, as on the desktop. */
 enum class Stroke { THIN, MEDIUM, THICK }
@@ -161,5 +166,69 @@ data class Fit(val source: Box, val scale: Float, val offsetX: Float, val offset
                 (height - source.height * scale) / 2,
             )
         }
+    }
+}
+
+fun Shape.moved(dx: Float, dy: Float): Shape = when (this) {
+    is Shape.Pen -> copy(points = points.map { Pt(it.x + dx, it.y + dy) })
+    is Shape.Rectangle -> copy(box = box.moved(dx, dy))
+    is Shape.Circle -> copy(box = box.moved(dx, dy))
+    is Shape.Arrow -> copy(from = Pt(from.x + dx, from.y + dy), to = Pt(to.x + dx, to.y + dy))
+    is Shape.Text -> copy(at = Pt(at.x + dx, at.y + dy))
+    is Shape.Blur -> copy(box = box.moved(dx, dy))
+}
+
+/**
+ * Finding the mark under a finger. A text's size depends on its font, so
+ * whoever draws it says how large it is ([textBox]).
+ */
+object Select {
+    /** The topmost shape near [p], as its index, [reach] being how far a touch may miss. */
+    fun at(shapes: List<Shape>, p: Pt, reach: Float, textBox: (Shape.Text) -> Box): Int? =
+        shapes.indices.reversed().firstOrNull { hits(shapes[it], p, reach, textBox) }
+
+    fun hits(shape: Shape, p: Pt, reach: Float, textBox: (Shape.Text) -> Box): Boolean = when (shape) {
+        is Shape.Pen -> {
+            val near = shape.width / 2 + reach
+            if (shape.points.size == 1) {
+                hypot(p.x - shape.points[0].x, p.y - shape.points[0].y) <= near
+            } else {
+                shape.points.zipWithNext().any { (a, b) -> distance(p, a, b) <= near }
+            }
+        }
+        is Shape.Arrow -> distance(p, shape.from, shape.to) <= shape.width / 2 + reach
+        // Inside counts too: a thin outline is hard to hit with a finger.
+        is Shape.Rectangle -> p in shape.box.grown(shape.width / 2 + reach)
+        is Shape.Blur -> p in shape.box.grown(reach)
+        is Shape.Circle -> {
+            val rx = shape.box.width / 2 + shape.width / 2 + reach
+            val ry = shape.box.height / 2 + shape.width / 2 + reach
+            val x = (p.x - (shape.box.left + shape.box.right) / 2) / rx
+            val y = (p.y - (shape.box.top + shape.box.bottom) / 2) / ry
+            x * x + y * y <= 1f
+        }
+        is Shape.Text -> p in textBox(shape).grown(reach)
+    }
+
+    /** The frame drawn around a selected shape. */
+    fun bounds(shape: Shape, textBox: (Shape.Text) -> Box): Box = when (shape) {
+        is Shape.Pen -> Box(
+            shape.points.minOf { it.x }, shape.points.minOf { it.y },
+            shape.points.maxOf { it.x }, shape.points.maxOf { it.y },
+        ).grown(shape.width / 2)
+        is Shape.Arrow -> Box.of(shape.from, shape.to).grown(shape.width * 2 + 6)
+        is Shape.Rectangle -> shape.box.grown(shape.width / 2)
+        is Shape.Circle -> shape.box.grown(shape.width / 2)
+        is Shape.Blur -> shape.box
+        is Shape.Text -> textBox(shape)
+    }
+
+    /** How far [p] is from the segment [a]-[b]. */
+    internal fun distance(p: Pt, a: Pt, b: Pt): Float {
+        val dx = b.x - a.x
+        val dy = b.y - a.y
+        val length = dx * dx + dy * dy
+        val t = if (length == 0f) 0f else (((p.x - a.x) * dx + (p.y - a.y) * dy) / length).coerceIn(0f, 1f)
+        return hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
     }
 }

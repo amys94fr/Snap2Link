@@ -163,4 +163,7 @@
     <string name="editor_stroke_thick">سميك</string>
     <string name="detect_notification_ignore">تجاهل</string>
     <string name="annotator_stroke">سُمك الخط</string>
+    <string name="annotator_tool_select">تحديد</string>
+    <string name="editor_select_hint">اضغط على شكل لتحديده، ثم اسحبه.</string>
+    <string name="editor_delete_shape">حذف الشكل</string>
 </resources>
