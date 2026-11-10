@@ -180,5 +180,9 @@
   "editor.tilt_reset": "まっすぐ",
   "editor.ratio": "縦横比",
   "editor.ratio_free": "自由",
-  "editor.ratio_original": "元の比率"
+  "editor.ratio_original": "元の比率",
+  "editor.adjust": "調整",
+  "editor.brightness": "明るさ",
+  "editor.contrast": "コントラスト",
+  "editor.light_reset": "リセット"
 }

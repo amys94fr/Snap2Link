@@ -180,5 +180,9 @@
   "editor.tilt_reset": "ישר",
   "editor.ratio": "יחס גובה-רוחב",
   "editor.ratio_free": "חופשי",
-  "editor.ratio_original": "מקורי"
+  "editor.ratio_original": "מקורי",
+  "editor.adjust": "כוונון",
+  "editor.brightness": "בהירות",
+  "editor.contrast": "ניגודיות",
+  "editor.light_reset": "איפוס"
 }

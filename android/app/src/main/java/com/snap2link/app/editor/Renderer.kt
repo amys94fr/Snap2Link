@@ -2,6 +2,7 @@ package com.snap2link.app.editor
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
@@ -22,6 +23,7 @@ import kotlin.math.sin
  */
 class Renderer(val source: Bitmap) {
     private val image = Paint(Paint.FILTER_BITMAP_FLAG)
+    private val lit = Paint(Paint.FILTER_BITMAP_FLAG)
     private val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
@@ -35,8 +37,13 @@ class Renderer(val source: Bitmap) {
         strokeJoin = Paint.Join.ROUND
     }
 
+    /** How the image shows: what a blur's colours depend on. */
+    private data class Look(val turns: Int, val flipped: Boolean, val angle: Float, val brightness: Int, val contrast: Int)
+
+    private fun Picture.look() = Look(turns, flipped, angle, brightness, contrast)
+
     /** Blurred pieces, made once per shape and way the image shows: blurring on every frame would be slow. */
-    private val blurred = HashMap<Pair<Triple<Int, Boolean, Float>, Shape.Blur>, Bitmap>()
+    private val blurred = HashMap<Pair<Look, Shape.Blur>, Bitmap>()
 
     /** The screenshot turned a quarter to the right [turns] times, then mirrored if [flipped], made once each. */
     private val turned = HashMap<Pair<Int, Boolean>, Bitmap>()
@@ -70,10 +77,18 @@ class Renderer(val source: Bitmap) {
         shapes.forEach { draw(canvas, it, picture) }
     }
 
+    /** The paint for the screenshot: brightness and contrast change it, never the marks. */
+    private fun imagePaint(picture: Picture): Paint {
+        if (!picture.adjusted) return image
+        lit.colorFilter = ColorMatrixColorFilter(Light.matrix(picture.brightness, picture.contrast))
+        return lit
+    }
+
     private fun drawImage(canvas: Canvas, picture: Picture) {
         val base = image(picture.turns, picture.flipped)
+        val paint = imagePaint(picture)
         if (picture.angle == 0f) {
-            canvas.drawBitmap(base, 0f, 0f, image)
+            canvas.drawBitmap(base, 0f, 0f, paint)
             return
         }
         val (width, height) = shownSize(picture)
@@ -81,17 +96,17 @@ class Renderer(val source: Bitmap) {
             translate(width / 2, height / 2)
             rotate(picture.angle)
             translate(-base.width / 2f, -base.height / 2f)
-            drawBitmap(base, 0f, 0f, image)
+            drawBitmap(base, 0f, 0f, paint)
         }
     }
 
-    /** The image as it shows, tilt included, in pixels: what a blur takes its colours from. Kept for one tilt at a time. */
-    private var shownKey: Triple<Int, Boolean, Float>? = null
+    /** The image as it shows, tilt and light included, in pixels: what a blur takes its colours from. Kept for one look at a time. */
+    private var shownKey: Look? = null
     private var shownBitmap: Bitmap? = null
 
     private fun shown(picture: Picture): Bitmap {
-        if (picture.angle == 0f) return image(picture.turns, picture.flipped)
-        val key = Triple(picture.turns, picture.flipped, picture.angle)
+        if (picture.angle == 0f && !picture.adjusted) return image(picture.turns, picture.flipped)
+        val key = picture.look()
         shownBitmap?.takeIf { shownKey == key }?.let { return it }
         val (width, height) = shownSize(picture)
         val bitmap = createBitmap(width.roundToInt().coerceAtLeast(1), height.roundToInt().coerceAtLeast(1))
@@ -137,8 +152,7 @@ class Renderer(val source: Bitmap) {
                 canvas.drawText(shape.text, shape.at.x, baseline, text)
             }
             is Shape.Blur -> {
-                val key = Triple(picture.turns, picture.flipped, picture.angle)
-                val piece = blurred.getOrPut(key to shape) { blur(shape, shown(picture)) }
+                val piece = blurred.getOrPut(picture.look() to shape) { blur(shape, shown(picture)) }
                 canvas.drawBitmap(piece, null, shape.box.rect(), image)
             }
         }

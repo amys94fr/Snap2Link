@@ -183,4 +183,8 @@
     <string name="editor_ratio">Пропорції</string>
     <string name="editor_ratio_free">Вільно</string>
     <string name="editor_ratio_original">Початкові</string>
+    <string name="editor_adjust">Налаштувати</string>
+    <string name="editor_brightness">Яскравість</string>
+    <string name="editor_contrast">Контраст</string>
+    <string name="editor_light_reset">Скинути</string>
 </resources>

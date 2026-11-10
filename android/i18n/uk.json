@@ -180,5 +180,9 @@
   "editor.tilt_reset": "Рівно",
   "editor.ratio": "Пропорції",
   "editor.ratio_free": "Вільно",
-  "editor.ratio_original": "Початкові"
+  "editor.ratio_original": "Початкові",
+  "editor.adjust": "Налаштувати",
+  "editor.brightness": "Яскравість",
+  "editor.contrast": "Контраст",
+  "editor.light_reset": "Скинути"
 }

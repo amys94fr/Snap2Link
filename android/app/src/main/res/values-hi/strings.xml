@@ -183,4 +183,8 @@
     <string name="editor_ratio">अनुपात</string>
     <string name="editor_ratio_free">मुक्त</string>
     <string name="editor_ratio_original">मूल</string>
+    <string name="editor_adjust">समायोजित करें</string>
+    <string name="editor_brightness">चमक</string>
+    <string name="editor_contrast">कंट्रास्ट</string>
+    <string name="editor_light_reset">रीसेट करें</string>
 </resources>

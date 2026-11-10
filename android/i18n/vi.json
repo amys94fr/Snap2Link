@@ -180,5 +180,9 @@
   "editor.tilt_reset": "Thẳng",
   "editor.ratio": "Tỷ lệ",
   "editor.ratio_free": "Tự do",
-  "editor.ratio_original": "Gốc"
+  "editor.ratio_original": "Gốc",
+  "editor.adjust": "Điều chỉnh",
+  "editor.brightness": "Độ sáng",
+  "editor.contrast": "Độ tương phản",
+  "editor.light_reset": "Đặt lại"
 }

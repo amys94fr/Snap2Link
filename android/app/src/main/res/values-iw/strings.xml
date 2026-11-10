@@ -183,4 +183,8 @@
     <string name="editor_ratio">יחס גובה-רוחב</string>
     <string name="editor_ratio_free">חופשי</string>
     <string name="editor_ratio_original">מקורי</string>
+    <string name="editor_adjust">כוונון</string>
+    <string name="editor_brightness">בהירות</string>
+    <string name="editor_contrast">ניגודיות</string>
+    <string name="editor_light_reset">איפוס</string>
 </resources>

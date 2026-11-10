@@ -183,4 +183,8 @@
     <string name="editor_ratio">Proporcje</string>
     <string name="editor_ratio_free">Dowolne</string>
     <string name="editor_ratio_original">Oryginalne</string>
+    <string name="editor_adjust">Dostosuj</string>
+    <string name="editor_brightness">Jasność</string>
+    <string name="editor_contrast">Kontrast</string>
+    <string name="editor_light_reset">Resetuj</string>
 </resources>

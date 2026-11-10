@@ -180,5 +180,9 @@
   "editor.tilt_reset": "Gerade",
   "editor.ratio": "Seitenverhältnis",
   "editor.ratio_free": "Frei",
-  "editor.ratio_original": "Original"
+  "editor.ratio_original": "Original",
+  "editor.adjust": "Anpassen",
+  "editor.brightness": "Helligkeit",
+  "editor.contrast": "Kontrast",
+  "editor.light_reset": "Zurücksetzen"
 }

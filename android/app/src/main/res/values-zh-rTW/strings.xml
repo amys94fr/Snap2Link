@@ -183,4 +183,8 @@
     <string name="editor_ratio">比例</string>
     <string name="editor_ratio_free">自由</string>
     <string name="editor_ratio_original">原始</string>
+    <string name="editor_adjust">調整</string>
+    <string name="editor_brightness">亮度</string>
+    <string name="editor_contrast">對比</string>
+    <string name="editor_light_reset">重設</string>
 </resources>

@@ -183,4 +183,8 @@
     <string name="editor_ratio">비율</string>
     <string name="editor_ratio_free">자유</string>
     <string name="editor_ratio_original">원본</string>
+    <string name="editor_adjust">조정</string>
+    <string name="editor_brightness">밝기</string>
+    <string name="editor_contrast">대비</string>
+    <string name="editor_light_reset">초기화</string>
 </resources>

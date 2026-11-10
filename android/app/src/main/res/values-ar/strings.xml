@@ -183,4 +183,8 @@
     <string name="editor_ratio">الأبعاد</string>
     <string name="editor_ratio_free">حر</string>
     <string name="editor_ratio_original">الأصلية</string>
+    <string name="editor_adjust">ضبط</string>
+    <string name="editor_brightness">السطوع</string>
+    <string name="editor_contrast">التباين</string>
+    <string name="editor_light_reset">إعادة الضبط</string>
 </resources>

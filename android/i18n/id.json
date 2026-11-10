@@ -180,5 +180,9 @@
   "editor.tilt_reset": "Lurus",
   "editor.ratio": "Proporsi",
   "editor.ratio_free": "Bebas",
-  "editor.ratio_original": "Asli"
+  "editor.ratio_original": "Asli",
+  "editor.adjust": "Sesuaikan",
+  "editor.brightness": "Kecerahan",
+  "editor.contrast": "Kontras",
+  "editor.light_reset": "Atur ulang"
 }

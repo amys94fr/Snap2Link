@@ -180,5 +180,9 @@
   "editor.tilt_reset": "Düz",
   "editor.ratio": "En boy oranı",
   "editor.ratio_free": "Serbest",
-  "editor.ratio_original": "Orijinal"
+  "editor.ratio_original": "Orijinal",
+  "editor.adjust": "Ayarla",
+  "editor.brightness": "Parlaklık",
+  "editor.contrast": "Kontrast",
+  "editor.light_reset": "Sıfırla"
 }

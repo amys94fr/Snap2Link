@@ -180,5 +180,9 @@
   "editor.tilt_reset": "مستقيم",
   "editor.ratio": "الأبعاد",
   "editor.ratio_free": "حر",
-  "editor.ratio_original": "الأصلية"
+  "editor.ratio_original": "الأصلية",
+  "editor.adjust": "ضبط",
+  "editor.brightness": "السطوع",
+  "editor.contrast": "التباين",
+  "editor.light_reset": "إعادة الضبط"
 }

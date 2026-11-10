@@ -183,4 +183,8 @@
     <string name="editor_ratio">تناسب</string>
     <string name="editor_ratio_free">آزاد</string>
     <string name="editor_ratio_original">اصلی</string>
+    <string name="editor_adjust">تنظیم</string>
+    <string name="editor_brightness">روشنایی</string>
+    <string name="editor_contrast">کنتراست</string>
+    <string name="editor_light_reset">بازنشانی</string>
 </resources>

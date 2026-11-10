@@ -183,4 +183,8 @@
     <string name="editor_ratio">Tỷ lệ</string>
     <string name="editor_ratio_free">Tự do</string>
     <string name="editor_ratio_original">Gốc</string>
+    <string name="editor_adjust">Điều chỉnh</string>
+    <string name="editor_brightness">Độ sáng</string>
+    <string name="editor_contrast">Độ tương phản</string>
+    <string name="editor_light_reset">Đặt lại</string>
 </resources>

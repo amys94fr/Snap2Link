@@ -38,7 +38,7 @@ data class Box(val left: Float, val top: Float, val right: Float, val bottom: Fl
     }
 }
 
-enum class Tool { CROP, SELECT, PEN, RECTANGLE, CIRCLE, ARROW, TEXT, BLUR }
+enum class Tool { CROP, ADJUST, SELECT, PEN, RECTANGLE, CIRCLE, ARROW, TEXT, BLUR }
 
 /** The three thicknesses, as on the desktop. */
 enum class Stroke { THIN, MEDIUM, THICK }
@@ -91,8 +91,9 @@ class Sizes(width: Int, height: Int) {
 /**
  * What is sent: the marks, the part of the image to keep, how many quarter
  * turns to the right the image took, whether it was then mirrored left to
- * right, and how many degrees it was tilted after that, clockwise. Marks
- * and crop are in the pixels of the image as it now shows.
+ * right, how many degrees it was tilted after that, clockwise, and its
+ * [brightness] and [contrast], each from -100 to 100. Marks and crop are in
+ * the pixels of the image as it now shows.
  */
 data class Picture(
     val shapes: List<Shape>,
@@ -100,7 +101,11 @@ data class Picture(
     val turns: Int = 0,
     val flipped: Boolean = false,
     val angle: Float = 0f,
+    val brightness: Int = 0,
+    val contrast: Int = 0,
 ) {
+    val adjusted get() = brightness != 0 || contrast != 0
+
     /**
      * A quarter turn to the right of an image now [width] x [height]: the
      * marks and the crop turn with it. A text turns around its middle but
@@ -125,7 +130,7 @@ data class Picture(
             }
         }
         // Turning a mirrored image to the right turns the original one to the left.
-        return Picture(shapes, turn(crop), (turns + if (flipped) 3 else 1) % 4, flipped, angle)
+        return copy(shapes = shapes, crop = turn(crop), turns = (turns + if (flipped) 3 else 1) % 4)
     }
 
     /**
@@ -150,7 +155,7 @@ data class Picture(
             }
         }
         // In a mirror, a tilt goes the other way.
-        return Picture(shapes, flip(crop), turns, !flipped, -angle)
+        return copy(shapes = shapes, crop = flip(crop), flipped = !flipped, angle = -angle)
     }
 
     /** Mirrored top to bottom: mirrored left to right, then turned half way round. */
@@ -218,7 +223,7 @@ data class Picture(
             )
             kept.intersect(whole) ?: kept
         }
-        return Picture(shapes, crop, turns, flipped, degrees)
+        return copy(shapes = shapes, crop = crop, angle = degrees)
     }
 
     companion object {
@@ -648,5 +653,27 @@ object Tilt {
         val w = width * k
         val h = height * k
         return Box((outerWidth - w) / 2, (outerHeight - h) / 2, (outerWidth + w) / 2, (outerHeight + h) / 2)
+    }
+}
+
+/** Brightness and contrast as a colour matrix, each from -100 to 100. */
+object Light {
+    const val MAX = 100
+
+    /**
+     * The 4 x 5 matrix Android's colour filters take. Contrast spreads the
+     * colours away from mid grey, up to twice, or draws them in, down to a
+     * fifth; brightness then adds or takes up to 100 out of 255.
+     */
+    fun matrix(brightness: Int, contrast: Int): FloatArray {
+        val c = contrast.coerceIn(-MAX, MAX) / MAX.toFloat()
+        val scale = if (c >= 0) 1 + c else 1 + c * 0.8f
+        val shift = 128 * (1 - scale) + brightness.coerceIn(-MAX, MAX)
+        return floatArrayOf(
+            scale, 0f, 0f, 0f, shift,
+            0f, scale, 0f, 0f, shift,
+            0f, 0f, scale, 0f, shift,
+            0f, 0f, 0f, 1f, 0f,
+        )
     }
 }

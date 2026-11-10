@@ -457,4 +457,32 @@ class PictureTest {
         assertEquals(250f, (crop.top + crop.bottom) / 2, 0.01f)
         assertEquals(100f, crop.left, 0.01f)
     }
+
+    @Test
+    fun lightLeavesTheImageAloneAtZero() {
+        val matrix = Light.matrix(0, 0)
+        assertEquals(1f, matrix[0])
+        assertEquals(0f, matrix[4])
+        assertEquals(1f, matrix[18])
+    }
+
+    @Test
+    fun brightnessAddsAndContrastSpreadsAroundMidGrey() {
+        assertEquals(50f, Light.matrix(50, 0)[4])
+        val strong = Light.matrix(0, 100)
+        assertEquals(2f, strong[0])
+        // Mid grey stays where it is: 128 x 2 - 128 = 128.
+        assertEquals(128f, 128 * strong[0] + strong[4])
+        val soft = Light.matrix(0, -100)
+        assertEquals(0.2f, soft[0], 0.0001f)
+        assertEquals(1f, soft[18])
+    }
+
+    @Test
+    fun turnsMirrorsAndTiltsKeepTheLight() {
+        val lit = Picture.blank(1080, 2400).copy(brightness = 30, contrast = -20)
+        val turned = lit.turned(1080f, 2400f, noText).flippedOver(2400f, noText).angled(5f, 2400f, 1080f, noText)
+        assertEquals(30, turned.brightness)
+        assertEquals(-20, turned.contrast)
+    }
 }

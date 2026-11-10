@@ -183,4 +183,8 @@
     <string name="editor_ratio">Proporsi</string>
     <string name="editor_ratio_free">Bebas</string>
     <string name="editor_ratio_original">Asli</string>
+    <string name="editor_adjust">Sesuaikan</string>
+    <string name="editor_brightness">Kecerahan</string>
+    <string name="editor_contrast">Kontras</string>
+    <string name="editor_light_reset">Atur ulang</string>
 </resources>

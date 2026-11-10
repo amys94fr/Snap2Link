@@ -180,5 +180,9 @@
   "editor.tilt_reset": "صاف",
   "editor.ratio": "تناسب",
   "editor.ratio_free": "آزاد",
-  "editor.ratio_original": "اصلی"
+  "editor.ratio_original": "اصلی",
+  "editor.adjust": "تنظیم",
+  "editor.brightness": "روشنایی",
+  "editor.contrast": "کنتراست",
+  "editor.light_reset": "بازنشانی"
 }

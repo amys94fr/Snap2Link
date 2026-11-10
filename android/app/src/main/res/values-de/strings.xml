@@ -183,4 +183,8 @@
     <string name="editor_ratio">Seitenverhältnis</string>
     <string name="editor_ratio_free">Frei</string>
     <string name="editor_ratio_original">Original</string>
+    <string name="editor_adjust">Anpassen</string>
+    <string name="editor_brightness">Helligkeit</string>
+    <string name="editor_contrast">Kontrast</string>
+    <string name="editor_light_reset">Zurücksetzen</string>
 </resources>

@@ -180,5 +180,9 @@
   "editor.tilt_reset": "摆正",
   "editor.ratio": "比例",
   "editor.ratio_free": "自由",
-  "editor.ratio_original": "原始"
+  "editor.ratio_original": "原始",
+  "editor.adjust": "调整",
+  "editor.brightness": "亮度",
+  "editor.contrast": "对比度",
+  "editor.light_reset": "重置"
 }

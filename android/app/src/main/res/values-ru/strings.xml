@@ -183,4 +183,8 @@
     <string name="editor_ratio">Пропорции</string>
     <string name="editor_ratio_free">Свободно</string>
     <string name="editor_ratio_original">Исходные</string>
+    <string name="editor_adjust">Настроить</string>
+    <string name="editor_brightness">Яркость</string>
+    <string name="editor_contrast">Контраст</string>
+    <string name="editor_light_reset">Сбросить</string>
 </resources>

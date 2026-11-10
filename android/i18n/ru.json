@@ -180,5 +180,9 @@
   "editor.tilt_reset": "Ровно",
   "editor.ratio": "Пропорции",
   "editor.ratio_free": "Свободно",
-  "editor.ratio_original": "Исходные"
+  "editor.ratio_original": "Исходные",
+  "editor.adjust": "Настроить",
+  "editor.brightness": "Яркость",
+  "editor.contrast": "Контраст",
+  "editor.light_reset": "Сбросить"
 }

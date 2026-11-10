@@ -180,5 +180,9 @@
   "editor.tilt_reset": "똑바로",
   "editor.ratio": "비율",
   "editor.ratio_free": "자유",
-  "editor.ratio_original": "원본"
+  "editor.ratio_original": "원본",
+  "editor.adjust": "조정",
+  "editor.brightness": "밝기",
+  "editor.contrast": "대비",
+  "editor.light_reset": "초기화"
 }

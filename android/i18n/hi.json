@@ -180,5 +180,9 @@
   "editor.tilt_reset": "सीधा",
   "editor.ratio": "अनुपात",
   "editor.ratio_free": "मुक्त",
-  "editor.ratio_original": "मूल"
+  "editor.ratio_original": "मूल",
+  "editor.adjust": "समायोजित करें",
+  "editor.brightness": "चमक",
+  "editor.contrast": "कंट्रास्ट",
+  "editor.light_reset": "रीसेट करें"
 }

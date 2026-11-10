@@ -183,4 +183,8 @@
     <string name="editor_ratio">En boy oranı</string>
     <string name="editor_ratio_free">Serbest</string>
     <string name="editor_ratio_original">Orijinal</string>
+    <string name="editor_adjust">Ayarla</string>
+    <string name="editor_brightness">Parlaklık</string>
+    <string name="editor_contrast">Kontrast</string>
+    <string name="editor_light_reset">Sıfırla</string>
 </resources>

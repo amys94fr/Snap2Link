@@ -183,4 +183,8 @@
     <string name="editor_ratio">縦横比</string>
     <string name="editor_ratio_free">自由</string>
     <string name="editor_ratio_original">元の比率</string>
+    <string name="editor_adjust">調整</string>
+    <string name="editor_brightness">明るさ</string>
+    <string name="editor_contrast">コントラスト</string>
+    <string name="editor_light_reset">リセット</string>
 </resources>

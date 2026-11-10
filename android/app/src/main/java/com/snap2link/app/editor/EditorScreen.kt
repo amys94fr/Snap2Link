@@ -20,6 +20,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -119,11 +120,13 @@ fun EditorScreen(
     var writing by remember { mutableStateOf<Writing?>(null) }
     var selected by remember { mutableStateOf<Int?>(null) }
     var tilting by remember { mutableStateOf<Float?>(null) }
+    var lighting by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     // "free", "original" or a Ratio's name.
     var proportion by rememberSaveable { mutableStateOf(FREE) }
     val baseWidth = renderer.width(edits.now.turns).toFloat()
     val baseHeight = renderer.height(edits.now.turns).toFloat()
     val preview = tilting?.let { edits.now.angled(it, baseWidth, baseHeight, renderer::textBox) }
+        ?: lighting?.let { (brightness, contrast) -> edits.now.copy(brightness = brightness, contrast = contrast) }
     val ratio = ratioOf(proportion, baseWidth, baseHeight)
     val color = Palette[colorIndex]
     // An undo can remove the selected shape: the selection only holds while it points at one.
@@ -227,6 +230,16 @@ fun EditorScreen(
                         proportion = FREE
                         onEdit(edits.then(edits.now.copy(crop = renderer.whole(edits.now))))
                     },
+                    brightness = lighting?.first ?: edits.now.brightness,
+                    contrast = lighting?.second ?: edits.now.contrast,
+                    onLight = { brightness, contrast -> lighting = brightness to contrast },
+                    onLightDone = {
+                        lighting?.let { (brightness, contrast) ->
+                            onEdit(edits.then(edits.now.copy(brightness = brightness, contrast = contrast)))
+                        }
+                        lighting = null
+                    },
+                    onLightReset = { onEdit(edits.then(edits.now.copy(brightness = 0, contrast = 0))) },
                     proportion = proportion,
                     onProportion = { choice ->
                         proportion = choice
@@ -672,7 +685,7 @@ private fun shapeFor(tool: Tool, a: Pt, b: Pt, color: Int, stroke: Stroke, sizes
     Tool.CIRCLE -> Shape.Circle(Box.of(a, b), color, sizes.line(stroke))
     Tool.ARROW -> Shape.Arrow(a, b, color, sizes.line(stroke))
     Tool.BLUR -> Shape.Blur(Box.of(a, b), sizes.blur(stroke))
-    Tool.CROP, Tool.SELECT, Tool.TEXT -> null
+    Tool.CROP, Tool.ADJUST, Tool.SELECT, Tool.TEXT -> null
 }
 
 /** A slip of the finger leaves nothing behind. */
@@ -700,6 +713,11 @@ private fun Options(
     onFlip: () -> Unit,
     onFlipVertical: () -> Unit,
     onResetCrop: () -> Unit,
+    brightness: Int,
+    contrast: Int,
+    onLight: (brightness: Int, contrast: Int) -> Unit,
+    onLightDone: () -> Unit,
+    onLightReset: () -> Unit,
     proportion: String,
     onProportion: (String) -> Unit,
     angle: Float,
@@ -740,6 +758,20 @@ private fun Options(
                     ProportionMenu(proportion, onProportion, canResetCrop, onResetCrop)
                 }
                 TiltSlider(angle, onTilt, onTiltDone, onTiltReset)
+            }
+            return@Row
+        }
+        if (tool == Tool.ADJUST) {
+            Column(Modifier.weight(1f)) {
+                LightSlider(R.string.editor_brightness, brightness, { onLight(it, contrast) }, onLightDone)
+                LightSlider(R.string.editor_contrast, contrast, { onLight(brightness, it) }, onLightDone)
+                TextButton(
+                    onClick = onLightReset,
+                    enabled = brightness != 0 || contrast != 0,
+                    modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp),
+                ) {
+                    Text(stringResource(R.string.editor_light_reset))
+                }
             }
             return@Row
         }
@@ -858,6 +890,7 @@ private data class ToolItem(val tool: Tool, @DrawableRes val icon: Int, @StringR
 
 private val ToolItems = listOf(
     ToolItem(Tool.CROP, R.drawable.ic_crop, R.string.editor_crop),
+    ToolItem(Tool.ADJUST, R.drawable.ic_sun, R.string.editor_adjust),
     ToolItem(Tool.SELECT, R.drawable.ic_select, R.string.annotator_tool_select),
     ToolItem(Tool.PEN, R.drawable.ic_pen, R.string.annotator_tool_pen),
     ToolItem(Tool.RECTANGLE, R.drawable.ic_square, R.string.annotator_tool_rectangle),
@@ -871,27 +904,30 @@ private val ToolItems = listOf(
 private fun Tools(selected: Tool, onTool: (Tool) -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(
-                Modifier.fillMaxWidth().selectableGroup(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                ToolItems.forEach { item ->
-                    val on = item.tool == selected
-                    Box(
-                        Modifier
-                            .size(44.dp)
-                            .background(
-                                if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                RoundedCornerShape(14.dp),
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val cell = minOf(44.dp, maxWidth / ToolItems.size)
+                Row(
+                    Modifier.fillMaxWidth().selectableGroup(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    ToolItems.forEach { item ->
+                        val on = item.tool == selected
+                        Box(
+                            Modifier
+                                .size(cell)
+                                .background(
+                                    if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                    RoundedCornerShape(14.dp),
+                                )
+                                .selectable(selected = on, role = Role.RadioButton, onClick = { onTool(item.tool) }),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painterResource(item.icon),
+                                contentDescription = stringResource(item.name),
+                                tint = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            .selectable(selected = on, role = Role.RadioButton, onClick = { onTool(item.tool) }),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            painterResource(item.icon),
-                            contentDescription = stringResource(item.name),
-                            tint = if (on) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        }
                     }
                 }
             }
@@ -1084,5 +1120,38 @@ private fun ProportionMenu(choice: String, onChoice: (String) -> Unit, canReset:
                 },
             )
         }
+    }
+}
+
+/** One light setting: its name and value, a slider from -100 to 100, and the change kept when the finger lifts. */
+@Composable
+private fun LightSlider(@StringRes name: Int, value: Int, onChange: (Int) -> Unit, onDone: () -> Unit) {
+    val label = stringResource(name)
+    val shown = if (value > 0) "+$value" else value.toString()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(96.dp).clearAndSetSemantics {},
+        )
+        Slider(
+            value = value.toFloat(),
+            onValueChange = { onChange(it.roundToInt()) },
+            onValueChangeFinished = onDone,
+            valueRange = -Light.MAX.toFloat()..Light.MAX.toFloat(),
+            modifier = Modifier
+                .weight(1f)
+                .semantics {
+                    contentDescription = label
+                    stateDescription = shown
+                },
+        )
+        Text(
+            shown,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(48.dp).padding(start = 8.dp).clearAndSetSemantics {},
+        )
     }
 }
