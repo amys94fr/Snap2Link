@@ -177,4 +177,5 @@
     <string name="editor_rotate">چرخش به راست</string>
     <string name="editor_rotate_left">چرخش به چپ</string>
     <string name="editor_flip">قرینهٔ افقی</string>
+    <string name="editor_flip_vertical">قرینهٔ عمودی</string>
 </resources>

@@ -174,5 +174,6 @@
   "editor.tip_ok": "Verstanden",
   "editor.rotate": "Nach rechts drehen",
   "editor.rotate_left": "Nach links drehen",
-  "editor.flip": "Horizontal spiegeln"
+  "editor.flip": "Horizontal spiegeln",
+  "editor.flip_vertical": "Vertikal spiegeln"
 }

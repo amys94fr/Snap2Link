@@ -177,4 +177,5 @@
     <string name="editor_rotate">Putar ke kanan</string>
     <string name="editor_rotate_left">Putar ke kiri</string>
     <string name="editor_flip">Balik horizontal</string>
+    <string name="editor_flip_vertical">Balik vertikal</string>
 </resources>

@@ -177,4 +177,5 @@
     <string name="editor_rotate">Повернуть вправо</string>
     <string name="editor_rotate_left">Повернуть влево</string>
     <string name="editor_flip">Отразить по горизонтали</string>
+    <string name="editor_flip_vertical">Отразить по вертикали</string>
 </resources>

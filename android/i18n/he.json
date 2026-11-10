@@ -174,5 +174,6 @@
   "editor.tip_ok": "הבנתי",
   "editor.rotate": "סיבוב ימינה",
   "editor.rotate_left": "סיבוב שמאלה",
-  "editor.flip": "היפוך אופקי"
+  "editor.flip": "היפוך אופקי",
+  "editor.flip_vertical": "היפוך אנכי"
 }

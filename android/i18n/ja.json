@@ -174,5 +174,6 @@
   "editor.tip_ok": "OK",
   "editor.rotate": "右に回転",
   "editor.rotate_left": "左に回転",
-  "editor.flip": "左右反転"
+  "editor.flip": "左右反転",
+  "editor.flip_vertical": "上下反転"
 }

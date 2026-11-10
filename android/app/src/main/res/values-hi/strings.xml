@@ -177,4 +177,5 @@
     <string name="editor_rotate">दाईं ओर घुमाएँ</string>
     <string name="editor_rotate_left">बाईं ओर घुमाएँ</string>
     <string name="editor_flip">क्षैतिज रूप से पलटें</string>
+    <string name="editor_flip_vertical">लंबवत रूप से पलटें</string>
 </resources>

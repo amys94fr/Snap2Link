@@ -174,5 +174,6 @@
   "editor.tip_ok": "حسنًا",
   "editor.rotate": "تدوير لليمين",
   "editor.rotate_left": "تدوير لليسار",
-  "editor.flip": "قلب أفقي"
+  "editor.flip": "قلب أفقي",
+  "editor.flip_vertical": "قلب عمودي"
 }

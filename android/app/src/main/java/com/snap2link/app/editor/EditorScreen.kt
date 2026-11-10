@@ -201,6 +201,11 @@ fun EditorScreen(
                         selected = null
                         onEdit(edits.then(edits.now.flippedOver(renderer.width(edits.now.turns), renderer::textBox)))
                     },
+                    onFlipVertical = {
+                        val turns = edits.now.turns
+                        selected = null
+                        onEdit(edits.then(edits.now.flippedUpsideDown(renderer.width(turns), renderer.height(turns), renderer::textBox)))
+                    },
                     onResetCrop = {
                         val turns = edits.now.turns
                         onEdit(edits.then(edits.now.copy(crop = Box.of(renderer.width(turns), renderer.height(turns)))))
@@ -647,6 +652,7 @@ private fun Options(
     onRotateLeft: () -> Unit,
     onRotate: () -> Unit,
     onFlip: () -> Unit,
+    onFlipVertical: () -> Unit,
     onResetCrop: () -> Unit,
     selectedShape: Shape?,
     onRecolor: (Int) -> Unit,
@@ -658,7 +664,7 @@ private fun Options(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (tool == Tool.CROP) {
-            // The hint on its own line: next to three buttons it would wrap word by word.
+            // The hint on its own line: next to four buttons it would wrap word by word.
             Column(Modifier.weight(1f)) {
                 Text(
                     stringResource(R.string.editor_crop_hint),
@@ -674,6 +680,9 @@ private fun Options(
                     }
                     IconButton(onClick = onFlip) {
                         Icon(painterResource(R.drawable.ic_flip), contentDescription = stringResource(R.string.editor_flip))
+                    }
+                    IconButton(onClick = onFlipVertical) {
+                        Icon(painterResource(R.drawable.ic_flip_vertical), contentDescription = stringResource(R.string.editor_flip_vertical))
                     }
                     Spacer(Modifier.weight(1f))
                     TextButton(onClick = onResetCrop, enabled = canResetCrop, modifier = Modifier.heightIn(min = 48.dp)) {

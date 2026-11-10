@@ -174,5 +174,6 @@
   "editor.tip_ok": "Rozumiem",
   "editor.rotate": "Obróć w prawo",
   "editor.rotate_left": "Obróć w lewo",
-  "editor.flip": "Odbij w poziomie"
+  "editor.flip": "Odbij w poziomie",
+  "editor.flip_vertical": "Odbij w pionie"
 }

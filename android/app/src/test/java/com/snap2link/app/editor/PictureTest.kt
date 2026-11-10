@@ -337,4 +337,18 @@ class PictureTest {
         assertEquals(3, flipped.turned(1080, 2400, noText).turns)
         assertEquals(1, flipped.turnedLeft(1080, 2400, noText).turns)
     }
+
+    @Test
+    fun aVerticalFlipMirrorsTopToBottom() {
+        val picture = Picture(
+            listOf(Shape.Rectangle(Box(100f, 200f, 300f, 250f), red, 12f), Shape.Text(Pt(40f, 60f), "Here", red, 40f)),
+            crop = Box(0f, 0f, 1080f, 2000f),
+        )
+        val flipped = picture.flippedUpsideDown(1080, 2400, noText)
+        assertEquals(Box(100f, 2150f, 300f, 2200f), (flipped.shapes[0] as Shape.Rectangle).box)
+        // The test's text box is 40 high: from 60-100 it goes to 2300-2340, still the right way up.
+        assertEquals(Pt(40f, 2300f), (flipped.shapes[1] as Shape.Text).at)
+        assertEquals(Box(0f, 400f, 1080f, 2400f), flipped.crop)
+        assertEquals(picture, flipped.flippedUpsideDown(1080, 2400, noText))
+    }
 }

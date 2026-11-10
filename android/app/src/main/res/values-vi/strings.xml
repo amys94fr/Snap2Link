@@ -177,4 +177,5 @@
     <string name="editor_rotate">Xoay sang phải</string>
     <string name="editor_rotate_left">Xoay sang trái</string>
     <string name="editor_flip">Lật ngang</string>
+    <string name="editor_flip_vertical">Lật dọc</string>
 </resources>

@@ -174,5 +174,6 @@
   "editor.tip_ok": "Compris",
   "editor.rotate": "Faire pivoter vers la droite",
   "editor.rotate_left": "Faire pivoter vers la gauche",
-  "editor.flip": "Retourner horizontalement"
+  "editor.flip": "Retourner horizontalement",
+  "editor.flip_vertical": "Retourner verticalement"
 }

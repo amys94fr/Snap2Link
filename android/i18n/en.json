@@ -174,5 +174,6 @@
   "editor.tip_ok": "Got it",
   "editor.rotate": "Rotate right",
   "editor.rotate_left": "Rotate left",
-  "editor.flip": "Flip horizontally"
+  "editor.flip": "Flip horizontally",
+  "editor.flip_vertical": "Flip vertically"
 }

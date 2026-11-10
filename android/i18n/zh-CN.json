@@ -174,5 +174,6 @@
   "editor.tip_ok": "知道了",
   "editor.rotate": "向右旋转",
   "editor.rotate_left": "向左旋转",
-  "editor.flip": "水平翻转"
+  "editor.flip": "水平翻转",
+  "editor.flip_vertical": "垂直翻转"
 }

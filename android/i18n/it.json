@@ -174,5 +174,6 @@
   "editor.tip_ok": "Ho capito",
   "editor.rotate": "Ruota a destra",
   "editor.rotate_left": "Ruota a sinistra",
-  "editor.flip": "Capovolgi orizzontalmente"
+  "editor.flip": "Capovolgi orizzontalmente",
+  "editor.flip_vertical": "Capovolgi verticalmente"
 }

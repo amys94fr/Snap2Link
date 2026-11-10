@@ -174,5 +174,6 @@
   "editor.tip_ok": "Đã hiểu",
   "editor.rotate": "Xoay sang phải",
   "editor.rotate_left": "Xoay sang trái",
-  "editor.flip": "Lật ngang"
+  "editor.flip": "Lật ngang",
+  "editor.flip_vertical": "Lật dọc"
 }

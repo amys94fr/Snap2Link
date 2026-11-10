@@ -174,5 +174,6 @@
   "editor.tip_ok": "Entendido",
   "editor.rotate": "Girar a la derecha",
   "editor.rotate_left": "Girar a la izquierda",
-  "editor.flip": "Voltear horizontalmente"
+  "editor.flip": "Voltear horizontalmente",
+  "editor.flip_vertical": "Voltear verticalmente"
 }

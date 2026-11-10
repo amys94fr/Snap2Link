@@ -177,4 +177,5 @@
     <string name="editor_rotate">Ruota a destra</string>
     <string name="editor_rotate_left">Ruota a sinistra</string>
     <string name="editor_flip">Capovolgi orizzontalmente</string>
+    <string name="editor_flip_vertical">Capovolgi verticalmente</string>
 </resources>

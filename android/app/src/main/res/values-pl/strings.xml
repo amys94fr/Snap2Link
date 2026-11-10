@@ -177,4 +177,5 @@
     <string name="editor_rotate">Obróć w prawo</string>
     <string name="editor_rotate_left">Obróć w lewo</string>
     <string name="editor_flip">Odbij w poziomie</string>
+    <string name="editor_flip_vertical">Odbij w pionie</string>
 </resources>

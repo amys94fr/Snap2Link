@@ -174,5 +174,6 @@
   "editor.tip_ok": "Mengerti",
   "editor.rotate": "Putar ke kanan",
   "editor.rotate_left": "Putar ke kiri",
-  "editor.flip": "Balik horizontal"
+  "editor.flip": "Balik horizontal",
+  "editor.flip_vertical": "Balik vertikal"
 }
