@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">Pomiń</string>
     <string name="annotator_stroke">Grubość linii</string>
     <string name="annotator_tool_select">Zaznaczanie</string>
-    <string name="editor_select_hint">Stuknij kształt, aby go zaznaczyć. Przeciągnij, aby go przesunąć, lub pociągnij uchwyty, aby zmienić rozmiar.</string>
+    <string name="editor_select_hint">Stuknij kształt, aby go zaznaczyć. Przeciągnij, aby go przesunąć, lub pociągnij uchwyty, aby zmienić rozmiar. Stuknij ponownie zaznaczony tekst, aby go edytować.</string>
     <string name="editor_delete_shape">Usuń kształt</string>
     <string name="editor_text_size">Rozmiar tekstu</string>
     <string name="editor_size_small">Mały</string>

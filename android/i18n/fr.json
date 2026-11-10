@@ -162,7 +162,7 @@
   "detect.notification.ignore": "Ignorer",
   "annotator.stroke": "Épaisseur du trait",
   "annotator.tool.select": "Sélectionner",
-  "editor.select_hint": "Touchez une forme pour la sélectionner. Faites-la glisser pour la déplacer, ou tirez ses poignées pour la redimensionner.",
+  "editor.select_hint": "Touchez une forme pour la sélectionner. Faites-la glisser pour la déplacer, ou tirez ses poignées pour la redimensionner. Touchez à nouveau un texte sélectionné pour le modifier.",
   "editor.delete_shape": "Supprimer la forme",
   "editor.text_size": "Taille du texte",
   "editor.size.small": "Petit",

@@ -162,7 +162,7 @@
   "detect.notification.ignore": "تجاهل",
   "annotator.stroke": "سُمك الخط",
   "annotator.tool.select": "تحديد",
-  "editor.select_hint": "اضغط على شكل لتحديده. اسحبه لنقله، أو اسحب مقابضه لتغيير حجمه.",
+  "editor.select_hint": "اضغط على شكل لتحديده. اسحبه لنقله، أو اسحب مقابضه لتغيير حجمه. اضغط مرة أخرى على نص محدد لتعديله.",
   "editor.delete_shape": "حذف الشكل",
   "editor.text_size": "حجم النص",
   "editor.size.small": "صغير",

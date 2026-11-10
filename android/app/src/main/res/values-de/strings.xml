@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">Ignorieren</string>
     <string name="annotator_stroke">Strichstärke</string>
     <string name="annotator_tool_select">Auswählen</string>
-    <string name="editor_select_hint">Tippen Sie auf eine Form, um sie auszuwählen. Ziehen Sie sie, um sie zu verschieben, oder ziehen Sie an den Griffen, um ihre Größe zu ändern.</string>
+    <string name="editor_select_hint">Tippen Sie auf eine Form, um sie auszuwählen. Ziehen Sie sie, um sie zu verschieben, oder ziehen Sie an den Griffen, um ihre Größe zu ändern. Tippen Sie erneut auf einen ausgewählten Text, um ihn zu bearbeiten.</string>
     <string name="editor_delete_shape">Form löschen</string>
     <string name="editor_text_size">Textgröße</string>
     <string name="editor_size_small">Klein</string>

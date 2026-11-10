@@ -162,7 +162,7 @@
   "detect.notification.ignore": "Ignorieren",
   "annotator.stroke": "Strichstärke",
   "annotator.tool.select": "Auswählen",
-  "editor.select_hint": "Tippen Sie auf eine Form, um sie auszuwählen. Ziehen Sie sie, um sie zu verschieben, oder ziehen Sie an den Griffen, um ihre Größe zu ändern.",
+  "editor.select_hint": "Tippen Sie auf eine Form, um sie auszuwählen. Ziehen Sie sie, um sie zu verschieben, oder ziehen Sie an den Griffen, um ihre Größe zu ändern. Tippen Sie erneut auf einen ausgewählten Text, um ihn zu bearbeiten.",
   "editor.delete_shape": "Form löschen",
   "editor.text_size": "Textgröße",
   "editor.size.small": "Klein",

@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">Yoksay</string>
     <string name="annotator_stroke">Çizgi kalınlığı</string>
     <string name="annotator_tool_select">Seç</string>
-    <string name="editor_select_hint">Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin.</string>
+    <string name="editor_select_hint">Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin. Düzenlemek için seçili bir metne yeniden dokunun.</string>
     <string name="editor_delete_shape">Şekli sil</string>
     <string name="editor_text_size">Metin boyutu</string>
     <string name="editor_size_small">Küçük</string>

@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">Ignora</string>
     <string name="annotator_stroke">Spessore del tratto</string>
     <string name="annotator_tool_select">Seleziona</string>
-    <string name="editor_select_hint">Tocca una forma per selezionarla. Trascinala per spostarla o tira le maniglie per ridimensionarla.</string>
+    <string name="editor_select_hint">Tocca una forma per selezionarla. Trascinala per spostarla o tira le maniglie per ridimensionarla. Tocca di nuovo un testo selezionato per modificarlo.</string>
     <string name="editor_delete_shape">Elimina la forma</string>
     <string name="editor_text_size">Dimensione del testo</string>
     <string name="editor_size_small">Piccolo</string>

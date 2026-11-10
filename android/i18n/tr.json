@@ -162,7 +162,7 @@
   "detect.notification.ignore": "Yoksay",
   "annotator.stroke": "Çizgi kalınlığı",
   "annotator.tool.select": "Seç",
-  "editor.select_hint": "Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin.",
+  "editor.select_hint": "Seçmek için bir şekle dokunun. Taşımak için sürükleyin veya boyutunu değiştirmek için tutamaçlarını çekin. Düzenlemek için seçili bir metne yeniden dokunun.",
   "editor.delete_shape": "Şekli sil",
   "editor.text_size": "Metin boyutu",
   "editor.size.small": "Küçük",

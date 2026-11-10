@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">Пропустити</string>
     <string name="annotator_stroke">Товщина лінії</string>
     <string name="annotator_tool_select">Вибір</string>
-    <string name="editor_select_hint">Торкніться фігури, щоб вибрати її. Перетягніть, щоб перемістити, або потягніть за маркери, щоб змінити розмір.</string>
+    <string name="editor_select_hint">Торкніться фігури, щоб вибрати її. Перетягніть, щоб перемістити, або потягніть за маркери, щоб змінити розмір. Торкніться вибраного тексту ще раз, щоб змінити його.</string>
     <string name="editor_delete_shape">Видалити фігуру</string>
     <string name="editor_text_size">Розмір тексту</string>
     <string name="editor_size_small">Малий</string>

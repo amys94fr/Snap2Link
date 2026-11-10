@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">Пропустить</string>
     <string name="annotator_stroke">Толщина линии</string>
     <string name="annotator_tool_select">Выбор</string>
-    <string name="editor_select_hint">Нажмите на фигуру, чтобы выбрать её. Перетащите, чтобы переместить, или потяните за маркеры, чтобы изменить размер.</string>
+    <string name="editor_select_hint">Нажмите на фигуру, чтобы выбрать её. Перетащите, чтобы переместить, или потяните за маркеры, чтобы изменить размер. Нажмите на выбранный текст ещё раз, чтобы изменить его.</string>
     <string name="editor_delete_shape">Удалить фигуру</string>
     <string name="editor_text_size">Размер текста</string>
     <string name="editor_size_small">Маленький</string>

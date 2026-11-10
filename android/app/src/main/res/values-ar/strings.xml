@@ -164,7 +164,7 @@
     <string name="detect_notification_ignore">تجاهل</string>
     <string name="annotator_stroke">سُمك الخط</string>
     <string name="annotator_tool_select">تحديد</string>
-    <string name="editor_select_hint">اضغط على شكل لتحديده. اسحبه لنقله، أو اسحب مقابضه لتغيير حجمه.</string>
+    <string name="editor_select_hint">اضغط على شكل لتحديده. اسحبه لنقله، أو اسحب مقابضه لتغيير حجمه. اضغط مرة أخرى على نص محدد لتعديله.</string>
     <string name="editor_delete_shape">حذف الشكل</string>
     <string name="editor_text_size">حجم النص</string>
     <string name="editor_size_small">صغير</string>

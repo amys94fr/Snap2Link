@@ -162,7 +162,7 @@
   "detect.notification.ignore": "Pomiń",
   "annotator.stroke": "Grubość linii",
   "annotator.tool.select": "Zaznaczanie",
-  "editor.select_hint": "Stuknij kształt, aby go zaznaczyć. Przeciągnij, aby go przesunąć, lub pociągnij uchwyty, aby zmienić rozmiar.",
+  "editor.select_hint": "Stuknij kształt, aby go zaznaczyć. Przeciągnij, aby go przesunąć, lub pociągnij uchwyty, aby zmienić rozmiar. Stuknij ponownie zaznaczony tekst, aby go edytować.",
   "editor.delete_shape": "Usuń kształt",
   "editor.text_size": "Rozmiar tekstu",
   "editor.size.small": "Mały",

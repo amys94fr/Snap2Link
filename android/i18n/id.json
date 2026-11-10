@@ -162,7 +162,7 @@
   "detect.notification.ignore": "Abaikan",
   "annotator.stroke": "Ketebalan garis",
   "annotator.tool.select": "Pilih",
-  "editor.select_hint": "Ketuk bentuk untuk memilihnya. Seret untuk memindahkannya, atau tarik pegangannya untuk mengubah ukuran.",
+  "editor.select_hint": "Ketuk bentuk untuk memilihnya. Seret untuk memindahkannya, atau tarik pegangannya untuk mengubah ukuran. Ketuk lagi teks yang dipilih untuk mengeditnya.",
   "editor.delete_shape": "Hapus bentuk",
   "editor.text_size": "Ukuran teks",
   "editor.size.small": "Kecil",
