@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The macOS install steps in the README and the release notes now describe *Open Anyway* in System Settings: macOS 15 Sequoia removed the Control-click *Open* shortcut for apps that aren't notarised.
+
 ## [1.9.1] – 2026-11-08
 
 ### Added
