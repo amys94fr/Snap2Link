@@ -170,4 +170,6 @@
     <string name="editor_size_small">Petit</string>
     <string name="editor_size_medium">Moyen</string>
     <string name="editor_size_large">Grand</string>
+    <string name="editor_text_edit_title">Modifier le texte</string>
+    <string name="editor_text_save">Enregistrer</string>
 </resources>

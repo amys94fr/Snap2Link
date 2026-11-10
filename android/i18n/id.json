@@ -167,5 +167,7 @@
   "editor.text_size": "Ukuran teks",
   "editor.size.small": "Kecil",
   "editor.size.medium": "Sedang",
-  "editor.size.large": "Besar"
+  "editor.size.large": "Besar",
+  "editor.text_edit_title": "Edit teks",
+  "editor.text_save": "Simpan"
 }

@@ -167,5 +167,7 @@
   "editor.text_size": "글자 크기",
   "editor.size.small": "작게",
   "editor.size.medium": "보통",
-  "editor.size.large": "크게"
+  "editor.size.large": "크게",
+  "editor.text_edit_title": "텍스트 편집",
+  "editor.text_save": "저장"
 }

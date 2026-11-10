@@ -170,4 +170,6 @@
     <string name="editor_size_small">کوچک</string>
     <string name="editor_size_medium">متوسط</string>
     <string name="editor_size_large">بزرگ</string>
+    <string name="editor_text_edit_title">ویرایش متن</string>
+    <string name="editor_text_save">ذخیره</string>
 </resources>

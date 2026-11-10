@@ -167,5 +167,7 @@
   "editor.text_size": "文字大小",
   "editor.size.small": "小",
   "editor.size.medium": "中",
-  "editor.size.large": "大"
+  "editor.size.large": "大",
+  "editor.text_edit_title": "编辑文字",
+  "editor.text_save": "保存"
 }

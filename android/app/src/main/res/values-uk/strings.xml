@@ -170,4 +170,6 @@
     <string name="editor_size_small">Малий</string>
     <string name="editor_size_medium">Середній</string>
     <string name="editor_size_large">Великий</string>
+    <string name="editor_text_edit_title">Змінити текст</string>
+    <string name="editor_text_save">Зберегти</string>
 </resources>

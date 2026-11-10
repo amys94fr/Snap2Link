@@ -167,5 +167,7 @@
   "editor.text_size": "اندازهٔ متن",
   "editor.size.small": "کوچک",
   "editor.size.medium": "متوسط",
-  "editor.size.large": "بزرگ"
+  "editor.size.large": "بزرگ",
+  "editor.text_edit_title": "ویرایش متن",
+  "editor.text_save": "ذخیره"
 }

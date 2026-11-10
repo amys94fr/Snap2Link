@@ -167,5 +167,7 @@
   "editor.text_size": "टेक्स्ट का आकार",
   "editor.size.small": "छोटा",
   "editor.size.medium": "मध्यम",
-  "editor.size.large": "बड़ा"
+  "editor.size.large": "बड़ा",
+  "editor.text_edit_title": "टेक्स्ट बदलें",
+  "editor.text_save": "सेव करें"
 }

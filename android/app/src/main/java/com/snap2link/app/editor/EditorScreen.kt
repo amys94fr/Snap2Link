@@ -72,6 +72,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -96,7 +98,7 @@ fun EditorScreen(
     var tool by rememberSaveable { mutableStateOf(Tool.CROP) }
     var colorIndex by rememberSaveable { mutableIntStateOf(0) }
     var stroke by rememberSaveable { mutableStateOf(Stroke.MEDIUM) }
-    var textAt by remember { mutableStateOf<Pt?>(null) }
+    var writing by remember { mutableStateOf<Writing?>(null) }
     var selected by remember { mutableStateOf<Int?>(null) }
     val color = Palette[colorIndex]
     // An undo can remove the selected shape: the selection only holds while it points at one.
@@ -145,7 +147,8 @@ fun EditorScreen(
                     stroke = stroke,
                     sizes = sizes,
                     onEdit = onEdit,
-                    onText = { textAt = it },
+                    onText = { writing = Writing.New(it) },
+                    onEditText = { index, text -> writing = Writing.Existing(index, text) },
                     selected = chosen,
                     onSelect = { selected = it },
                 )
@@ -187,13 +190,20 @@ fun EditorScreen(
                 )
             }
         }
-        textAt?.let { at ->
+        writing?.let { now ->
             TextDialog(
-                onDismiss = { textAt = null },
-                onAdd = { text ->
-                    val shape = Shape.Text(at, text, color, sizes.text(stroke))
-                    onEdit(edits.then(edits.now.copy(shapes = edits.now.shapes + shape)))
-                    textAt = null
+                initial = (now as? Writing.Existing)?.text.orEmpty(),
+                editing = now is Writing.Existing,
+                onDismiss = { writing = null },
+                onDone = { text ->
+                    val shapes = when (now) {
+                        is Writing.New -> edits.now.shapes + Shape.Text(now.at, text, color, sizes.text(stroke))
+                        is Writing.Existing -> edits.now.shapes.mapIndexed { i, shape ->
+                            if (i == now.index && shape is Shape.Text) shape.copy(text = text) else shape
+                        }
+                    }
+                    onEdit(edits.then(edits.now.copy(shapes = shapes)))
+                    writing = null
                 },
             )
         }
@@ -252,6 +262,7 @@ private fun Board(
     sizes: Sizes,
     onEdit: (Edits) -> Unit,
     onText: (Pt) -> Unit,
+    onEditText: (index: Int, text: String) -> Unit,
     selected: Int?,
     onSelect: (Int?) -> Unit,
 ) {
@@ -277,6 +288,10 @@ private fun Board(
     val latestColor by rememberUpdatedState(color)
     val latestStroke by rememberUpdatedState(stroke)
     val latestSelected by rememberUpdatedState(selected)
+    // Callbacks too: the gestures were set up with the first ones, which see the marks of that time.
+    val latestOnText by rememberUpdatedState(onText)
+    val latestOnEditText by rememberUpdatedState(onEditText)
+    val latestOnSelect by rememberUpdatedState(onSelect)
 
     val description = stringResource(R.string.editor_board)
     Canvas(
@@ -289,11 +304,26 @@ private fun Board(
                     val f = latestFit ?: return@detectTapGestures
                     val p = f.toImage(offset.x, offset.y)
                     when (tool) {
-                        Tool.TEXT -> onText(p.inside(latestEdits.now.crop))
+                        // On an existing text, the Text tool edits it rather than adding another.
+                        Tool.TEXT -> {
+                            val existing = Select.textAt(latestEdits.now.shapes, p, reach / f.scale, renderer::textBox)
+                            val shape = existing?.let { latestEdits.now.shapes[it] } as? Shape.Text
+                            if (existing != null && shape != null) {
+                                latestOnEditText(existing, shape.text)
+                            } else {
+                                latestOnText(p.inside(latestEdits.now.crop))
+                            }
+                        }
                         Tool.SELECT -> {
                             val current = latestSelected?.let { latestEdits.now.shapes.getOrNull(it) }
                             val onHandle = current?.let { Resize.gripAt(it, p, reach / f.scale, renderer::textBox) } != null
-                            if (!onHandle) onSelect(Select.at(latestEdits.now.shapes, p, reach / f.scale, renderer::textBox))
+                            val hit = Select.at(latestEdits.now.shapes, p, reach / f.scale, renderer::textBox)
+                            when {
+                                onHandle -> Unit
+                                // A second tap on a selected text edits it.
+                                hit != null && hit == latestSelected && current is Shape.Text -> latestOnEditText(hit, current.text)
+                                else -> latestOnSelect(hit)
+                            }
                         }
                         else -> Unit
                     }
@@ -323,7 +353,7 @@ private fun Board(
                                     moving = index to now.shapes[index]
                                 } else {
                                     val hit = Select.at(now.shapes, p, reach / f.scale, renderer::textBox)
-                                    onSelect(hit)
+                                    latestOnSelect(hit)
                                     moving = hit?.let { it to now.shapes[it] }
                                 }
                             }
@@ -681,19 +711,29 @@ private fun Tools(selected: Tool, onTool: (Tool) -> Unit) {
     }
 }
 
+/** A text to write: a new one where the finger was, or one already on the screenshot. */
+private sealed interface Writing {
+    data class New(val at: Pt) : Writing
+    data class Existing(val index: Int, val text: String) : Writing
+}
+
 @Composable
-private fun TextDialog(onDismiss: () -> Unit, onAdd: (String) -> Unit) {
-    var text by rememberSaveable { mutableStateOf("") }
+private fun TextDialog(initial: String, editing: Boolean, onDismiss: () -> Unit, onDone: (String) -> Unit) {
+    // The cursor starts at the end of a text being edited.
+    var field by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(initial, TextRange(initial.length)))
+    }
+    val text = field.text
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
-    val add = { if (text.isNotBlank()) onAdd(text.trim()) }
+    val add = { if (text.isNotBlank()) onDone(text.trim()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.editor_text_title)) },
+        title = { Text(stringResource(if (editing) R.string.editor_text_edit_title else R.string.editor_text_title)) },
         text = {
             OutlinedTextField(
-                value = text,
-                onValueChange = { text = it.replace('\n', ' ') },
+                value = field,
+                onValueChange = { field = it.copy(text = it.text.replace('\n', ' ')) },
                 singleLine = true,
                 label = { Text(stringResource(R.string.annotator_tool_text)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -702,7 +742,9 @@ private fun TextDialog(onDismiss: () -> Unit, onAdd: (String) -> Unit) {
             )
         },
         confirmButton = {
-            TextButton(onClick = add, enabled = text.isNotBlank()) { Text(stringResource(R.string.editor_text_add)) }
+            TextButton(onClick = add, enabled = text.isNotBlank()) {
+                Text(stringResource(if (editing) R.string.editor_text_save else R.string.editor_text_add))
+            }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.annotator_cancel)) }

@@ -187,6 +187,10 @@ object Select {
     fun at(shapes: List<Shape>, p: Pt, reach: Float, textBox: (Shape.Text) -> Box): Int? =
         shapes.indices.reversed().firstOrNull { hits(shapes[it], p, reach, textBox) }
 
+    /** The topmost text near [p], as its index: with the Text tool, a tap on one edits it. */
+    fun textAt(shapes: List<Shape>, p: Pt, reach: Float, textBox: (Shape.Text) -> Box): Int? =
+        shapes.indices.reversed().firstOrNull { shapes[it] is Shape.Text && hits(shapes[it], p, reach, textBox) }
+
     fun hits(shape: Shape, p: Pt, reach: Float, textBox: (Shape.Text) -> Box): Boolean = when (shape) {
         is Shape.Pen -> {
             val near = shape.width / 2 + reach

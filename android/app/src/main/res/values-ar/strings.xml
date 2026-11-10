@@ -170,4 +170,6 @@
     <string name="editor_size_small">صغير</string>
     <string name="editor_size_medium">متوسط</string>
     <string name="editor_size_large">كبير</string>
+    <string name="editor_text_edit_title">تعديل النص</string>
+    <string name="editor_text_save">حفظ</string>
 </resources>

@@ -170,4 +170,6 @@
     <string name="editor_size_small">Nhỏ</string>
     <string name="editor_size_medium">Vừa</string>
     <string name="editor_size_large">Lớn</string>
+    <string name="editor_text_edit_title">Sửa văn bản</string>
+    <string name="editor_text_save">Lưu</string>
 </resources>

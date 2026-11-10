@@ -167,5 +167,7 @@
   "editor.text_size": "Cỡ chữ",
   "editor.size.small": "Nhỏ",
   "editor.size.medium": "Vừa",
-  "editor.size.large": "Lớn"
+  "editor.size.large": "Lớn",
+  "editor.text_edit_title": "Sửa văn bản",
+  "editor.text_save": "Lưu"
 }

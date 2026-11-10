@@ -225,4 +225,14 @@ class PictureTest {
         assertEquals(Stroke.THICK, text.stroke(sizes))
         assertEquals(sizes.text(Stroke.THIN), (text.restroked(Stroke.THIN, sizes) as Shape.Text).size)
     }
+
+    @Test
+    fun theTextToolFindsATextEvenUnderAnotherMark() {
+        val text = Shape.Text(Pt(50f, 50f), "Here", red, 40f)
+        val box = Shape.Rectangle(Box(0f, 0f, 300f, 300f), red, 12f)
+        val shapes = listOf(text, box)
+        assertEquals(1, Select.at(shapes, Pt(70f, 70f), reach = 0f, textBox = noText))
+        assertEquals(0, Select.textAt(shapes, Pt(70f, 70f), reach = 0f, textBox = noText))
+        assertNull(Select.textAt(shapes, Pt(250f, 250f), reach = 0f, textBox = noText))
+    }
 }

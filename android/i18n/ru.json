@@ -167,5 +167,7 @@
   "editor.text_size": "Размер текста",
   "editor.size.small": "Маленький",
   "editor.size.medium": "Средний",
-  "editor.size.large": "Большой"
+  "editor.size.large": "Большой",
+  "editor.text_edit_title": "Изменить текст",
+  "editor.text_save": "Сохранить"
 }

@@ -167,5 +167,7 @@
   "editor.text_size": "Taille du texte",
   "editor.size.small": "Petit",
   "editor.size.medium": "Moyen",
-  "editor.size.large": "Grand"
+  "editor.size.large": "Grand",
+  "editor.text_edit_title": "Modifier le texte",
+  "editor.text_save": "Enregistrer"
 }

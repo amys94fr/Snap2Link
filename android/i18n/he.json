@@ -167,5 +167,7 @@
   "editor.text_size": "גודל הטקסט",
   "editor.size.small": "קטן",
   "editor.size.medium": "בינוני",
-  "editor.size.large": "גדול"
+  "editor.size.large": "גדול",
+  "editor.text_edit_title": "עריכת הטקסט",
+  "editor.text_save": "שמירה"
 }

@@ -167,5 +167,7 @@
   "editor.text_size": "Metin boyutu",
   "editor.size.small": "Küçük",
   "editor.size.medium": "Orta",
-  "editor.size.large": "Büyük"
+  "editor.size.large": "Büyük",
+  "editor.text_edit_title": "Metni düzenle",
+  "editor.text_save": "Kaydet"
 }
