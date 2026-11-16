@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.2] – 2026-11-16
+
 ### Fixed
 
+- French, German, Turkish, Indonesian and Traditional Chinese now address you the same way everywhere: History and the online account card no longer switch to the informal form. Hebrew uses its neutral form there too.
 - The macOS install steps in the README and the release notes now describe *Open Anyway* in System Settings: macOS 15 Sequoia removed the Control-click *Open* shortcut for apps that aren't notarised.
 
 ## [1.9.1] – 2026-11-08
